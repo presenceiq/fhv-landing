@@ -628,8 +628,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
       out.push(p + 'came to ' + money(v.total) + ' a year, of which the ' + v.name + ' alone was ' + money(v.cdd) + '.');
     } else {
       out.push(p + 'On one real 2026 TRIM notice from ' + community + ', the non-ad valorem side');
-      out.push(p + 'came to ' + money(v.total) + ' a year. There is no CDD in ' + community + ', which is');
-      out.push(p + 'unusual and worth knowing.');
+      out.push(p + 'came to ' + money(v.total) + ' a year. There is no CDD in ' + community + '.');
     }
     out.push(p + 'That is one parcel, not an average, and none of it changes.');
     return out;
@@ -640,7 +639,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
     return '<p style="margin-top:0.75rem;"><strong>A real number for the part that does not change.</strong> '
       + 'On one 2026 TRIM notice from ' + esc(community) + ' the non-ad valorem side came to <strong>' + money(v.total) + ' a year</strong>'
       + (v.cdd ? ', of which the ' + esc(v.name) + ' alone was ' + money(v.cdd) + '.' :
-                 '. There is no CDD in ' + esc(community) + ', which is unusual for a community built this recently.')
+                 '. There is no CDD in ' + esc(community) + '.')
       + ' That is one parcel rather than an average, and none of it is touched by the exemption.</p>';
   }
 
