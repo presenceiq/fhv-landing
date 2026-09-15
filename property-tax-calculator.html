@@ -281,12 +281,62 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
 
 </div>
 
-<script src="fhv-parcels.js?v=20260912a"></script>
+<script src="fhv-streets.js?v=20260915a"></script>
 <script>
 (function(){
-  var P = window.FHV_PARCELS;
+  /* ── COUNTYWIDE DATA, LOADED ON DEMAND ────────────────────────────────────
+     fhv-streets.js carries every street name in Sarasota County paired with
+     the shard file that holds it, plus the community and district tables.
+     It is about 62KB gzipped and loads once. The parcel rows for a given
+     street are fetched only when someone types that street, so nobody
+     downloads 235,589 parcels to look up one address.
+     R starts empty and fills as shards arrive. Everything downstream -
+     search(), bill(), render(), NAV_SAMPLE, the buy-here dropdown - reads
+     exactly the same row layout it always did. */
+  var P = window.FHV_INDEX;
   if(!P){ return; }
-  var D = P.districts, C = P.communities, R = P.rows;
+  var D = P.districts, C = P.communities, R = [];
+  var STREETS = P.streets, LOADED = {}, PENDING = {};
+
+  function shardsFor(typedStreet){
+    var want = [], k;
+    for(k in STREETS){
+      if(k.indexOf(typedStreet) === 0){
+        for(var i=0;i<STREETS[k].length;i++){
+          if(want.indexOf(STREETS[k][i]) === -1) want.push(STREETS[k][i]);
+        }
+      }
+      if(want.length > 6) break;
+    }
+    return want;
+  }
+
+  function loadShard(tag, done){
+    if(LOADED[tag]){ done(); return; }
+    if(PENDING[tag]){ PENDING[tag].push(done); return; }
+    PENDING[tag] = [done];
+    var sc = document.createElement('script');
+    sc.src = 'fhv-p-' + tag + '.js?v=20260915a';
+    sc.onload = function(){
+      LOADED[tag] = 1;
+      var pack = window.FHV_P && window.FHV_P[tag];
+      if(pack && pack.rows){ R = R.concat(pack.rows); }
+      var q = PENDING[tag]; delete PENDING[tag];
+      for(var i=0;i<q.length;i++) q[i]();
+    };
+    sc.onerror = function(){
+      LOADED[tag] = 1;
+      var q = PENDING[tag]; delete PENDING[tag];
+      for(var i=0;i<q.length;i++) q[i]();
+    };
+    document.head.appendChild(sc);
+  }
+
+  function ensure(typedStreet, done){
+    var tags = shardsFor(typedStreet), left = tags.length;
+    if(!left){ done(); return; }
+    tags.forEach(function(t){ loadShard(t, function(){ if(--left === 0) done(); }); });
+  }
   var STD = 51411;                       // the standard 2026 homestead exemption
   var NEW_2027 = 150000, NEW_2028 = 250000;
 
@@ -547,12 +597,12 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
   /* One real 2026 TRIM notice per community, so the non-ad valorem side stops
      being an abstraction. These are single parcels, not community averages. */
   var NAV_SAMPLE = {
-    'Gran Paradiso':    { total: 2675, cdd: 1949, name: 'West Villages CDD' },
-    'IslandWalk':       { total: 1412, cdd: 563,  name: 'West Villages CDD' },
-    'Sarasota National':{ total: 2246, cdd: 1497, name: 'Sarasota National CDD' },
-    'Palmero':          { total: 694,  cdd: 0,    name: '' },
-    'Talon Preserve':   { total: 660,  cdd: 0,    name: '' },
-    'Gulf Gate Woods':  { total: 709,  cdd: 0,    name: '' }
+    'Gran Paradiso':    { total: 2721, cdd: 1949, name: 'West Villages ID' },
+    'IslandWalk':       { total: 1412, cdd: 563,  name: 'West Villages ID' },
+    'Sarasota National':{ total: 2311, cdd: 1497, name: 'Sarasota National CDD' },
+    'Palmero':          { total: 859,  cdd: 0,    name: '' },
+    'Gulf Gate Woods':  { total: 768,  cdd: 0,    name: '' },
+    'Talon Preserve':   { total: 717,  cdd: 0,    name: '' }
   };
   /* Gran Paradiso and IslandWalk are both in the West Villages district and their
      CDD lines are $1,949 and $563. Same district, more than three times apart,
@@ -578,8 +628,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
       out.push(p + 'came to ' + money(v.total) + ' a year, of which the ' + v.name + ' alone was ' + money(v.cdd) + '.');
     } else {
       out.push(p + 'On one real 2026 TRIM notice from ' + community + ', the non-ad valorem side');
-      out.push(p + 'came to ' + money(v.total) + ' a year. There is no CDD in ' + community + ', which is');
-      out.push(p + 'unusual and worth knowing.');
+      out.push(p + 'came to ' + money(v.total) + ' a year. There is no CDD in ' + community + '.');
     }
     out.push(p + 'That is one parcel, not an average, and none of it changes.');
     return out;
@@ -590,7 +639,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
     return '<p style="margin-top:0.75rem;"><strong>A real number for the part that does not change.</strong> '
       + 'On one 2026 TRIM notice from ' + esc(community) + ' the non-ad valorem side came to <strong>' + money(v.total) + ' a year</strong>'
       + (v.cdd ? ', of which the ' + esc(v.name) + ' alone was ' + money(v.cdd) + '.' :
-                 '. There is no CDD in ' + esc(community) + ', which is unusual for a community built this recently.')
+                 '. There is no CDD in ' + esc(community) + '.')
       + ' That is one parcel rather than an average, and none of it is touched by the exemption.</p>';
   }
 
@@ -827,6 +876,20 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
   }
 
   box.oninput = function(){
+    /* Pull the shard for whatever street is being typed, then search.
+       Typing a house number first is fine - the street part is what
+       decides which file is needed, and until there is one there is
+       nothing to fetch. */
+    var q = tidy(box.value);
+    var m = q.match(/^(\d+)\s*(.*)$/);
+    var st = m ? m[2] : q;
+    if(st && st.length >= 2){
+      ensure(st, function(){ if(tidy(box.value) === q) show(); });
+    }
+    show();
+  };
+
+  function show(){
     var res = search(box.value);
     if(!res.length){ hits.style.display='none'; return; }
     hits.innerHTML = '';
@@ -840,7 +903,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
       hits.appendChild(row);
     });
     hits.style.display = 'block';
-  };
+  }
   box.onblur = function(){ setTimeout(function(){ hits.style.display='none'; }, 180); };
 
   /* ── scenario 5: buying here ─────────────────────────────────────────────
@@ -851,8 +914,9 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
     var pi=document.getElementById('buyprice'), sel=document.getElementById('buycom'),
         go=document.getElementById('buygo'), bo=document.getElementById('buyout');
     if(!pi||!sel||!go) return;
-    var dOf={};
-    for(var i=0;i<R.length;i++){ if(!(C[R[i][7]] in dOf)) dOf[C[R[i][7]]]=R[i][6]; }
+    /* R is empty until a shard loads, so the district for each named
+       community comes from the index rather than from scanned rows. */
+    var dOf = P.communityDistrict || {};
     var order=['Gran Paradiso','IslandWalk','Palmero','Talon Preserve','Grand Palm',
                'Sarasota National','Renaissance','Sunstone','Brightmore','Sunrise Preserve','Gulf Gate Woods'];
     var h='';
