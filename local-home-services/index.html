@@ -1,1 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local Home Services Directory | Florida Home Value AI</title>
+<meta name="description" content="A directory of local home and real-estate-related businesses serving Venice, Nokomis, Sarasota and Southwest Florida. From Putnam Realty Group.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Local Home Services | Florida Home Value AI">
+<meta property="og:description" content="A directory of local home and real-estate-related businesses serving Sarasota County and Southwest Florida.">
+<meta property="og:image" content="https://floridahomevalueai.com/og-image.jpg">
+<meta property="og:url" content="https://floridahomevalueai.com/local-home-services">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Local Home Services | Florida Home Value AI">
+<meta name="twitter:description" content="A directory of local home businesses serving Sarasota County and SW Florida.">
+<meta name="twitter:image" content="https://floridahomevalueai.com/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Lato:wght@300;400;700&family=DM+Mono:wght@400;500&display=optional" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --gold-light:#d4904a;
+    --ink:#1a1814; --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8;
+    --surface:#ffffff; --sage:#4a7c59; --radius:12px;
+    --shadow:0 2px 16px rgba(26,24,20,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 1.25rem;}
+  a{color:var(--gold);}
+  .topbar{border-bottom:1px solid var(--border);background:var(--surface);}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;}
+  .backlink{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;color:var(--ink-mid);text-decoration:none;text-transform:uppercase;}
+  .backlink:hover{color:var(--gold);}
+  .brand-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--ink);}
 
+  .hero{padding:2.75rem 0 1.25rem;}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:1.1rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,3.2rem);font-weight:600;line-height:1.12;color:var(--ink);margin-bottom:.9rem;}
+  .lede{font-size:1.1rem;color:var(--ink-mid);max-width:60ch;}
+
+  .cat-label{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;letter-spacing:0.10em;color:var(--gold);text-transform:uppercase;margin:2.25rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid var(--border);}
+
+  .vendor{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem 1.5rem;margin-bottom:1rem;box-shadow:var(--shadow);text-decoration:none;color:var(--ink);transition:border-color .15s, transform .15s;}
+  .vendor:hover{border-color:var(--gold);transform:translateY(-1px);}
+  .vendor-name{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:600;color:var(--ink);}
+  .vendor-owner{font-size:14px;color:var(--ink-mid);margin:.15rem 0 .6rem;}
+  .vendor-blurb{font-size:15px;color:var(--ink-mid);margin-bottom:.8rem;}
+  .vendor-badge{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--sage);text-transform:uppercase;background:rgba(74,124,89,0.1);border-radius:999px;padding:5px 12px;}
+  .vendor-more{float:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;}
+
+  .getlisted{background:var(--warm);border:1px dashed var(--gold-light);border-radius:var(--radius);padding:1.4rem 1.5rem;margin-top:1.5rem;text-align:center;}
+  .getlisted h2{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:600;margin-bottom:.35rem;}
+  .getlisted p{font-size:15px;color:var(--ink-mid);margin-bottom:1rem;}
+  .cta{display:inline-block;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;text-decoration:none;padding:11px 22px;border-radius:999px;background:var(--gold);color:#fff;}
+  .cta:hover{background:var(--gold-light);}
+  .cta.placeholder{opacity:.6;border:1px dashed var(--gold);background:var(--surface);color:var(--gold);pointer-events:none;}
+
+  .valuation{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 1.6rem;margin-top:2rem;}
+  .valuation h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;margin-bottom:.35rem;}
+  .valuation .sub{font-size:14px;color:var(--ink-mid);margin-bottom:1rem;}
+  .pill-group-label{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.10em;color:var(--gold);text-transform:uppercase;margin:.9rem 0 .5rem;}
+  .pills{display:flex;flex-wrap:wrap;gap:.5rem;}
+  .pill{display:inline-flex;align-items:center;font-size:14px;font-weight:700;text-decoration:none;color:var(--ink);background:var(--warm);border:1px solid var(--gold);border-radius:999px;padding:8px 16px;transition:all .15s;}
+  .pill:hover{background:var(--gold);color:#fff;}
+
+  footer{border-top:1px solid var(--border);background:var(--surface);margin-top:2.5rem;padding:1.75rem 0 2.5rem;}
+  footer .id{font-size:14px;color:var(--ink-mid);line-height:1.7;}
+  footer .id strong{color:var(--ink);font-weight:700;}
+  footer .disc{font-size:11px;color:var(--ink-faint);line-height:1.6;margin-top:1rem;}
+  footer a.home{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);text-decoration:none;text-transform:uppercase;letter-spacing:0.06em;}
+  .footnav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:1.25rem;}
+  .footnav a{font-family:'Lato',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink);text-decoration:none;padding:7px 15px;border:1px solid var(--gold);border-radius:999px;background:var(--surface);transition:all .15s;}
+  .footnav a:hover{color:var(--gold);border-color:var(--gold);}
+</style>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="backlink" href="https://floridahomevalueai.com/">&larr; Florida Home Value AI</a>
+    <span class="brand-name">Local Home Services</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Local Home Services &middot; Sarasota County &amp; SW Florida</div>
+    <h1>Local home services directory</h1>
+    <p class="lede">A directory of local home and real-estate-related businesses serving homeowners in Sarasota County and Southwest Florida, for buying, selling, moving into, or owning a home in the area. Listings are informational only. This list grows as businesses are added.</p>
+  </header>
+
+  <div class="cat-label">Roofing</div>
+
+  <a class="vendor" href="https://floridahomevalueai.com/local-home-services/as-star-roofing">
+    <span class="vendor-more">View &rarr;</span>
+    <div class="vendor-name">A's Star Roofing</div>
+    <div class="vendor-owner">Owner: Ken Siharath &middot; 15 years in roofing</div>
+    <div class="vendor-blurb">Residential and commercial roofing, shingle, tile, metal, TPO, and flat, plus roof leak and emergency repair. Serving Venice, Nokomis, Englewood, Sarasota, Port Charlotte, and Arcadia.</div>
+  </a>
+
+  <div class="cat-label">Home Inspection</div>
+
+  <a class="vendor" href="https://floridahomevalueai.com/local-home-services/lundstrom-home-inspections">
+    <span class="vendor-more">View &rarr;</span>
+    <div class="vendor-name">Lundstrom Home Inspections</div>
+    <div class="vendor-owner">Owner: Scott Lundstrom &middot; InterNACHI Certified Professional Inspector</div>
+    <div class="vendor-blurb">Full home inspections plus the Florida reports insurers ask for, including 4-point and wind mitigation. Thermal imaging, mold, radon, and water quality testing. Serving North Port, Venice, Nokomis, Osprey, Sarasota, Englewood, and Port Charlotte.</div>
+  </a>
+
+  <div class="cat-label">Mortgage &amp; Home Financing</div>
+    <a class="vendor" href="https://floridahomevalueai.com/local-home-services/leolends-mortgage">
+      <span class="vendor-more">View &rarr;</span>
+      <div class="vendor-name">LeoLends Mortgage</div>
+      <div class="vendor-owner">Leo Namiot &middot; Mortgage Loan Officer &middot; 23 years</div>
+      <div class="vendor-blurb">Home purchase loans, pre-approval before you make an offer, refinancing, first-time buyer programs and investment property financing. Serving buyers and investors across Florida.</div>
+    </a>
+    <div class="getlisted">
+    <h2>Are you a local home-services business?</h2>
+    <p>If you serve homeowners in the area, you can be listed here with your own shareable page. Free listing, owner-submitted information.</p>
+    <a class="cta" href="https://forms.gle/BsJAEAH4rNeUi7Gx8" target="_blank" rel="noopener">Get featured</a>
+  </div>
+
+  <section class="valuation">
+    <h2>Find your home's value</h2>
+    <div class="sub">Free instant estimates from Florida Home Value AI. Tap your community, or use any Florida address.</div>
+    <div class="pill-group-label">Community tools</div>
+    <div class="pills">
+      <a class="pill" href="https://granparadiso.floridahomevalueai.com">Gran Paradiso</a>
+      <a class="pill" href="https://talonpreserve.floridahomevalueai.com">Talon Preserve</a>
+      <a class="pill" href="https://palmero.floridahomevalueai.com">Palmero</a>
+      <a class="pill" href="https://islandwalk.floridahomevalueai.com">IslandWalk</a>
+    </div>
+    <div class="pill-group-label">Any address</div>
+    <div class="pills">
+      <a class="pill" href="https://floridahomevalueai.com/nokomis">Nokomis</a>
+      <a class="pill" href="https://floridahomevalueai.com/osprey">Osprey</a>
+      <a class="pill" href="https://floridahomevalueai.com/home-value">Any Florida home</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <nav aria-label="Site links" class="footnav">
+      <a href="https://floridahomevalueai.com/">Home</a>
+      <a href="https://floridahomevalueai.com/local-home-services">Local Home Services</a>
+      <a href="https://floridahomevalueai.com/market-report">Market Report</a>
+      <a href="https://floridahomevalueai.com/home-value">Home Value</a>
+      <a href="https://floridahomevalueai.com/seller-guide">Seller Guide</a>
+      <a href="https://floridahomevalueai.com/buyer-guide">Buyer Guide</a>
+      <a href="https://floridahomevalueai.com/meet">Meet Your Agent</a>
+      <a href="https://granparadiso.floridahomevalueai.com">Gran Paradiso</a>
+      <a href="https://talonpreserve.floridahomevalueai.com">Talon Preserve</a>
+      <a href="https://palmero.floridahomevalueai.com">Palmero</a>
+      <a href="https://islandwalk.floridahomevalueai.com">IslandWalk</a>
+    </nav>
+    <a class="home" href="https://floridahomevalueai.com/">&larr; Back to Florida Home Value AI</a>
+    <div class="id" style="margin-top:1rem;">
+      <strong><a href="https://floridahomevalueai.com/meet" style="color:inherit">Michael Putnam</a></strong> &middot; Putnam Realty Group &middot; 941-662-9941<br>
+      Sales Associate SL3220671 &middot; Broker: Brian Putnam Jr. BK3276432<br>
+      Michael@PutnamRealtyGroup.com &middot; Venice, FL
+    </div>
+    <div class="disc">Local Home Services features local home and real-estate-related businesses. Listings are shared as a convenience and are not endorsements of any specific outcome. Always confirm a contractor's current license, insurance, and permits before hiring. Featured businesses are independent and not affiliated with Putnam Realty Group.</div>
+  </div>
+
+  <p style="font-size:12px;color:#9a948e;margin-top:1rem;text-align:center;"><a href="https://floridahomevalueai.com/terms" style="color:#9a948e;text-decoration:underline;">Terms of Use</a> &middot; <a href="https://floridahomevalueai.com/privacy" style="color:#9a948e;text-decoration:underline;">Privacy Policy</a></p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Local Home Services",
+  "description": "A directory of local home and real-estate-related businesses serving Sarasota County and Southwest Florida.",
+  "url": "https://floridahomevalueai.com/local-home-services",
+  "isPartOf": { "@type": "WebSite", "name": "Florida Home Value AI", "url": "https://floridahomevalueai.com" },
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@type": "RoofingContractor",
+          "name": "A's Star Roofing",
+          "url": "https://floridahomevalueai.com/local-home-services/as-star-roofing",
+          "areaServed": ["Venice, FL", "Nokomis, FL", "Englewood, FL", "Sarasota, FL", "Port Charlotte, FL", "Arcadia, FL"]
+        }
+      }
+    ]
+  }
+}
+</script>
+
+</body>
+</html>
