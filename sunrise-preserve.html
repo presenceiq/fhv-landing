@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What's My Sunrise Preserve Home Worth? | Putnam Realty</title>
+<meta name="description" content="Instant estimate for any address in this maintenance-free Mattamy community in Palmer Ranch, Sarasota FL, plus villa versus single-family value.">
+<link rel="canonical" href="https://floridahomevalueai.com/sunrise-preserve">
+<meta property="og:image" content="https://floridahomevalueai.com/sunrise-preserve-og.jpg" />
+<meta name="twitter:image" content="https://floridahomevalueai.com/sunrise-preserve-og.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&family=DM+Mono&display=optional" rel="stylesheet">
+<style>
+:root{
+  --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --gold-light:#d4904a;
+  --ink:#1a1814; --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8;
+  --surface:#ffffff; --sage:#4a7c59; --radius:12px; --radius-sm:8px;
+  --shadow:0 2px 16px rgba(26,24,20,0.08); --shadow-lg:0 8px 40px rgba(26,24,20,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;}
+a{color:var(--gold);}
+.site-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2rem;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem;}
+.brand-wrap{display:flex;align-items:center;gap:0.75rem;}
+.brand-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 38px;}
+.brand-icon img{width:100%;height:100%;object-fit:contain;display:block;}
+.brand-name{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;}
+.brand-name span{color:var(--gold);}
+.brand-sub{font-size:12px;color:var(--ink-faint);}
+.header-contact{font-size:13px;text-align:right;}
+.header-contact a{text-decoration:none;}
+.back-home{display:inline-block;font-size:12px;color:var(--gold);text-decoration:none;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:0.06em;padding:0.75rem 2rem;}
+.hero{max-width:760px;margin:0 auto;padding:2.5rem 2rem 1rem;text-align:center;}
+.status-pill{display:inline-block;background:var(--warm);color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:0.35rem 0.85rem;border-radius:99px;margin-bottom:1rem;}
+.hero h1{font-family:'Playfair Display',serif;font-size:2.1rem;margin-bottom:0.5rem;}
+.hero .region{color:var(--ink-mid);font-weight:700;font-size:0.95rem;margin-bottom:0.75rem;}
+.hero .desc{color:var(--ink-mid);font-size:0.95rem;max-width:560px;margin:0 auto 0.5rem;}
+.valuebox{max-width:620px;margin:1.5rem auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.75rem;}
+.valuebox h2{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:0.35rem;text-align:center;}
+.valuebox p.sub{text-align:center;color:var(--ink-faint);font-size:0.85rem;margin-bottom:1.25rem;}
+.addr-row{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.addr-row input{flex:1;min-width:220px;padding:0.85rem 1rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:1rem;font-family:'Lato',sans-serif;}
+.addr-row button{padding:0.85rem 1.5rem;background:var(--gold);color:#fff;border:none;border-radius:var(--radius-sm);font-size:1rem;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;}
+.addr-row button:hover{background:var(--gold-light);}
+#rprWidgetContainer{margin-top:1.5rem;display:flex;justify-content:center;}
+.disclaimer{max-width:620px;margin:0 auto 1rem;font-size:11px;color:var(--ink-faint);text-align:center;line-height:1.7;}
+.notify{max-width:620px;margin:1.5rem auto;text-align:center;background:var(--warm);border-radius:var(--radius);padding:1.5rem;}
+.notify h3{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.5rem;}
+.hero-photo{max-width:480px;margin:0.75rem auto 0;padding:0 2rem;}
+.hero-photo img{width:100%;height:auto;border-radius:12px;display:block;box-shadow:var(--shadow);}
+.content{max-width:760px;margin:1.5rem auto 0;padding:0 2rem;}
+.content h2{font-family:'Playfair Display',serif;font-size:1.45rem;margin:1.9rem 0 0.55rem;color:var(--ink);}
+.content p{color:var(--ink-mid);font-size:0.98rem;margin-bottom:0.75rem;}
+.content .faq-q{font-weight:700;color:var(--ink);margin:1.05rem 0 0.3rem;}
+.notify p{font-size:0.9rem;color:var(--ink-mid);margin-bottom:1rem;}
+.notify a.email-btn{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;padding:0.75rem 1.5rem;border-radius:var(--radius-sm);font-weight:700;font-size:0.95rem;}
+.site-footer{padding:2rem 1.5rem;text-align:center;font-size:13px;color:var(--ink-mid);border-top:1px solid var(--border);background:var(--surface);line-height:2.2;margin-top:2rem;}
+.site-footer .links{display:flex;gap:1rem;justify-content:center;margin-bottom:0.75rem;flex-wrap:wrap;}
+.site-footer .links a{color:var(--gold);text-decoration:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;}
+</style>
+<!-- RPR widget: set options from ?address= param, THEN load script normally (in head, like the proven pattern) -->
+<script>
+  function rprGetParam(n){ return new URLSearchParams(window.location.search).get(n); }
+  var rprQueryAddress = rprGetParam('address');
+  if (rprQueryAddress) {
+    window.rprAvmWidgetOptions = {
+      Token: "B7078914-3207-44B1-A650-21ECA3E39AB7",
+      Query: decodeURIComponent(rprQueryAddress),
+      CoBrandCode: "btsputnamrealtygroup",
+      ContainerSelector: "#rprWidgetContainer",
+      ShowRprLinks: false
+    };
+  }
+</script>
+<script src="https://www.narrpr.com/widgets/avm-widget/widget.ashx/script"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent","name":"Putnam Realty Group","url":"https://floridahomevalueai.com/sunrise-preserve","telephone":"+19416629941","email":"michael@putnamrealtygroup.com","areaServed":["Sunrise Preserve","Palmer Ranch","Sarasota FL","Sarasota County FL"],"address":{"@type":"PostalAddress","addressLocality":"Sarasota","addressRegion":"FL","postalCode":"34238","addressCountry":"US"},"founder":{"@type":"Person","name":"Michael Putnam","jobTitle":"Florida Real Estate Sales Associate","identifier":"FL License SL3220671","telephone":"+19416629941","email":"michael@putnamrealtygroup.com"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How much does a pool add in Sunrise Preserve?","acceptedAnswer":{"@type":"Answer","text":"More than in any community we track, and the size-matched numbers back it up. Take the 2,489-square-foot floor plan, which resold four times: the one without a pool sold for $814,500, and the three with a pool sold for $1,050,000, $1,050,000 and $1,145,000. Widen it to single-family resales between 2,200 and 2,700 square feet and twelve with a pool ran a median of $1,090,000 against $814,500 for five without, a gap of $275,500. Some of that is the lot and the view, since a buyer paying for a pool at this price point is usually paying for the preserve or water behind it. But this is the high end of the local market, and a home without a pool is at a real disadvantage."}},
+{"@type":"Question","name":"How many Sunrise Preserve villas have a pool?","acceptedAnswer":{"@type":"Answer","text":"None. County records show zero of the 106 villas have a private pool, against 123 of 298 single-family homes, about 41 percent. So the pool premium above applies to single-family homes only. Villa resales ran a median of $470,000 at $305 per square foot over two years, on 7 sales, which is a thin sample and should be treated as a guide rather than a benchmark."}},
+{"@type":"Question","name":"Why does this page use two years of sales instead of one?","acceptedAnswer":{"@type":"Answer","text":"Because Sunrise Preserve is small and trades slowly. There are 404 homes and only 19 resold in the past twelve months, so a one-year median swings on a handful of transactions. Widening to 24 months gives 36 sales, which is enough to separate single-family from villa and pool from no-pool without a couple of unusual sales distorting everything. Where a sample is still thin, such as the 7 villa sales, the page says so."}},
+{"@type":"Question","name":"What have Sunrise Preserve homes actually sold for?","acceptedAnswer":{"@type":"Answer","text":"Sarasota County recorded 36 owner-to-owner resales in Sunrise Preserve in the two years ending August 3, 2026, out of 404 homes. Single-family homes ran a median of $800,000, or $354 per square foot, and villas $470,000 at $305. Prices ranged from $419,000 to $1,150,000, with the middle half between $580,000 and $1,050,000. A 24-month window is used here rather than 12 months because only 10 sales closed in the last six months, and a single year is too thin to draw conclusions from in a community this size."}},
+{"@type":"Question","name":"What's my Sunrise Preserve home worth?","acceptedAnswer":{"@type":"Answer","text":"It depends heavily on whether it's a villa or single-family home, the view (water, preserve, or interior lot), lot privacy, pool, and upgrades. Use the instant estimate for a ballpark, then a local comparative market analysis for a real address-specific number."}},
+{"@type":"Question","name":"Does villa vs. single-family affect value in Sunrise Preserve?","acceptedAnswer":{"@type":"Answer","text":"Yes. Villas (about 1,500-1,700 sq ft) and single-family homes (about 2,000-2,700 sq ft) draw different buyers and behave like separate micro-markets, so comparing one to the other can mislead."}},
+{"@type":"Question","name":"Who builds Sunrise Preserve?","acceptedAnswer":{"@type":"Answer","text":"Mattamy Homes. Sunrise Preserve is a smaller gated community of about 400 homes in Palmer Ranch, Sarasota, built between 2018 and 2024 in a Mediterranean style."}},
+{"@type":"Question","name":"Is Sunrise Preserve a 55+ community?","acceptedAnswer":{"@type":"Answer","text":"No. Sunrise Preserve is not age-restricted and all ages are welcome."}},
+{"@type":"Question","name":"Does Sunrise Preserve have CDD fees?","acceptedAnswer":{"@type":"Answer","text":"No. Sunrise Preserve does not have a CDD assessment, which is a real cost difference from many newer communities nearby. It does have an HOA that includes lawn care and common-area maintenance."}},
+{"@type":"Question","name":"What is flat-fee MLS at Sunrise Preserve?","acceptedAnswer":{"@type":"Answer","text":"You pay a one-time fee to list on the MLS instead of a percentage commission. Putnam Realty Group offers tiers starting at $499."}}
+]}
+</script>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+<meta property="og:url" content="https://floridahomevalueai.com/sunrise-preserve">
+</head>
+<body>
+<a class="back-home" href="https://floridahomevalueai.com/">← Back to all communities</a>
+<header class="site-header">
+  <div class="brand-wrap">
+    <div class="brand-icon"><img src="/putnam-mark.png" alt="Putnam Realty Group" width="38" height="38"></div>
+    <div>
+      <div class="brand-name">Florida <span>Home Value</span> AI</div>
+      <div class="brand-sub">Putnam Realty Group · Nokomis, FL</div>
+    </div>
+  </div>
+  <div class="header-contact">
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="status-pill">Palmer Ranch · Sarasota, FL · Mattamy Homes</div>
+  <h1>What's My Sunrise Preserve Home Worth?</h1>
+  <div class="region">Palmer Ranch · Sarasota, FL</div>
+  <p class="desc">Get an instant estimate for any Sunrise Preserve address, plus real local insight on what moves value in this smaller, maintenance-free Mattamy community &mdash; from a local agent who answers the phone.</p>
+</div>
+
+<div class="hero-photo"><img src="sunrise-preserve-entrance-palmer-ranch-sarasota-fl.jpg?v=20260705a" alt="Sunrise Preserve at Palmer Ranch entrance monument in Sarasota Florida" width="480" height="270" loading="eager" /></div>
+
+<div class="valuebox" id="estimate">
+  <h2>Get an instant home value</h2>
+  <p class="sub">Enter your address for an instant estimate. For a precise, Sunrise Preserve-specific number, just call.</p>
+  <div class="addr-row" style="position:relative;">
+    <input type="text" id="addressInput" placeholder="Start typing your street number..."
+      onkeydown="if(event.key==='Enter'){rprSubmit();}"/>
+    <button onclick="rprSubmit()">Get value</button>
+    <div id="sp-sugg" style="display:none;position:absolute;z-index:60;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-top:0;border-radius:0 0 10px 10px;max-height:280px;overflow:auto;box-shadow:0 6px 20px rgba(26,24,20,.12);text-align:left;"></div>
+</div>
+  <div id="rprWidgetContainer"></div>
+  <div id="sp-facts" style="display:none;max-width:760px;margin:1rem auto 0;text-align:left;"></div>
+  <div id="sp-comps" style="display:none;max-width:760px;margin:1rem auto 0;text-align:left;"></div>
+</div>
+<p class="disclaimer">Estimate provided by RPR® (Realtors Property Resource®). This is an automated estimate for general information only and is not an appraisal or a formal opinion of value. For a precise, hyperlocal valuation, contact Putnam Realty Group.</p>
+
+<div class="content">
+    <section style="margin:1.5rem 0;">
+  <h2>Sunrise Preserve by the numbers</h2>
+  <p>Sunrise Preserve is small and it trades slowly, so a single year of sales is too thin to draw conclusions from. Everything below uses a <strong>24-month window</strong> &mdash; the <strong>36 owner-to-owner resales</strong> recorded in Sarasota County public records in the two years ending August 3, 2026. These are prices buyers actually paid at closing, not asking prices or automated estimates.</p>
+  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8e2d8;border-radius:12px;overflow:hidden;font-size:15px;margin:1rem 0;">
+    <tr><td style="padding:.55rem .8rem;color:#4a4640;">Home type</td><td style="padding:.55rem .8rem;color:#4a4640;">Sales</td><td style="padding:.55rem .8rem;color:#4a4640;">Median price</td><td style="padding:.55rem .8rem;color:#4a4640;">Per sq ft</td><td style="padding:.55rem .8rem;color:#4a4640;">Median size</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Single-family</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">29</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$800,000</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$354</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">2,298 sqft</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Villa / attached</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">7</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$470,000</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$305</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">1,540 sqft</td></tr>
+  </table>
+  <p style="font-size:13px;color:#6b6560;">Resale prices ranged from $419,000 to $1,150,000, with the middle half between $580,000 and $1,050,000. Only 10 of the 36 closed in the last six months, which is why the wider window matters here.</p>
+
+  <h2 style="margin-top:2rem;">A pool is worth more in Sunrise Preserve than anywhere else we track</h2>
+  <p>Across the whole community, single-family resales with a pool ran a median of <strong>$1,050,000</strong> against <strong>$635,000</strong> without. That headline overstates it, because pool homes here also tend to be larger. So look at homes of the same size instead.</p>
+  <p>Take the <strong>2,489-square-foot floor plan</strong>, which sold four times. The one without a pool went for <strong>$814,500</strong>. The three with a pool went for <strong>$1,050,000, $1,050,000 and $1,145,000</strong>. Same plan, same community &mdash; and a gap of $235,000 to $330,000.</p>
+  <p>Widen it slightly and the pattern holds. Among single-family resales between 2,200 and 2,700 square feet, twelve with a pool ran a median of <strong>$1,090,000</strong> and five without ran <strong>$814,500</strong>, a difference of $275,500.</p>
+  <p>Some of that is still the lot and the view, because at this price point a buyer paying for a pool is usually paying for a preserve or water lot behind it. But this is the high end of the local market, where a buyer spending a million expects a pool, and the numbers say a home without one is at a real disadvantage.</p>
+  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8e2d8;border-radius:12px;overflow:hidden;font-size:15px;margin:1rem 0;">
+    <tr><td style="padding:.55rem .8rem;color:#4a4640;">2,489 sqft floor plan</td><td style="padding:.55rem .8rem;color:#4a4640;">Pool</td><td style="padding:.55rem .8rem;color:#4a4640;">Sold for</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">One sale</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">No</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$814,500</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Three sales</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Yes</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$1,050,000 &middot; $1,050,000 &middot; $1,145,000</td></tr>
+  </table>
+
+  <h2 style="margin-top:2rem;">None of that applies if you own a villa</h2>
+  <p>County records show <strong>zero of the 106 villas in Sunrise Preserve have a private pool</strong>. Among single-family homes, <strong>123 of 298 do &mdash; 41 percent</strong>. So the pool premium above describes single-family homes only, and the community-wide pool figure has nothing to do with a villa.</p>
+  <p>Villa resales ran a median of $470,000 at $305 per square foot over two years, on 7 sales. That is a thin sample, so treat it as a guide rather than a benchmark.</p>
+
+  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8e2d8;border-radius:12px;overflow:hidden;font-size:15px;margin:1rem 0;">
+    <tr><td style="padding:.55rem .8rem;color:#4a4640;">Homes built in the community</td><td style="padding:.55rem .8rem;font-weight:600;">404 (298 single-family, 106 villa)</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Year built</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">2018&ndash;2024</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Home size</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">1,429 to 2,965 sqft (median 2,091)</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Share of homes with a pool</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">41% of single-family &middot; 0% of villas</td></tr>
+  </table>
+  <p style="font-size:13px;color:#9a948e;">Source: Sarasota County public records, qualified owner-to-owner resales only, 24-month window. Vacant lots and non-residential parcels are excluded from the home count. Figures are estimates for general market awareness, not appraisals.</p>
+  </section>
+
+  <h2>Sunrise Preserve, in plain terms</h2>
+  <p>Sunrise Preserve is a smaller gated community in <strong>Palmer Ranch</strong> (Sarasota), built by <strong>Mattamy Homes</strong> &mdash; about 300+ single-family homes and 50+ villas, roughly 400 homes in all, built between 2018 and 2024. It's <strong>maintenance-free</strong> (the HOA includes lawn care and common-area upkeep), has resort amenities without a golf course, and notably has <strong>no CDD</strong> assessment. It is not age-restricted.</p>
+  <h2>Why one Sunrise Preserve home is worth more than another</h2>
+  <p>Value here turns on a handful of specific things. The biggest swing factors: <strong>villa vs. single-family</strong> (these behave like separate micro-markets); <strong>water view vs. interior lot</strong>; <strong>preserve view</strong>; <strong>pool vs. non-pool</strong>; outdoor-living upgrades; and <strong>lot privacy</strong> &mdash; relatively few lots here have a fully private rear yard, so a private or preserve-backed lot carries a real premium. Because the community was built in a tight window (2018&ndash;2024), view, upgrades, and floor plan often matter more than a home's age. A national estimate can't see any of this; a local comparative market analysis prices it in.</p>
+  <h2>What makes Sunrise Preserve different</h2>
+  <p>Its identity is <strong>maintenance-free Palmer Ranch living with Mattamy architecture and a smaller-community feel.</strong> Mediterranean-style Mattamy homes; a lock-and-leave, lawn-care-included lifestyle; a footprint of roughly 400 homes rather than the scale of the large master-planned communities nearby; resort amenities (heated pool and spa, clubhouse, staffed fitness center, tennis, pickleball, bocce) with <strong>no bundled golf cost</strong>; and no CDD. That mix sits in an interesting middle ground &mdash; newer construction without the scale of a massive master-planned community.</p>
+  <h2>Home types behave like separate micro-markets</h2>
+  <p>Sunrise Preserve pairs single-family homes (roughly 2,000&ndash;2,700 square feet) with villas (roughly 1,500&ndash;1,700 square feet). They draw different buyers and price differently, so a villa sale isn't a reliable comp for a single-family home or vice versa.</p>
+  <h2>Location</h2>
+  <p>Sunrise Preserve sits in Palmer Ranch, about 1.7 miles from the Legacy Trail access at McIntosh Road and Palmer Ranch Parkway, and roughly 11 miles from downtown Sarasota, with its resort amenity center on site.</p>
+  <h2>Sunrise Preserve vs. other Palmer Ranch communities</h2>
+  <p>Buyers weighing Sunrise Preserve often also look at other Palmer Ranch and nearby communities &mdash; Esplanade on Palmer Ranch, Hammock Preserve, Isles of Sarasota, and <a href="https://talonpreserve.floridahomevalueai.com/">Talon Preserve</a>. Against those, Sunrise Preserve stands out as the <strong>smaller, maintenance-free Mattamy option without bundled golf</strong> and without a CDD &mdash; a different value equation than the larger or golf-oriented communities. Mattamy finished here some time ago - county records show its last closing in 2021 - so every sale is an owner-to-owner resale (<a href="https://floridahomevalueai.com/new-vs-resale">more on new vs. resale</a>), and it's gated (<a href="https://floridahomevalueai.com/gated-communities">how gated-community fees work</a>).</p>
+  <h2>Sunrise Preserve home value questions</h2>
+  <div class="faq-q">How much does a pool add in Sunrise Preserve?</div>
+  <p>More than in any community we track, and the size-matched numbers back it up. Take the 2,489-square-foot floor plan, which resold four times: the one without a pool sold for $814,500, and the three with a pool sold for $1,050,000, $1,050,000 and $1,145,000. Widen it to single-family resales between 2,200 and 2,700 square feet and twelve with a pool ran a median of $1,090,000 against $814,500 for five without, a gap of $275,500. Some of that is the lot and the view, since a buyer paying for a pool at this price point is usually paying for the preserve or water behind it. But this is the high end of the local market, and a home without a pool is at a real disadvantage.</p>
+  <div class="faq-q">How many Sunrise Preserve villas have a pool?</div>
+  <p>None. County records show zero of the 106 villas have a private pool, against 123 of 298 single-family homes, about 41 percent. So the pool premium above applies to single-family homes only. Villa resales ran a median of $470,000 at $305 per square foot over two years, on 7 sales, which is a thin sample and should be treated as a guide rather than a benchmark.</p>
+  <div class="faq-q">Why does this page use two years of sales instead of one?</div>
+  <p>Because Sunrise Preserve is small and trades slowly. There are 404 homes and only 19 resold in the past twelve months, so a one-year median swings on a handful of transactions. Widening to 24 months gives 36 sales, which is enough to separate single-family from villa and pool from no-pool without a couple of unusual sales distorting everything. Where a sample is still thin, such as the 7 villa sales, the page says so.</p>
+  <div class="faq-q">What have Sunrise Preserve homes actually sold for?</div>
+  <p>Sarasota County recorded 36 owner-to-owner resales in Sunrise Preserve in the two years ending August 3, 2026, out of 404 homes. Single-family homes ran a median of $800,000, or $354 per square foot, and villas $470,000 at $305. Prices ranged from $419,000 to $1,150,000, with the middle half between $580,000 and $1,050,000. A 24-month window is used here rather than 12 months because only 10 sales closed in the last six months, and a single year is too thin to draw conclusions from in a community this size.</p>
+  <div class="faq-q">What's my Sunrise Preserve home worth?</div>
+  <p>It depends heavily on villa vs. single-family, view (water, preserve, or interior lot), lot privacy, pool, and upgrades. Use the instant estimate above for a ballpark, then a local comparative market analysis for a real, address-specific number.</p>
+  <div class="faq-q">Does villa vs. single-family affect my home's value?</div>
+  <p>Yes. Villas (about 1,500&ndash;1,700 sq ft) and single-family homes (about 2,000&ndash;2,700 sq ft) draw different buyers and behave like separate micro-markets.</p>
+  <div class="faq-q">Who builds Sunrise Preserve?</div>
+  <p>Mattamy Homes. It's a smaller gated community of about 400 homes in Palmer Ranch, Sarasota, built between 2018 and 2024.</p>
+  <div class="faq-q">Is Sunrise Preserve a 55+ community?</div>
+  <p>No. Sunrise Preserve is not age-restricted and all ages are welcome.</p>
+  <div class="faq-q">Does Sunrise Preserve have CDD fees?</div>
+  <p>No. There is no CDD assessment &mdash; a real cost difference from many newer communities nearby. It does have an HOA that includes lawn care and common-area maintenance.</p>
+  <div class="faq-q">What is flat-fee MLS?</div>
+  <p>You pay a one-time fee to list on the MLS instead of a percentage commission. Putnam Realty Group offers tiers starting at $499.</p>
+</div>
+
+<div class="notify">
+  <h3>Questions about Sunrise Preserve?</h3>
+  <p>Have a question about Sunrise Preserve, or want a real read on your own home? Ask away. Your info is safe with us; no spam, ever.</p>
+  <a class="email-btn" href="mailto:Michael@PutnamRealtyGroup.com?subject=Sunrise%20Preserve%20%E2%80%94%20Question">Email Michael about Sunrise Preserve</a>
+</div>
+
+  <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;margin:2rem 0 .5rem;">Related home value pages</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;">
+    <a href="https://floridahomevalueai.com/market-report" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Monthly Market Report</a>
+    <a href="https://floridahomevalueai.com/venice" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Venice</a><a href="https://floridahomevalueai.com/osprey" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Osprey</a><a href="https://floridahomevalueai.com/palmer-ranch" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Palmer Ranch</a><a href="https://floridahomevalueai.com/nokomis" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Nokomis</a>
+  
+    <a href="https://floridahomevalueai.com/about" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">About Michael</a>
+  </div>
+<footer class="site-footer">
+  <div class="links">
+    <a href="https://floridahomevalueai.com/">Home</a>
+    <a href="https://floridahomevalueai.com/nokomis" style="font-size:13px;color:#1a1814;padding:4px 12px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;">Nokomis Values</a>
+    <a href="https://floridahomevalueai.com/meet" style="font-size:13px;color:#1a1814;padding:4px 12px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;">Meet Your Agent</a>
+    <a href="https://floridahomevalueai.com/local-vs-big-brokerage" style="font-size:13px;color:#1a1814;padding:4px 12px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;">Big Brokerage?</a>
+    <a href="https://floridahomevalueai.com/for-agents">For Agents</a>
+    <a href="https://floridahomevalueai.com/seller-guide">Seller Guide</a>
+  </div>
+  <strong>Putnam Realty Group</strong> · Michael Putnam, Sales Associate SL3220671 · Broker: Brian Putnam Jr. BK3276432<br>
+  941-662-9941 · Michael@PutnamRealtyGroup.com · Nokomis, FL 34275
+
+  <p style="font-size:12px;color:#9a948e;margin-top:1rem;"><a href="https://floridahomevalueai.com/home-search" style="color:#9a948e;text-decoration:underline;">Search homes for sale</a> &middot;
+      <a href="https://floridahomevalueai.com/terms" style="color:#9a948e;text-decoration:underline;">Terms of Use</a> &middot; <a href="https://floridahomevalueai.com/privacy" style="color:#9a948e;text-decoration:underline;">Privacy Policy</a></p>
+</footer>
+
+<script>window.FHV_TERRITORY="Sunrise Preserve (coming-soon)";window.FHV_SUBDIVISION="Sunrise Preserve";window.FHV_ASSESS=true;</script>
+<script src="fhv-capture.js?v=20260705b"></script>
+<script>
+  // prefill the box with the submitted address, and wire submit -> reload with ?address=
+  (function(){
+    var input = document.getElementById('addressInput');
+    if (rprQueryAddress && input) input.value = decodeURIComponent(rprQueryAddress);
+  })();
+  function rprSubmit(){
+    var a = document.getElementById('addressInput').value.trim();
+    if(!a){ document.getElementById('addressInput').focus(); return; }
+    if(window.fhvCaptureAddress){ window.fhvCaptureAddress(a); }
+    window.location.href = window.location.pathname + '?address=' + encodeURIComponent(a);
+  }
+</script>
+<script>/* Sunrise Preserve address index - Sarasota County public records, built 8/11/26.
+   Inlined deliberately: a separate .js file was dropped on deploy for Grand Palm. */
+window.SP_ADDRESSES = [["5300 Fall Moon Ct",1677,2021,0,"V",402000,"2021-06-09"],
+["5301 Fall Moon Ct",1677,2020,0,"V",363300,"2021-01-19"],
+["5304 Fall Moon Ct",1677,2021,0,"V",460000,"2021-08-26"],
+["5305 Fall Moon Ct",1677,2020,0,"V",379000,"2021-01-26"],
+["5308 Fall Moon Ct",1677,2021,0,"S",429600,"2021-07-13"],
+["5309 Fall Moon Ct",1677,2019,0,"V",368000,"2021-01-08"],
+["5313 Fall Moon Ct",1677,2019,0,"V",356500,"2020-04-06"],
+["5317 Fall Moon Ct",1540,2019,0,"V",395700,"2019-08-09"],
+["5321 Fall Moon Ct",1540,2019,0,"V",392900,"2019-08-09"],
+["5400 Hope Sound Cir",2965,2018,1,"S",599900,"2020-09-14"],
+["5401 Hope Sound Cir",2091,2018,0,"S",435700,"2020-01-10"],
+["5404 Hope Sound Cir",2298,2018,0,"S",445000,"2020-01-10"],
+["5405 Hope Sound Cir",1843,2018,1,"S",492000,"2020-12-28"],
+["5408 Hope Sound Cir",2091,2018,1,"S",413000,"2019-05-03"],
+["5409 Hope Sound Cir",2298,2018,1,"S",436000,"2019-12-20"],
+["5412 Hope Sound Cir",1843,2019,0,"S",401000,"2019-12-18"],
+["5413 Hope Sound Cir",2080,2019,0,"S",460000,"2021-01-06"],
+["5416 Hope Sound Cir",2298,2019,0,"S",450000,"2020-01-10"],
+["5417 Hope Sound Cir",2201,2018,0,"S",435000,"2019-07-29"],
+["5420 Hope Sound Cir",1843,2021,0,"S",496600,"2021-08-26"],
+["5421 Hope Sound Cir",2503,2022,1,"S",642000,"2022-04-01"],
+["5424 Hope Sound Cir",2091,2021,1,"S",650000,"2026-04-03"],
+["5425 Hope Sound Cir",1838,2022,0,"S",605000,"2024-10-30"],
+["5428 Hope Sound Cir",2293,2022,0,"S",587100,"2022-02-28"],
+["5429 Hope Sound Cir",1950,2021,0,"S",469400,"2021-11-04"],
+["5432 Hope Sound Cir",2293,2022,1,"S",616400,"2022-04-08"],
+["5433 Hope Sound Cir",1843,2021,1,"S",504400,"2021-10-28"],
+["5436 Hope Sound Cir",1843,2021,0,"S",525000,"2026-04-30"],
+["5440 Hope Sound Cir",2092,2022,0,"S",545500,"2022-03-03"],
+["5444 Hope Sound Cir",2091,2021,1,"S",485100,"2021-03-19"],
+["5448 Hope Sound Cir",2091,2020,0,"S",472000,"2021-03-25"],
+["5452 Hope Sound Cir",1843,2020,0,"S",455200,"2021-03-18"],
+["5456 Hope Sound Cir",2298,2020,0,"S",517900,"2021-04-20"],
+["5501 Blue Water Blvd",2632,2024,0,"S",1002000,"2024-04-04"],
+["5505 Blue Water Blvd",2632,2024,0,"S",900100,"2024-04-12"],
+["5509 Blue Water Blvd",2632,2024,1,"S",1024800,"2024-05-16"],
+["5513 Blue Water Blvd",2261,2023,0,"S",919100,"2024-01-31"],
+["5517 Blue Water Blvd",2632,2023,0,"S",909700,"2024-05-10"],
+["5521 Blue Water Blvd",2632,2023,0,"S",1075200,"2023-05-30"],
+["5525 Blue Water Blvd",2495,2023,1,"S",949200,"2024-01-29"],
+["5529 Blue Water Blvd",2632,2023,0,"S",1046800,"2023-11-29"],
+["5533 Long Shore Loop",2632,2023,1,"S",1150000,"2025-08-05"],
+["5537 Long Shore Loop",1677,2018,0,"V",600000,"2024-07-31"],
+["5541 Long Shore Loop",1540,2018,0,"V",619100,"2022-04-20"],
+["5545 Long Shore Loop",2632,2024,0,"S",994000,"2024-04-04"],
+["5548 Long Shore Loop",2483,2022,1,"S",662600,"2022-03-30"],
+["5549 Long Shore Loop",2498,2018,0,"S",875000,"2023-12-14"],
+["5552 Long Shore Loop",2622,2019,1,"S",1219000,"2023-03-28"],
+["5553 Long Shore Loop",1843,2018,1,"S",725000,"2023-02-24"],
+["5557 Long Shore Loop",2298,2018,1,"S",840000,"2023-04-28"],
+["5560 Long Shore Loop",2622,2020,0,"S",905000,"2022-06-16"],
+["5561 Long Shore Loop",2489,2018,1,"S",980000,"2023-02-27"],
+["5564 Long Shore Loop",2253,2020,1,"S",483300,"2020-07-13"],
+["5565 Long Shore Loop",2622,2018,1,"S",1100000,"2025-08-15"],
+["5568 Long Shore Loop",2489,2020,0,"S",515000,"2020-06-24"],
+["5569 Long Shore Loop",2622,2021,1,"S",1070000,"2024-05-22"],
+["5572 Long Shore Loop",2622,2020,0,"S",568900,"2020-12-03"],
+["5573 Long Shore Loop",2622,2021,1,"S",649900,"2021-07-20"],
+["5576 Long Shore Loop",2489,2021,0,"S",780000,"2024-01-31"],
+["5577 Long Shore Loop",2622,2019,1,"S",721000,"2019-07-26"],
+["5580 Long Shore Loop",2616,2020,1,"S",599800,"2020-09-29"],
+["5581 Long Shore Loop",2489,2019,1,"S",615300,"2019-07-26"],
+["5584 Long Shore Loop",2622,2021,1,"S",1025000,"2024-06-10"],
+["5585 Long Shore Loop",2489,2020,1,"S",1050000,"2024-11-01"],
+["5588 Long Shore Loop",2489,2021,0,"S",590700,"2022-01-12"],
+["5589 Long Shore Loop",2489,2020,1,"S",1050000,"2025-01-13"],
+["5592 Long Shore Loop",2622,2021,0,"S",595200,"2021-08-05"],
+["5593 Long Shore Loop",2622,2019,1,"S",538000,"2020-05-13"],
+["5596 Long Shore Loop",2622,2020,1,"S",634400,"2021-06-01"],
+["5597 Long Shore Loop",2622,2019,1,"S",559400,"2019-11-05"],
+["5600 Long Shore Loop",2253,2020,0,"S",479000,"2020-11-30"],
+["5600 Morning Sun Dr",2253,2018,0,"S",445000,"2020-05-15"],
+["5601 Long Shore Loop",2489,2019,1,"S",1145000,"2025-03-21"],
+["5601 Morning Sun Dr",2622,2019,0,"S",550000,"2019-05-31"],
+["5604 Long Shore Loop",2489,2020,0,"S",507700,"2020-08-18"],
+["5604 Morning Sun Dr",2489,2018,0,"S",814500,"2026-05-08"],
+["5605 Long Shore Loop",2261,2020,1,"S",1150000,"2025-11-24"],
+["5605 Morning Sun Dr",2261,2019,0,"S",975000,"2022-03-15"],
+["5608 Long Shore Loop",2622,2021,1,"S",657800,"2021-03-25"],
+["5608 Morning Sun Dr",2266,2018,0,"S",553600,"2018-10-17"],
+["5609 Long Shore Loop",2261,2019,0,"S",0,""],
+["5609 Morning Sun Dr",2622,2019,0,"S",588800,"2019-02-27"],
+["5612 Long Shore Loop",2091,2020,0,"S",546500,"2020-06-18"],
+["5612 Morning Sun Dr",2489,2018,1,"S",975000,"2022-06-07"],
+["5613 Long Shore Loop",2622,2020,1,"S",637000,"2020-03-17"],
+["5613 Morning Sun Dr",2489,2019,1,"S",538900,"2019-05-17"],
+["5616 Long Shore Loop",2623,2021,0,"S",635900,"2021-08-26"],
+["5616 Morning Sun Dr",2253,2018,1,"S",500000,"2018-10-04"],
+["5617 Long Shore Loop",2622,2020,1,"S",1130000,"2026-04-13"],
+["5617 Morning Sun Dr",2622,2018,0,"S",560000,"2020-10-01"],
+["5620 Long Shore Loop",2624,2022,1,"S",716900,"2022-03-30"],
+["5620 Morning Sun Dr",2838,2018,1,"S",505000,"2020-02-10"],
+["5621 Long Shore Loop",2622,2021,1,"S",607500,"2021-02-15"],
+["5621 Morning Sun Dr",2622,2018,0,"S",589500,"2018-12-20"],
+["5624 Long Shore Loop",2483,2022,0,"S",735700,"2022-03-11"],
+["5625 Long Shore Loop",2489,2020,0,"S",538000,"2020-03-17"],
+["5625 Morning Sun Dr",2489,2018,0,"S",517000,"2019-03-28"],
+["5628 Long Shore Loop",2092,2022,0,"S",635000,"2025-01-14"],
+["5629 Long Shore Loop",2622,2020,1,"S",572000,"2020-06-10"],
+["5632 Long Shore Loop",2298,2021,1,"S",725000,"2026-06-12"],
+["5633 Long Shore Loop",2489,2020,1,"S",595100,"2020-10-06"],
+["5636 Long Shore Loop",1843,2021,1,"S",476400,"2021-03-18"],
+["5637 Long Shore Loop",2266,2021,0,"S",870000,"2024-04-04"],
+["5641 Long Shore Loop",2489,2021,1,"S",1000000,"2023-03-29"],
+["5645 Long Shore Loop",2622,2020,1,"S",660800,"2020-12-22"],
+["5649 Long Shore Loop",2622,2020,0,"S",621300,"2020-10-06"],
+["5653 Long Shore Loop",2622,2020,1,"S",618900,"2020-11-17"],
+["5657 Long Shore Loop",2489,2021,0,"S",635400,"2021-07-20"],
+["5661 Long Shore Loop",2622,2021,1,"S",656400,"2021-02-04"],
+["5665 Long Shore Loop",1843,2021,1,"S",484900,"2021-02-15"],
+["5669 Long Shore Loop",2091,2021,0,"S",537200,"2021-07-20"],
+["5673 Long Shore Loop",2298,2021,1,"S",629400,"2021-08-31"],
+["5677 Long Shore Loop",2298,2021,1,"S",554200,"2021-06-23"],
+["5681 Long Shore Loop",2091,2021,0,"S",630000,"2021-11-12"],
+["5685 Long Shore Loop",2068,2022,0,"S",556500,"2022-03-11"],
+["5690 Long Shore Loop",1944,2023,0,"S",673600,"2023-01-31"],
+["5693 Long Shore Loop",2068,2022,1,"S",620600,"2022-05-26"],
+["5697 Long Shore Loop",2293,2022,1,"S",797500,"2022-07-15"],
+["5701 Long Shore Loop",1833,2022,1,"S",615600,"2022-07-29"],
+["5705 Long Shore Loop",2293,2022,0,"S",676000,"2022-05-26"],
+["5709 Long Shore Loop",1847,2022,0,"S",589600,"2022-06-15"],
+["5713 Long Shore Loop",2092,2022,0,"S",642000,"2022-05-31"],
+["5717 Long Shore Loop",2092,2022,0,"S",682600,"2022-12-21"],
+["5721 Long Shore Loop",2092,2022,1,"S",800000,"2025-04-03"],
+["5725 Long Shore Loop",1924,2022,0,"S",624200,"2022-08-25"],
+["5729 Long Shore Loop",2092,2022,0,"S",767500,"2024-12-31"],
+["5733 Long Shore Loop",2306,2023,1,"S",841900,"2023-06-30"],
+["5737 Long Shore Loop",2106,2023,0,"S",763100,"2023-04-25"],
+["5738 Long Shore Loop",2106,2023,0,"S",732500,"2023-04-27"],
+["5741 Long Shore Loop",2624,2022,1,"S",903000,"2022-07-20"],
+["5742 Long Shore Loop",1936,2022,1,"S",703400,"2022-11-04"],
+["5745 Long Shore Loop",2483,2022,0,"S",889000,"2022-08-16"],
+["5746 Long Shore Loop",1838,2022,0,"S",715000,"2022-11-15"],
+["5750 Long Shore Loop",2092,2022,1,"S",785000,"2025-07-18"],
+["5753 Long Shore Loop",2624,2022,1,"S",853900,"2022-05-27"],
+["5754 Long Shore Loop",1944,2023,0,"S",643800,"2023-05-01"],
+["5757 Long Shore Loop",2094,2022,1,"S",744800,"2022-12-21"],
+["5758 Long Shore Loop",2093,2023,0,"S",756500,"2023-03-24"],
+["5761 Long Shore Loop",2624,2022,1,"S",902400,"2022-06-22"],
+["5762 Long Shore Loop",1838,2022,0,"S",654800,"2022-12-22"],
+["5765 Long Shore Loop",2624,2022,1,"S",873900,"2022-08-12"],
+["5766 Long Shore Loop",1944,2023,0,"S",669800,"2023-07-13"],
+["5769 Long Shore Loop",2458,2023,0,"S",863500,"2023-01-30"],
+["5770 Long Shore Loop",2106,2023,0,"S",697400,"2023-05-25"],
+["5773 Long Shore Loop",2624,2022,0,"S",887800,"2022-12-16"],
+["5774 Long Shore Loop",2106,2023,0,"S",679500,"2024-04-09"],
+["5778 Long Shore Loop",2106,2023,0,"S",728400,"2023-12-08"],
+["5779 Long Shore Loop",2261,2023,1,"S",796500,"2023-03-14"],
+["5782 Long Shore Loop",1847,2023,0,"S",580000,"2024-09-09"],
+["5783 Long Shore Loop",2632,2023,1,"S",1023200,"2023-03-29"],
+["5785 Long Shore Loop",2458,2023,1,"S",896900,"2023-04-28"],
+["5786 Long Shore Loop",1847,2023,0,"S",670000,"2023-12-13"],
+["5790 Long Shore Loop",1880,2023,0,"S",634900,"2026-02-12"],
+["5793 Long Shore Loop",2632,2023,0,"S",899500,"2025-08-28"],
+["5794 Long Shore Loop",2306,2023,0,"S",781500,"2023-03-13"],
+["5797 Long Shore Loop",2632,2023,0,"S",1069000,"2023-03-17"],
+["5798 Long Shore Loop",2306,2023,0,"S",851300,"2023-02-27"],
+["5802 Long Shore Loop",2306,2023,0,"S",723700,"2023-02-28"],
+["5803 Long Shore Loop",2632,2023,0,"S",949900,"2023-04-14"],
+["5806 Long Shore Loop",1847,2023,0,"S",629000,"2024-04-25"],
+["5809 Long Shore Loop",2306,2024,0,"S",712000,"2024-05-24"],
+["5810 Long Shore Loop",2306,2023,1,"S",861200,"2023-05-30"],
+["5813 Long Shore Loop",1944,2023,0,"S",640000,"2024-06-20"],
+["5814 Long Shore Loop",1944,2023,1,"S",628700,"2023-02-28"],
+["5817 Long Shore Loop",2306,2023,0,"S",906400,"2023-05-30"],
+["5818 Long Shore Loop",2306,2023,0,"S",835400,"2023-02-28"],
+["5821 Long Shore Loop",2306,2023,0,"S",896900,"2023-05-23"],
+["5822 Long Shore Loop",2106,2023,0,"S",766500,"2023-02-27"],
+["5825 Long Shore Loop",1932,2020,1,"S",430200,"2020-12-22"],
+["5826 Long Shore Loop",2298,2021,1,"S",547500,"2021-05-14"],
+["5829 Long Shore Loop",2298,2021,0,"S",492100,"2021-04-30"],
+["5830 Long Shore Loop",2091,2020,1,"S",560200,"2020-11-17"],
+["5833 Long Shore Loop",2091,2021,0,"S",700000,"2024-05-13"],
+["5834 Long Shore Loop",2201,2020,0,"S",480000,"2020-11-17"],
+["5837 Long Shore Loop",1932,2020,0,"S",448700,"2020-12-22"],
+["5838 Long Shore Loop",2091,2020,0,"S",440100,"2020-07-16"],
+["5841 Long Shore Loop",1843,2020,0,"S",629900,"2026-05-08"],
+["5842 Long Shore Loop",1843,2020,0,"S",410000,"2020-03-20"],
+["5845 Long Shore Loop",2091,2021,1,"S",850000,"2023-07-17"],
+["5846 Long Shore Loop",1843,2020,1,"S",416600,"2020-07-16"],
+["5849 Long Shore Loop",2462,2020,1,"S",865000,"2022-02-25"],
+["5850 Long Shore Loop",2298,2020,0,"S",469800,"2020-05-15"],
+["5853 Long Shore Loop",2306,2024,1,"S",685500,"2024-05-17"],
+["5854 Long Shore Loop",2462,2020,0,"S",499000,"2021-02-04"],
+["5857 Long Shore Loop",2091,2024,0,"S",827000,"2024-04-19"],
+["5858 Long Shore Loop",2298,2021,0,"S",814000,"2026-01-06"],
+["5861 Long Shore Loop",2106,2024,0,"S",803100,"2024-04-25"],
+["5862 Long Shore Loop",2298,2021,1,"S",613500,"2021-07-13"],
+["5865 Long Shore Loop",2298,2020,1,"S",463000,"2020-09-28"],
+["5866 Long Shore Loop",2091,2020,1,"S",790000,"2024-06-04"],
+["5869 Long Shore Loop",2298,2020,1,"S",679000,"2021-10-12"],
+["5870 Long Shore Loop",1843,2018,0,"S",399500,"2019-01-11"],
+["5873 Long Shore Loop",2091,2020,1,"S",840000,"2024-05-10"],
+["5874 Long Shore Loop",2298,2018,0,"S",437000,"2020-04-06"],
+["5877 Long Shore Loop",1843,2020,1,"S",458200,"2020-03-20"],
+["5878 Long Shore Loop",2298,2018,0,"S",437000,"2019-12-04"],
+["5881 Long Shore Loop",1843,2020,0,"S",448900,"2020-04-06"],
+["5882 Long Shore Loop",2201,2018,0,"S",435000,"2019-06-27"],
+["5885 Long Shore Loop",2298,2020,1,"S",507500,"2020-02-10"],
+["5886 Long Shore Loop",2091,2019,1,"S",604300,"2019-04-12"],
+["5889 Long Shore Loop",1843,2020,1,"S",630000,"2024-09-11"],
+["5890 Long Shore Loop",2298,2020,0,"S",493800,"2020-10-06"],
+["5893 Long Shore Loop",1843,2020,1,"S",430900,"2020-04-17"],
+["5894 Long Shore Loop",2091,2019,1,"S",900000,"2022-06-30"],
+["5897 Long Shore Loop",2091,2018,1,"S",440000,"2019-05-03"],
+["5898 Long Shore Loop",2091,2018,0,"S",472500,"2019-02-15"],
+["5901 Long Shore Loop",1843,2018,0,"S",427500,"2019-05-15"],
+["5902 Long Shore Loop",1843,2018,0,"S",432400,"2019-05-15"],
+["5905 Long Shore Loop",2298,2019,0,"S",480000,"2019-07-10"],
+["5909 Long Shore Loop",2091,2019,1,"S",456100,"2020-02-10"],
+["5913 Long Shore Loop",2091,2019,0,"S",489900,"2019-08-30"],
+["5917 Long Shore Loop",2201,2020,0,"S",452000,"2020-02-10"],
+["5921 Long Shore Loop",2298,2018,0,"S",786300,"2023-02-28"],
+["5925 Long Shore Loop",2201,2018,0,"S",755000,"2024-12-17"],
+["5929 Long Shore Loop",2091,2018,0,"S",660000,"2023-03-17"],
+["5933 Long Shore Loop",1843,2018,0,"S",402000,"2020-02-10"],
+["5937 Long Shore Loop",1932,2020,0,"S",475000,"2020-12-22"],
+["5941 Long Shore Loop",2298,2021,0,"S",585200,"2021-07-20"],
+["5945 Long Shore Loop",1950,2021,0,"S",475400,"2021-07-20"],
+["5949 Long Shore Loop",2306,2023,0,"S",760800,"2023-04-28"],
+["5953 Long Shore Loop",1847,2023,0,"S",648000,"2023-03-30"],
+["8500 September Sky Ct",1843,2021,0,"S",489300,"2021-12-21"],
+["8501 September Sky Ct",1950,2021,0,"S",511300,"2021-12-22"],
+["8504 September Sky Ct",1944,2023,0,"S",662000,"2023-03-10"],
+["8505 September Sky Ct",1847,2023,1,"S",649500,"2023-07-18"],
+["8508 September Sky Ct",1838,2022,1,"S",623700,"2022-06-09"],
+["8509 September Sky Ct",2080,2021,1,"S",568300,"2022-03-29"],
+["8512 September Sky Ct",2092,2022,1,"S",612600,"2022-03-24"],
+["8513 September Sky Ct",1843,2021,0,"S",550900,"2022-01-27"],
+["8516 September Sky Ct",2092,2022,0,"S",621300,"2022-09-01"],
+["8517 September Sky Ct",2522,2022,1,"S",663000,"2022-04-11"],
+["8520 September Sky Ct",1936,2022,0,"S",599100,"2022-05-27"],
+["8521 September Sky Ct",2298,2021,1,"S",574800,"2021-12-07"],
+["8524 September Sky Ct",1838,2022,0,"S",557400,"2022-05-06"],
+["8525 September Sky Ct",2080,2021,1,"S",556400,"2021-12-10"],
+["8528 September Sky Ct",2092,2022,0,"S",616000,"2022-06-16"],
+["8529 September Sky Ct",2080,2021,1,"S",560200,"2022-02-04"],
+["8532 September Sky Ct",2092,2022,0,"S",590000,"2022-05-12"],
+["8533 September Sky Ct",1925,2022,0,"S",579000,"2022-05-26"],
+["8536 September Sky Ct",1838,2022,1,"S",677200,"2022-09-22"],
+["8537 September Sky Ct",1847,2023,0,"S",554600,"2024-05-08"],
+["8600 Rain Song Rd",1540,2018,0,"V",470000,"2025-01-10"],
+["8600 Sundance Loop",2458,2023,0,"S",845700,"2023-03-10"],
+["8601 Rain Song Rd",1622,2019,0,"V",345000,"2019-09-19"],
+["8601 Sundance Loop",2489,2021,1,"S",633400,"2021-07-30"],
+["8604 Rain Song Rd",1540,2018,0,"V",320000,"2020-01-13"],
+["8604 Sundance Loop",2622,2021,1,"S",1100000,"2024-08-07"],
+["8605 Rain Song Rd",1622,2019,0,"V",357000,"2019-07-11"],
+["8605 Sundance Loop",2622,2021,1,"S",1050000,"2022-10-28"],
+["8608 Rain Song Rd",1622,2018,0,"V",330000,"2020-03-17"],
+["8608 Sundance Loop",2622,2021,1,"S",731200,"2021-12-10"],
+["8609 Rain Song Rd",1677,2018,0,"V",525000,"2022-09-28"],
+["8609 Sundance Loop",2489,2021,1,"S",610100,"2021-05-27"],
+["8612 Rain Song Rd",1622,2018,0,"V",354900,"2018-09-12"],
+["8612 Sundance Loop",2622,2022,0,"S",1040000,"2026-03-31"],
+["8613 Rain Song Rd",1677,2018,0,"V",357500,"2019-06-27"],
+["8613 Sundance Loop",2622,2021,0,"S",560100,"2021-04-03"],
+["8616 Rain Song Rd",1540,2019,0,"V",340000,"2019-09-25"],
+["8616 Sundance Loop",2489,2022,0,"S",652700,"2022-03-25"],
+["8617 Rain Song Rd",1677,2019,0,"V",369000,"2019-07-11"],
+["8617 Sundance Loop",2622,2021,1,"S",681500,"2021-07-21"],
+["8620 Rain Song Rd",1634,2019,0,"V",475000,"2021-10-01"],
+["8620 Sundance Loop",2257,2022,0,"S",643700,"2022-03-31"],
+["8621 Rain Song Rd",1677,2019,0,"V",355000,"2019-07-10"],
+["8621 Sundance Loop",2622,2021,1,"S",1080000,"2025-10-30"],
+["8624 Rain Song Rd",1677,2018,0,"V",440000,"2026-01-16"],
+["8624 Sundance Loop",2622,2021,1,"S",1037000,"2023-12-27"],
+["8625 Rain Song Rd",1540,2018,0,"V",370300,"2018-11-15"],
+["8625 Sundance Loop",2489,2021,1,"S",554800,"2021-01-29"],
+["8628 Rain Song Rd",1677,2018,0,"V",339500,"2018-09-24"],
+["8628 Sundance Loop",2622,2021,0,"S",644000,"2021-07-22"],
+["8629 Rain Song Rd",1540,2018,0,"V",594100,"2023-05-12"],
+["8629 Sundance Loop",2622,2021,1,"S",702700,"2021-02-15"],
+["8632 Rain Song Rd",1677,2018,0,"V",359700,"2018-10-31"],
+["8632 Sundance Loop",2266,2021,1,"S",950000,"2023-07-07"],
+["8633 Rain Song Rd",1622,2019,0,"V",333000,"2019-04-23"],
+["8633 Sundance Loop",2489,2021,0,"S",587200,"2021-06-23"],
+["8636 Rain Song Rd",1677,2018,0,"V",340600,"2018-12-21"],
+["8636 Sundance Loop",2489,2021,0,"S",600100,"2021-05-14"],
+["8637 Rain Song Rd",1622,2019,0,"V",335000,"2020-01-10"],
+["8640 Rain Song Rd",1622,2018,0,"V",337000,"2019-12-04"],
+["8640 Sundance Loop",2298,2021,0,"S",478200,"2021-01-26"],
+["8641 Rain Song Rd",1677,2021,0,"S",472800,"2021-08-26"],
+["8644 Rain Song Rd",1622,2018,0,"V",389000,"2018-11-30"],
+["8644 Sundance Loop",2594,2021,1,"S",699000,"2025-06-03"],
+["8645 Rain Song Rd",1677,2019,0,"V",350000,"2019-12-20"],
+["8648 Sundance Loop",2091,2020,0,"S",449000,"2020-08-18"],
+["8649 Rain Song Rd",1677,2019,0,"V",376000,"2019-12-04"],
+["8650 Rain Song Rd",1540,2018,0,"V",324000,"2019-04-26"],
+["8652 Sundance Loop",2298,2020,1,"S",506400,"2020-04-06"],
+["8653 Rain Song Rd",1677,2018,0,"V",363600,"2019-01-15"],
+["8654 Rain Song Rd",1638,2018,0,"V",353600,"2018-11-26"],
+["8656 Sundance Loop",2632,2023,1,"S",1004800,"2023-03-08"],
+["8657 Rain Song Rd",1677,2018,0,"V",427200,"2018-11-21"],
+["8657 Sundance Loop",1843,2023,0,"S",713700,"2023-05-31"],
+["8658 Rain Song Rd",1677,2020,0,"V",339800,"2020-07-13"],
+["8660 Sundance Loop",2495,2023,0,"S",869900,"2024-03-28"],
+["8661 Rain Song Rd",1677,2018,0,"V",392100,"2018-11-29"],
+["8661 Sundance Loop",2458,2023,0,"S",839000,"2023-02-28"],
+["8662 Rain Song Rd",1677,2020,0,"V",339900,"2020-08-21"],
+["8664 Sundance Loop",2624,2022,1,"S",907800,"2022-12-19"],
+["8665 Rain Song Rd",1677,2018,0,"V",365000,"2019-05-31"],
+["8665 Sundance Loop",2624,2022,1,"S",860100,"2022-06-27"],
+["8666 Rain Song Rd",1540,2020,0,"V",330000,"2020-09-30"],
+["8668 Sundance Loop",2632,2023,0,"S",904800,"2023-05-31"],
+["8669 Rain Song Rd",1540,2018,0,"V",486000,"2025-08-29"],
+["8669 Sundance Loop",2483,2022,1,"S",748100,"2022-06-08"],
+["8670 Rain Song Rd",1540,2020,0,"V",550000,"2022-07-28"],
+["8672 Sundance Loop",2261,2023,1,"S",789500,"2023-03-17"],
+["8673 Rain Song Rd",1540,2018,0,"V",330000,"2019-07-02"],
+["8673 Sundance Loop",2624,2022,1,"S",791600,"2022-07-28"],
+["8674 Rain Song Rd",1677,2020,0,"V",349600,"2021-01-26"],
+["8676 Sundance Loop",2624,2022,1,"S",987500,"2024-08-22"],
+["8677 Rain Song Rd",1677,2020,0,"V",350800,"2020-03-20"],
+["8677 Sundance Loop",2261,2023,0,"S",831800,"2023-02-13"],
+["8678 Rain Song Rd",1677,2020,0,"V",440000,"2025-09-23"],
+["8680 Sundance Loop",2624,2022,0,"S",762300,"2022-05-27"],
+["8681 Rain Song Rd",1677,2020,0,"V",356500,"2020-04-06"],
+["8681 Sundance Loop",2624,2022,0,"S",929900,"2022-10-28"],
+["8682 Rain Song Rd",1540,2020,0,"V",334800,"2020-11-10"],
+["8684 Sundance Loop",2458,2023,0,"S",846400,"2023-04-26"],
+["8685 Rain Song Rd",1540,2021,0,"V",570000,"2024-01-23"],
+["8685 Sundance Loop",2878,2022,0,"S",784200,"2022-11-23"],
+["8686 Rain Song Rd",1540,2020,0,"V",334800,"2020-09-29"],
+["8688 Sundance Loop",2624,2022,1,"S",1100000,"2024-07-31"],
+["8689 Rain Song Rd",1540,2021,0,"V",388100,"2021-02-15"],
+["8689 Sundance Loop",2489,2022,0,"S",756100,"2022-06-24"],
+["8690 Rain Song Rd",1622,2020,0,"V",465000,"2021-09-14"],
+["8692 Sundance Loop",2624,2022,1,"S",840000,"2022-07-21"],
+["8693 Rain Song Rd",1677,2020,0,"V",645500,"2024-03-12"],
+["8693 Sundance Loop",2624,2022,0,"S",878200,"2022-12-02"],
+["8694 Rain Song Rd",1622,2020,0,"V",348100,"2020-12-22"],
+["8697 Rain Song Rd",1677,2020,0,"V",401000,"2020-03-17"],
+["8697 Sundance Loop",2112,2023,0,"S",722000,"2023-05-26"],
+["8700 Bay Meadow Dr",1843,2021,1,"S",456500,"2021-05-14"],
+["8700 Rain Song Rd",1540,2022,0,"V",565000,"2023-04-05"],
+["8701 Bay Meadow Dr",2298,2020,0,"S",506000,"2020-04-06"],
+["8701 Rain Song Rd",1536,2023,0,"V",567300,"2023-02-10"],
+["8701 Sundance Loop",2306,2023,0,"S",734900,"2023-05-31"],
+["8704 Bay Meadow Dr",1843,2020,0,"S",411000,"2020-11-10"],
+["8704 Rain Song Rd",1540,2022,0,"V",513100,"2022-09-22"],
+["8705 Bay Meadow Dr",2298,2020,0,"S",490000,"2020-08-18"],
+["8705 Rain Song Rd",1492,2023,0,"V",551100,"2023-02-17"],
+["8705 Sundance Loop",2306,2023,0,"S",759500,"2023-05-26"],
+["8708 Bay Meadow Dr",1932,2020,1,"S",469300,"2021-01-19"],
+["8708 Rain Song Rd",1536,2023,0,"V",489700,"2023-02-13"],
+["8709 Bay Meadow Dr",2298,2020,1,"S",514600,"2020-03-17"],
+["8709 Rain Song Rd",1540,2022,0,"V",493500,"2022-08-30"],
+["8709 Sundance Loop",1847,2023,0,"S",608000,"2023-04-13"],
+["8712 Bay Meadow Dr",1843,2021,0,"S",471200,"2021-06-01"],
+["8712 Rain Song Rd",1536,2023,0,"V",493300,"2023-01-27"],
+["8713 Bay Meadow Dr",2080,2018,0,"S",504800,"2018-10-15"],
+["8713 Rain Song Rd",1540,2022,0,"V",490400,"2022-08-30"],
+["8713 Sundance Loop",1847,2023,0,"S",615000,"2023-08-11"],
+["8716 Bay Meadow Dr",1843,2019,0,"S",471200,"2019-05-10"],
+["8716 Rain Song Rd",1675,2022,0,"V",457300,"2022-04-08"],
+["8717 Bay Meadow Dr",2298,2019,0,"S",540300,"2019-05-24"],
+["8717 Rain Song Rd",1675,2022,0,"V",484600,"2022-03-29"],
+["8717 Sundance Loop",2293,2022,0,"S",756400,"2022-08-22"],
+["8720 Bay Meadow Dr",2091,2020,0,"S",460000,"2020-05-15"],
+["8720 Rain Song Rd",1675,2022,0,"V",444100,"2022-04-20"],
+["8721 Bay Meadow Dr",1843,2018,0,"S",388000,"2020-06-12"],
+["8721 Rain Song Rd",1675,2022,0,"V",511400,"2022-03-28"],
+["8721 Sundance Loop",2092,2022,0,"S",704200,"2022-07-14"],
+["8724 Bay Meadow Dr",2201,2019,0,"S",452000,"2019-10-16"],
+["8724 Rain Song Rd",1540,2021,0,"V",371100,"2021-08-05"],
+["8725 Rain Song Rd",1677,2021,0,"V",565000,"2023-10-24"],
+["8725 Sundance Loop",2306,2023,0,"S",806400,"2023-01-19"],
+["8728 Rain Song Rd",1540,2021,0,"V",369200,"2021-07-20"],
+["8729 Rain Song Rd",1677,2021,0,"V",411500,"2021-08-26"],
+["8732 Rain Song Rd",1677,2021,0,"V",395000,"2021-09-28"],
+["8733 Rain Song Rd",1540,2021,0,"V",470000,"2026-06-30"],
+["8736 Rain Song Rd",1677,2021,0,"V",547500,"2022-12-13"],
+["8737 Rain Song Rd",1540,2021,0,"V",560000,"2024-06-14"],
+["8740 Rain Song Rd",1429,2022,0,"V",433200,"2022-05-16"],
+["8741 Rain Song Rd",1429,2022,0,"V",419700,"2022-05-26"],
+["8744 Rain Song Rd",1429,2022,0,"V",414300,"2022-05-20"],
+["8745 Rain Song Rd",1429,2022,0,"V",432700,"2022-05-25"],
+["8748 Rain Song Rd",1540,2022,0,"V",455100,"2022-05-27"],
+["8749 Rain Song Rd",1540,2021,0,"V",411600,"2021-07-20"],
+["8752 Rain Song Rd",1540,2022,0,"V",448500,"2022-05-27"],
+["8753 Rain Song Rd",1540,2021,0,"V",381000,"2021-06-09"],
+["8757 Rain Song Rd",1677,2021,0,"V",395400,"2021-06-22"],
+["8760 Rain Song Rd",1641,2023,0,"S",474000,"2024-11-20"],
+["8761 Rain Song Rd",1677,2021,0,"V",385700,"2021-05-14"],
+["8764 Rain Song Rd",1675,2022,0,"V",568600,"2022-04-22"],
+["8765 Rain Song Rd",1675,2022,0,"V",411500,"2022-02-17"],
+["8768 Rain Song Rd",1675,2022,0,"V",520700,"2022-03-31"],
+["8769 Rain Song Rd",1675,2022,0,"V",586000,"2024-02-14"],
+["8772 Rain Song Rd",1434,2023,0,"V",514900,"2023-01-31"],
+["8773 Rain Song Rd",1677,2021,0,"V",408700,"2021-05-14"],
+["8776 Rain Song Rd",1434,2023,0,"V",499800,"2023-01-27"],
+["8777 Rain Song Rd",1677,2021,0,"V",439700,"2021-07-20"],
+["8780 Rain Song Rd",1540,2021,0,"V",391200,"2021-11-15"],
+["8781 Rain Song Rd",1675,2022,0,"S",468000,"2022-07-08"],
+["8784 Rain Song Rd",1540,2021,0,"V",376900,"2021-10-29"],
+["8788 Rain Song Rd",1675,2022,0,"V",572600,"2022-05-06"],
+["8792 Rain Song Rd",1675,2022,0,"V",419000,"2026-05-08"],
+["8796 Rain Song Rd",1540,2021,0,"V",419600,"2021-11-26"],
+["8800 Rain Song Rd",1540,2021,0,"V",585000,"2023-04-13"],
+["8804 Rain Song Rd",1677,2021,0,"V",466700,"2022-01-18"],
+["8808 Rain Song Rd",1677,2021,0,"V",476700,"2021-12-23"],
+["8812 Rain Song Rd",1434,2021,0,"V",373600,"2021-07-20"],
+["8816 Rain Song Rd",1434,2021,0,"V",470500,"2024-11-27"]];
+</script>
+<script>
+(function(){
+  var A=window.SP_ADDRESSES||[], COMPS=[["8733 Rain Song Rd", 470000, "2026-06-30", 1540, "V", 0], ["5632 Long Shore Loop", 725000, "2026-06-12", 2298, "S", 1], ["5604 Morning Sun Dr", 814500, "2026-05-08", 2489, "S", 0], ["5841 Long Shore Loop", 629900, "2026-05-08", 1843, "S", 0], ["8792 Rain Song Rd", 419000, "2026-05-08", 1675, "V", 0], ["5436 Hope Sound Cir", 525000, "2026-04-30", 1843, "S", 0], ["5617 Long Shore Loop", 1130000, "2026-04-13", 2622, "S", 1], ["5424 Hope Sound Cir", 650000, "2026-04-03", 2091, "S", 1], ["8612 Sundance Loop", 1040000, "2026-03-31", 2622, "S", 0], ["5790 Long Shore Loop", 634900, "2026-02-12", 1880, "S", 0], ["8624 Rain Song Rd", 440000, "2026-01-16", 1677, "V", 0], ["5858 Long Shore Loop", 814000, "2026-01-06", 2298, "S", 0], ["5605 Long Shore Loop", 1150000, "2025-11-24", 2261, "S", 1], ["8621 Sundance Loop", 1080000, "2025-10-30", 2622, "S", 1], ["8678 Rain Song Rd", 440000, "2025-09-23", 1677, "V", 0], ["8669 Rain Song Rd", 486000, "2025-08-29", 1540, "V", 0], ["5793 Long Shore Loop", 899500, "2025-08-28", 2632, "S", 0], ["5565 Long Shore Loop", 1100000, "2025-08-15", 2622, "S", 1], ["5533 Long Shore Loop", 1150000, "2025-08-05", 2632, "S", 1], ["5750 Long Shore Loop", 785000, "2025-07-18", 2092, "S", 1], ["8644 Sundance Loop", 699000, "2025-06-03", 2594, "S", 1], ["5721 Long Shore Loop", 800000, "2025-04-03", 2092, "S", 1], ["5601 Long Shore Loop", 1145000, "2025-03-21", 2489, "S", 1], ["5628 Long Shore Loop", 635000, "2025-01-14", 2092, "S", 0], ["5589 Long Shore Loop", 1050000, "2025-01-13", 2489, "S", 1], ["8600 Rain Song Rd", 470000, "2025-01-10", 1540, "V", 0], ["5729 Long Shore Loop", 767500, "2024-12-31", 2092, "S", 0], ["5925 Long Shore Loop", 755000, "2024-12-17", 2201, "S", 0], ["8816 Rain Song Rd", 470500, "2024-11-27", 1434, "V", 0], ["8760 Rain Song Rd", 474000, "2024-11-20", 1641, "S", 0], ["5585 Long Shore Loop", 1050000, "2024-11-01", 2489, "S", 1], ["5425 Hope Sound Cir", 605000, "2024-10-30", 1838, "S", 0], ["5889 Long Shore Loop", 630000, "2024-09-11", 1843, "S", 1], ["5782 Long Shore Loop", 580000, "2024-09-09", 1847, "S", 0], ["8676 Sundance Loop", 987500, "2024-08-22", 2624, "S", 1], ["8604 Sundance Loop", 1100000, "2024-08-07", 2622, "S", 1]], LOC="Sarasota, FL 34238";
+  var inp=document.getElementById('addressInput'), sug=document.getElementById('sp-sugg'),
+      facts=document.getElementById('sp-facts'), cbox=document.getElementById('sp-comps');
+  if(!inp||!A.length) return;
+  function money(n){ return '$'+Math.round(n).toLocaleString(); }
+  function nice(d){ if(!d) return ''; var p=d.split('-');
+    var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return M[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
+  function hide(){ sug.style.display='none'; sug.innerHTML=''; }
+  var TL={S:'single-family home',V:'villa',T:'townhome',C:'coach home'};
+  inp.addEventListener('input', function(){
+    var v=inp.value.trim().toLowerCase();
+    if(v.length<2){ hide(); return; }
+    var hits=A.filter(function(r){ return r[0].toLowerCase().indexOf(v)>-1; }).slice(0,8);
+    if(!hits.length){
+      if(v.length>=4){
+        sug.innerHTML='<div style="padding:14px 13px;font-size:14px;color:var(--ink-mid);line-height:1.6;">That address is not in Sunrise Preserve. Try <a href="https://floridahomevalueai.com/" style="color:var(--gold);font-weight:600;">the other communities</a> or <a href="https://floridahomevalueai.com/home-value" style="color:var(--gold);font-weight:600;">any Florida address</a>.</div>';
+        sug.style.display='block';
+      } else hide();
+      return;
+    }
+    sug.innerHTML=hits.map(function(r){ return '<div class="sp-opt" data-a="'+encodeURIComponent(r[0])+'" style="padding:12px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:15px;">'+r[0]+'</div>'; }).join('');
+    sug.style.display='block';
+    Array.prototype.forEach.call(sug.querySelectorAll('.sp-opt'), function(el){
+      el.addEventListener('mousedown', function(e){ e.preventDefault(); pick(decodeURIComponent(el.getAttribute('data-a'))); });
+    });
+  });
+  inp.addEventListener('blur', function(){ setTimeout(hide,150); });
+  function pick(addr){
+    hide();
+    var r=null,i; for(i=0;i<A.length;i++){ if(A[i][0]===addr){ r=A[i]; break; } }
+    if(!r) return;
+    inp.value=addr+', '+LOC;
+    // RPR sets its options before the page parses, so reload with the address.
+    if(!window.__SP_R){
+      if(window.fhvCaptureAddress){ try{ window.fhvCaptureAddress(addr+', '+LOC); }catch(e){} }
+      window.location.href = window.location.pathname + '?address=' + encodeURIComponent(addr+', '+LOC);
+      return;
+    }
+    var sqft=r[1],yr=r[2],pool=r[3],type=r[4],amt=r[5],dt=r[6];
+    var card='background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;';
+    var mono="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;";
+    var h='<div style="'+card+'"><div style="'+mono+'color:var(--gold);margin-bottom:.5rem;">'+addr+'</div>';
+    var bits=[]; if(sqft) bits.push(sqft.toLocaleString()+' sq ft');
+    bits.push(TL[type]||'home'); if(yr) bits.push('built '+yr); bits.push(pool?'pool':'no pool');
+    h+='<div style="font-size:15px;color:var(--ink-mid);margin-bottom:.7rem;">'+bits.join(' &middot; ')+'</div>';
+    h+= amt ? '<div style="font-size:16px;">Last recorded sale: <strong>'+money(amt)+'</strong> on '+nice(dt)+'.</div>'
+            : '<div style="font-size:16px;">No qualified sale is on record for this address yet.</div>';
+    h+='</div>';
+    facts.innerHTML=h; facts.style.display='block';
+    var mine=COMPS.filter(function(c){ return c[4]===type && c[0]!==addr; }).slice(0,8);
+    if(mine.length){
+      var t2='<div style="'+card+'"><div style="'+mono+'color:var(--ink-faint);margin-bottom:.6rem;">Recorded '+(TL[type]||'home')+' resales &middot; past 24 months</div>';
+      t2+='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;">';
+      t2+='<tr style="text-align:left;color:var(--ink-faint);"><th style="padding:6px 8px;font-weight:400;">Address</th><th style="padding:6px 8px;font-weight:400;">Sold</th><th style="padding:6px 8px;font-weight:400;">Price</th><th style="padding:6px 8px;font-weight:400;">Size</th></tr>';
+      mine.forEach(function(c){
+        t2+='<tr style="border-top:1px solid var(--border);"><td style="padding:8px;">'+c[0]+(c[5]?' <span style="color:var(--ink-faint);font-size:12px;">pool</span>':'')+'</td><td style="padding:8px;color:var(--ink-mid);">'+nice(c[2])+'</td><td style="padding:8px;font-weight:600;">'+money(c[1])+'</td><td style="padding:8px;color:var(--ink-mid);">'+c[3].toLocaleString()+' sf</td></tr>';
+      });
+      t2+='</table></div></div>';
+      cbox.innerHTML=t2; cbox.style.display='block';
+    }
+    if(window.gtag){ try{ gtag('event','address_lookup',{community:'Sunrise Preserve'}); }catch(e){} }
+  }
+  // On arrival with ?address=, RPR has rendered. Redraw the county cards and scroll to them.
+  (function(){
+    var q=null;
+    try{ q=new URLSearchParams(location.search).get('address'); }catch(e){}
+    if(!q) return;
+    var bare=q.split(',')[0].trim(), hit=null, i;
+    for(i=0;i<A.length;i++){ if(A[i][0].toLowerCase()===bare.toLowerCase()){ hit=A[i][0]; break; } }
+    if(!hit) return;
+    window.__SP_R=true; pick(hit); window.__SP_R=false;
+    try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
+    function toResult(){ var el=document.getElementById('estimate'); if(el) el.scrollIntoView(); }
+    if(document.readyState==='complete'){ toResult(); }
+    else { window.addEventListener('load', function(){ setTimeout(toResult,60); }); }
+    setTimeout(toResult, 400);
+  })();
+})();
+</script>
+</body>
+</html>

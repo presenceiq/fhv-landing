@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What's My Brightmore Home Worth? | Putnam Realty Group</title>
+<meta name="description" content="Instant estimate for any address in Brightmore, Wellen Park's only 55+ community in Venice FL, plus local insight on villa versus single-family value.">
+<link rel="canonical" href="https://floridahomevalueai.com/brightmore">
+<meta property="og:image" content="https://floridahomevalueai.com/brightmore-og.jpg" />
+<meta name="twitter:image" content="https://floridahomevalueai.com/brightmore-og.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&family=DM+Mono&display=optional" rel="stylesheet">
+<style>
+:root{
+  --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --gold-light:#d4904a;
+  --ink:#1a1814; --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8;
+  --surface:#ffffff; --sage:#4a7c59; --radius:12px; --radius-sm:8px;
+  --shadow:0 2px 16px rgba(26,24,20,0.08); --shadow-lg:0 8px 40px rgba(26,24,20,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;}
+a{color:var(--gold);}
+.site-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2rem;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem;}
+.brand-wrap{display:flex;align-items:center;gap:0.75rem;}
+.brand-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 38px;}
+.brand-icon img{width:100%;height:100%;object-fit:contain;display:block;}
+.brand-name{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;}
+.brand-name span{color:var(--gold);}
+.brand-sub{font-size:12px;color:var(--ink-faint);}
+.header-contact{font-size:13px;text-align:right;}
+.header-contact a{text-decoration:none;}
+.back-home{display:inline-block;font-size:12px;color:var(--gold);text-decoration:none;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:0.06em;padding:0.75rem 2rem;}
+.hero{max-width:760px;margin:0 auto;padding:2.5rem 2rem 1rem;text-align:center;}
+.status-pill{display:inline-block;background:var(--warm);color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:0.35rem 0.85rem;border-radius:99px;margin-bottom:1rem;}
+.hero h1{font-family:'Playfair Display',serif;font-size:2.1rem;margin-bottom:0.5rem;}
+.hero .region{color:var(--ink-mid);font-weight:700;font-size:0.95rem;margin-bottom:0.75rem;}
+.hero .desc{color:var(--ink-mid);font-size:0.95rem;max-width:560px;margin:0 auto 0.5rem;}
+.valuebox{max-width:620px;margin:1.5rem auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.75rem;}
+.valuebox h2{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:0.35rem;text-align:center;}
+.valuebox p.sub{text-align:center;color:var(--ink-faint);font-size:0.85rem;margin-bottom:1.25rem;}
+.addr-row{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.addr-row input{flex:1;min-width:220px;padding:0.85rem 1rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:1rem;font-family:'Lato',sans-serif;}
+.addr-row button{padding:0.85rem 1.5rem;background:var(--gold);color:#fff;border:none;border-radius:var(--radius-sm);font-size:1rem;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;}
+.addr-row button:hover{background:var(--gold-light);}
+#rprWidgetContainer{margin-top:1.5rem;display:flex;justify-content:center;}
+.disclaimer{max-width:620px;margin:0 auto 1rem;font-size:11px;color:var(--ink-faint);text-align:center;line-height:1.7;}
+.notify{max-width:620px;margin:1.5rem auto;text-align:center;background:var(--warm);border-radius:var(--radius);padding:1.5rem;}
+.notify h3{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.5rem;}
+.hero-photo{max-width:640px;margin:0.75rem auto 0;padding:0 2rem;}
+.hero-photo img{width:100%;height:auto;border-radius:12px;display:block;box-shadow:var(--shadow);}
+.content{max-width:760px;margin:1.5rem auto 0;padding:0 2rem;}
+.content h2{font-family:'Playfair Display',serif;font-size:1.45rem;margin:1.9rem 0 0.55rem;color:var(--ink);}
+.content p{color:var(--ink-mid);font-size:0.98rem;margin-bottom:0.75rem;}
+.content .faq-q{font-weight:700;color:var(--ink);margin:1.05rem 0 0.3rem;}
+.notify p{font-size:0.9rem;color:var(--ink-mid);margin-bottom:1rem;}
+.notify a.email-btn{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;padding:0.75rem 1.5rem;border-radius:var(--radius-sm);font-weight:700;font-size:0.95rem;}
+.site-footer{padding:2rem 1.5rem;text-align:center;font-size:13px;color:var(--ink-mid);border-top:1px solid var(--border);background:var(--surface);line-height:2.2;margin-top:2rem;}
+.site-footer .links{display:flex;gap:1rem;justify-content:center;margin-bottom:0.75rem;flex-wrap:wrap;}
+.site-footer .links a{color:var(--gold);text-decoration:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;}
+</style>
+<!-- RPR widget: set options from ?address= param, THEN load script normally (in head, like the proven pattern) -->
+<script>
+  function rprGetParam(n){ return new URLSearchParams(window.location.search).get(n); }
+  var rprQueryAddress = rprGetParam('address');
+  if (rprQueryAddress) {
+    window.rprAvmWidgetOptions = {
+      Token: "B7078914-3207-44B1-A650-21ECA3E39AB7",
+      Query: decodeURIComponent(rprQueryAddress),
+      CoBrandCode: "btsputnamrealtygroup",
+      ContainerSelector: "#rprWidgetContainer",
+      ShowRprLinks: false
+    };
+  }
+</script>
+<script src="https://www.narrpr.com/widgets/avm-widget/widget.ashx/script"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent","name":"Putnam Realty Group","url":"https://floridahomevalueai.com/brightmore","telephone":"+19416629941","email":"michael@putnamrealtygroup.com","areaServed":["Brightmore at Wellen Park","Wellen Park","Venice FL","Sarasota County FL"],"address":{"@type":"PostalAddress","addressLocality":"Venice","addressRegion":"FL","postalCode":"34293","addressCountry":"US"},"founder":{"@type":"Person","name":"Michael Putnam","jobTitle":"Florida Real Estate Sales Associate","identifier":"FL License SL3220671","telephone":"+19416629941","email":"michael@putnamrealtygroup.com"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What's my Brightmore home worth?","acceptedAnswer":{"@type":"Answer","text":"It depends heavily on villa vs. single-family, view (water, preserve, or interior lot), proximity to the amenity campus, phase, and upgrades. Use the instant estimate for a ballpark, then a local comparative market analysis for a real address-specific number."}},
+{"@type":"Question","name":"Is Brightmore a 55+ community?","acceptedAnswer":{"@type":"Answer","text":"Yes. Brightmore is an age-restricted 55+ active-adult community, and it is the only 55+ community in all of Wellen Park. At least one resident must meet the community's age requirement."}},
+{"@type":"Question","name":"Are all Brightmore homes single-story?","acceptedAnswer":{"@type":"Answer","text":"Yes. Every home in Brightmore, both paired villas and single-family homes, is single-story, which is a core part of its active-adult design."}},
+{"@type":"Question","name":"Does villa vs. single-family affect value in Brightmore?","acceptedAnswer":{"@type":"Answer","text":"Yes. Paired villas (about 1,412-1,754 sq ft) and single-family homes (about 1,424-2,478 sq ft) draw different buyers and behave like separate micro-markets."}},
+{"@type":"Question","name":"Who builds Brightmore?","acceptedAnswer":{"@type":"Answer","text":"Mattamy Homes. Brightmore is a gated 55+ community in Wellen Park, Venice, still actively building, with an 11-acre resort-style amenity campus."}},
+{"@type":"Question","name":"Does Brightmore have CDD fees?","acceptedAnswer":{"@type":"Answer","text":"Yes. Like most Wellen Park communities, Brightmore has a CDD assessment on the annual tax bill (it varies by home type) in addition to HOA dues. Verify current figures for a specific home."}},
+{"@type":"Question","name":"What is flat-fee MLS at Brightmore?","acceptedAnswer":{"@type":"Answer","text":"You pay a one-time fee to list on the MLS instead of a percentage commission. Putnam Realty Group offers tiers starting at $499."}}
+]}
+</script>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+<!-- Noindexed 22 Aug 2026. Built 2023-2025, so nearly every county sale is a
+     builder closing, not an owner-to-owner resale. FHV has nothing honest to say
+     about what homes here have SOLD for until real resale history exists.
+     Michael: "If there is no activity because it is too new of a territory, then
+     there will not be any customers there for a while." Remove this when resales appear. -->
+<meta name="robots" content="noindex, follow">
+<meta property="og:url" content="https://floridahomevalueai.com/brightmore">
+</head>
+<body>
+<a class="back-home" href="https://floridahomevalueai.com/">← Back to all communities</a>
+<header class="site-header">
+  <div class="brand-wrap">
+    <div class="brand-icon"><img src="/putnam-mark.png" alt="Putnam Realty Group" width="38" height="38"></div>
+    <div>
+      <div class="brand-name">Florida <span>Home Value</span> AI</div>
+      <div class="brand-sub">Putnam Realty Group · Nokomis, FL</div>
+    </div>
+  </div>
+  <div class="header-contact">
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="status-pill">Wellen Park · Venice, FL · 55+ · Mattamy Homes</div>
+  <h1>What's My Brightmore Home Worth?</h1>
+  <div class="region">Wellen Park · Venice, FL</div>
+  <p class="desc">Get an instant estimate for any Brightmore address, plus real local insight on what moves value in Wellen Park's only 55+ community &mdash; from a local agent who answers the phone.</p>
+</div>
+
+<div class="hero-photo"><img src="brightmore-wellen-park-entrance-venice-fl.jpg?v=20260705a" alt="Entrance monument for Brightmore at Wellen Park in Venice, Florida" width="640" height="370" loading="eager" /></div>
+
+<div class="valuebox">
+  <h2>Get an instant home value</h2>
+  <p class="sub">Enter your address for an instant estimate. For a precise, Brightmore-specific number, just call.</p>
+  <div class="addr-row">
+    <input type="text" id="addressInput" placeholder="Start typing your street number..."
+      onkeydown="if(event.key==='Enter'){rprSubmit();}"/>
+    <button onclick="rprSubmit()">Get value</button>
+  </div>
+  <div id="rprWidgetContainer"></div>
+</div>
+<p class="disclaimer">Estimate provided by RPR® (Realtors Property Resource®). This is an automated estimate for general information only and is not an appraisal or a formal opinion of value. For a precise, hyperlocal valuation, contact Putnam Realty Group.</p>
+
+<div class="content">
+    <section style="margin:1.5rem 0;">
+  <h2>Brightmore by the numbers</h2>
+  <p>Every figure below comes from Sarasota County public records for the 47 qualified home sales recorded in Brightmore in the 12 months ending July 24, 2026. These are prices buyers actually paid at closing, not asking prices or automated estimates.</p>
+  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8e2d8;border-radius:12px;overflow:hidden;font-size:15px;margin:1rem 0;">
+    <tr><td style="padding:.55rem .8rem;color:#4a4640;">Home type</td><td style="padding:.55rem .8rem;color:#4a4640;">Sales</td><td style="padding:.55rem .8rem;color:#4a4640;">Median price</td><td style="padding:.55rem .8rem;color:#4a4640;">Per sq ft</td><td style="padding:.55rem .8rem;color:#4a4640;">Median size</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Single-family</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">28</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$612,500</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$285</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">1,988 sqft</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Villa / attached</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">19</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$408,000</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">$251</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">1,592 sqft</td></tr>
+  </table>
+  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8e2d8;border-radius:12px;overflow:hidden;font-size:15px;margin:1rem 0;">
+    <tr><td style="padding:.55rem .8rem;color:#4a4640;">Homes built in the community</td><td style="padding:.55rem .8rem;font-weight:600;">177</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Year built</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">2023&ndash;2025</td></tr>
+    <tr><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;">Share of homes with a pool</td><td style="padding:.55rem .8rem;border-top:1px solid #e8e2d8;font-weight:600;">8% (15 of 177)</td></tr>
+  </table>
+  <p style="font-size:13px;color:#9a948e;margin:.6rem 0 0;">Brightmore is newly built, so most sales are recent construction and the figures reflect new-home pricing.</p>
+  <p style="font-size:13px;color:#9a948e;">Source: Sarasota County public records, qualified sales only. Vacant lots and non-residential parcels are excluded from the home count. Figures are estimates for general market awareness, not appraisals.</p>
+  </section>
+
+  <h2>Brightmore, in plain terms</h2>
+  <p>Brightmore is a gated <strong>55+ (age-restricted) community</strong> in Wellen Park (Venice), built by <strong>Mattamy Homes</strong> &mdash; and it is the <strong>only 55+ community in all of Wellen Park</strong>. It offers single-family homes and paired villas, <strong>all single-story</strong>, roughly 1,412 to 2,478 square feet, built from 2023 onward and still under active construction. At least one resident must meet the community's age requirement.</p>
+  <h2>What makes Brightmore different</h2>
+  <p>Three things set it apart. First, it's the <strong>only age-restricted 55+ option in Wellen Park</strong> &mdash; every other neighborhood here is all-ages. Second, <strong>every home is single-story</strong>, a deliberate active-adult and long-term-accessibility design choice. Third, its <strong>11-acre resort-style amenity campus</strong> is unusually deep for a community this size: a 21,000+ sq ft clubhouse, resort and lap pools, spa, caf&eacute; and bar, fitness center and studios, a dog park, an activities director, and a standout pickleball package with multiple courts including a competition stadium court &mdash; all with <strong>no golf-membership cost</strong>. It's a low-maintenance, lock-and-leave lifestyle.</p>
+  <h2>Why one Brightmore home is worth more than another</h2>
+  <p>Because every home is single-story, value here turns less on home style and more on: <strong>villa vs. single-family</strong> (separate micro-markets); <strong>preserve lot vs. interior lot</strong>; <strong>water view</strong>; proximity to the amenity campus; outdoor-living upgrades; premium lot orientation; and <strong>which phase</strong> a home is in, since the community is still being built out. A national estimate can't see any of this; a local comparative market analysis prices it in.</p>
+  <h2>Home types behave like separate micro-markets</h2>
+  <p>Brightmore pairs attached villas (about 1,412&ndash;1,754 sq ft) &mdash; the lock-and-leave option &mdash; with detached single-family homes (about 1,424&ndash;2,478 sq ft). Both are single-story, but they draw different buyers and price differently, so a villa sale isn't a reliable comp for a single-family home.</p>
+  <h2>Fees, and resale vs. new construction</h2>
+  <p>Brightmore is gated, with an HOA (which covers lawn and common-area maintenance, and more for the villas) plus a <strong>CDD assessment</strong> on the annual tax bill that varies by home type &mdash; standard for Wellen Park (verify current amounts; <a href="https://floridahomevalueai.com/gated-communities">how gated-community fees work</a>). And because Mattamy is <strong>still actively building</strong> Brightmore, resales compete with the builder's new inventory and incentives, so pricing a resale against the builder's net price matters (<a href="https://floridahomevalueai.com/new-vs-resale">more on new vs. resale</a>).</p>
+  <h2>Location</h2>
+  <p>Brightmore sits in Wellen Park, minutes from Downtown Wellen's waterfront dining, shopping, and events and CoolToday Park (Atlanta Braves spring training), with the Gulf beaches about 15 minutes away and 30+ miles of Wellen Park trails nearby.</p>
+  <h2>Brightmore vs. other Wellen Park communities</h2>
+  <p>Within Wellen Park, Brightmore is in a category of one &mdash; it's the only 55+ community, so there's no direct age-restricted comparison here. Buyers weighing it often also look at all-ages Mattamy neighborhoods like <a href="https://floridahomevalueai.com/renaissance">Renaissance</a> and <a href="https://floridahomevalueai.com/sunstone">Sunstone</a>, or the golf-oriented <a href="https://floridahomevalueai.com/sarasota-national">Sarasota National</a>. Against those, Brightmore's draw is the combination of <strong>55+ living, all single-story homes, and a first-class amenity campus</strong> without a golf cost.</p>
+  <h2>Brightmore home value questions</h2>
+  <div class="faq-q">What's my Brightmore home worth?</div>
+  <p>It depends heavily on villa vs. single-family, view, proximity to the amenity campus, phase, and upgrades. Use the instant estimate above for a ballpark, then a local comparative market analysis for a real, address-specific number.</p>
+  <div class="faq-q">Is Brightmore a 55+ community?</div>
+  <p>Yes. Brightmore is an age-restricted 55+ active-adult community &mdash; the only one in all of Wellen Park. At least one resident must meet the community's age requirement.</p>
+  <div class="faq-q">Are all Brightmore homes single-story?</div>
+  <p>Yes. Every home, both paired villas and single-family, is single-story &mdash; a core part of its active-adult design.</p>
+  <div class="faq-q">Does villa vs. single-family affect my home's value?</div>
+  <p>Yes. Paired villas (about 1,412&ndash;1,754 sq ft) and single-family homes (about 1,424&ndash;2,478 sq ft) draw different buyers and behave like separate micro-markets.</p>
+  <div class="faq-q">Does Brightmore have CDD fees?</div>
+  <p>Yes. Like most Wellen Park communities, Brightmore has a CDD assessment on the annual tax bill (it varies by home type) in addition to HOA dues. Verify current figures for a specific home.</p>
+  <div class="faq-q">What is flat-fee MLS?</div>
+  <p>You pay a one-time fee to list on the MLS instead of a percentage commission. Putnam Realty Group offers tiers starting at $499.</p>
+</div>
+
+<div class="notify">
+  <h3>Questions about Brightmore?</h3>
+  <p>Have a question about Brightmore, or want a real read on your own home? Ask away. Your info is safe with us; no spam, ever.</p>
+  <a class="email-btn" href="mailto:Michael@PutnamRealtyGroup.com?subject=Brightmore%20%E2%80%94%20Question">Email Michael about Brightmore</a>
+</div>
+
+  <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;margin:2rem 0 .5rem;">Related home value pages</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;">
+    <a href="https://floridahomevalueai.com/market-report" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Monthly Market Report</a>
+    <a href="https://floridahomevalueai.com/venice" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Venice</a><a href="https://floridahomevalueai.com/north-port" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">North Port</a><a href="https://granparadiso.floridahomevalueai.com" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Gran Paradiso</a><a href="https://floridahomevalueai.com/sarasota-national" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">Sarasota National</a><a href="https://islandwalk.floridahomevalueai.com" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">IslandWalk</a>
+  
+    <a href="https://floridahomevalueai.com/about" style="font-size:14px;padding:8px 14px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;color:#1a1814;">About Michael</a>
+  </div>
+<footer class="site-footer">
+  <div class="links">
+    <a href="https://floridahomevalueai.com/">Home</a>
+    <a href="https://floridahomevalueai.com/nokomis" style="font-size:13px;color:#1a1814;padding:4px 12px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;">Nokomis Values</a>
+    <a href="https://floridahomevalueai.com/meet" style="font-size:13px;color:#1a1814;padding:4px 12px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;">Meet Your Agent</a>
+    <a href="https://floridahomevalueai.com/local-vs-big-brokerage" style="font-size:13px;color:#1a1814;padding:4px 12px;border:1px solid #e8e2d8;border-radius:999px;background:#faf7f2;text-decoration:none;">Big Brokerage?</a>
+    <a href="https://floridahomevalueai.com/for-agents">For Agents</a>
+    <a href="https://floridahomevalueai.com/seller-guide">Seller Guide</a>
+  </div>
+  <strong>Putnam Realty Group</strong> · Michael Putnam, Sales Associate SL3220671 · Broker: Brian Putnam Jr. BK3276432<br>
+  941-662-9941 · Michael@PutnamRealtyGroup.com · Nokomis, FL 34275
+
+  <p style="font-size:12px;color:#9a948e;margin-top:1rem;"><a href="https://floridahomevalueai.com/home-search" style="color:#9a948e;text-decoration:underline;">Search homes for sale</a> &middot;
+      <a href="https://floridahomevalueai.com/terms" style="color:#9a948e;text-decoration:underline;">Terms of Use</a> &middot; <a href="https://floridahomevalueai.com/privacy" style="color:#9a948e;text-decoration:underline;">Privacy Policy</a></p>
+</footer>
+
+<script>window.FHV_TERRITORY="Brightmore (coming-soon)";window.FHV_SUBDIVISION="Brightmore at Wellen Park";window.FHV_ASSESS=true;</script>
+<script src="fhv-capture.js?v=20260705b"></script>
+<script>
+  // prefill the box with the submitted address, and wire submit -> reload with ?address=
+  (function(){
+    var input = document.getElementById('addressInput');
+    if (rprQueryAddress && input) input.value = decodeURIComponent(rprQueryAddress);
+  })();
+  function rprSubmit(){
+    var a = document.getElementById('addressInput').value.trim();
+    if(!a){ document.getElementById('addressInput').focus(); return; }
+    if(window.fhvCaptureAddress){ window.fhvCaptureAddress(a); }
+    window.location.href = window.location.pathname + '?address=' + encodeURIComponent(a);
+  }
+</script>
+</body>
+</html>

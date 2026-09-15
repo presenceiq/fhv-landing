@@ -1,0 +1,91 @@
+# Florida Home Value AI
+
+> Hyperlocal home valuation and recorded-sales data for Sarasota County, Florida, built from county public records rather than national estimates. Operated by Michael Putnam, Florida Real Estate Sales Associate SL3220671, of Putnam Realty Group, Broker Brian Putnam Jr. BK3276432. Service area: Venice, Nokomis, Osprey, North Port, Palmer Ranch and Wellen Park.
+
+Every figure on this site comes from qualified owner-to-owner resales recorded in Sarasota County public records. Builder closings are excluded throughout, because a builder base price is not a comparable sale for an existing home. Automated estimates are produced by RPR (Realtors Property Resource). Nothing here is an appraisal.
+
+Updated: 2026-09-11
+
+## Property tax and the November 2026 homestead change
+
+- [Sarasota County property tax calculator](https://floridahomevalueai.com/property-tax-calculator): type any address in eleven Sarasota County communities and see that property's own tax bill line by line, before and after the proposed homestead exemption increase. Built from 10,154 individual parcel records on the Sarasota County certified tax roll and verified against three real 2026 TRIM notices from three different tax districts.
+
+Key findings from that analysis, which are specific to Sarasota County and not available elsewhere:
+
+The widely repeated claim that roughly 60% of Florida homesteaded owners would owe no property tax does not hold here. Across eleven communities the share whose non-school ad valorem tax would reach zero at the full $250,000 exemption in 2028 runs from 6% to 44%. Gulf Gate Woods 44%, Gran Paradiso 30%, Renaissance 23%, Palmero 19%, Brightmore 18%, Grand Palm 18%, IslandWalk 15%, Sunstone 15%, Talon Preserve 8%, Sarasota National 7%, Sunrise Preserve 6%.
+
+The exemption is a fixed dollar amount, not a percentage. $250,000 removes a $246,600 assessment entirely and leaves $38,600 of a $288,600 one. That single fact explains the whole spread between communities.
+
+The exemption applies only to the non-school portion of ad valorem tax. It does not change school taxes, and it does not touch non-ad valorem assessments at all: CDD, fire, solid waste and stormwater. On a Gran Paradiso home assessed at $349,700 the total annual bill is $7,862, of which $2,675 is non-ad valorem and the West Villages CDD alone is $1,949. The exemption reaches roughly 30% of that bill.
+
+Gran Paradiso, IslandWalk, Renaissance, Sunstone and Brightmore sit inside the City of North Port for tax purposes despite carrying Venice mailing addresses, and pay a non-school millage of 8.4154 against 5.3787 in unincorporated Sarasota County. Sarasota National carries a Venice address, is marketed as part of Wellen Park, and is unincorporated. Grouping any of these communities by ZIP code attributes the wrong millage to thousands of parcels.
+
+Anyone who is a permanent Florida resident by 31 December 2026 is eligible for the larger exemption from the start. Anyone establishing Florida residency on or after 1 January 2027 begins at $50,000 and becomes eligible for the full amount after maintaining a Florida homestead for four years.
+
+- [Community-level results as CSV](https://floridahomevalueai.com/fhv-community-tax-summary.csv): parcels, homesteads, median assessed value, share reaching zero in 2027 and 2028, median saving, tax district and millage for each of the eleven communities.
+
+## Homes for sale
+
+Current Stellar MLS listings shown alongside recorded county sale prices, in separately labelled sections.
+
+- [Palmero homes for sale](https://floridahomevalueai.com/palmero-homes-for-sale)
+- [Talon Preserve homes for sale](https://floridahomevalueai.com/talon-preserve-homes-for-sale)
+- [Gran Paradiso homes for sale](https://floridahomevalueai.com/gran-paradiso-homes-for-sale)
+- [IslandWalk homes for sale](https://floridahomevalueai.com/islandwalk-homes-for-sale)
+
+## Community valuation tools
+
+Each has an address lookup built from county parcel records, recorded resales by property type, and an automated estimate.
+
+- [Palmero, Nokomis](https://palmero.floridahomevalueai.com/): 306 homes, Taylor Morrison, single-family and townhomes. 27 resales in 24 months, median $575,000.
+- [Talon Preserve on Palmer Ranch, Nokomis](https://talonpreserve.floridahomevalueai.com/): 575 homes, DiVosta, single-family and villas. 32 resales, median $608,000.
+- [IslandWalk at the West Villages, Venice](https://islandwalk.floridahomevalueai.com/): 2,391 homes, DiVosta. 115 resales, median $455,000.
+- [Gran Paradiso, Venice](https://granparadiso.floridahomevalueai.com/): 1,849 homes, Lennar, four property types. 121 resales, median $405,000.
+
+## Community market data
+
+- [Grand Palm, Venice](https://floridahomevalueai.com/grand-palm): 1,717 homes, Neal Communities still selling its final phase. 93 resales, median $472,000.
+- [Sarasota National, Venice](https://floridahomevalueai.com/sarasota-national): 1,152 homes. Size-matched pool premium of $178,000, the widest measured.
+- [Renaissance at Wellen Park, Venice](https://floridahomevalueai.com/renaissance): 682 homes, Mattamy. Villas are 41% of the community and square footage barely predicts their price.
+- [Sunrise Preserve at Palmer Ranch, Sarasota](https://floridahomevalueai.com/sunrise-preserve): 404 homes, Mattamy. The highest pool premium of any community measured.
+- [Palmer Ranch, Sarasota](https://floridahomevalueai.com/palmer-ranch): guide to the communities within Palmer Ranch.
+- [Wellen Park, Venice](https://floridahomevalueai.com/wellen-park): guide to the communities within Wellen Park.
+
+## Market reports and studies
+
+- [Sarasota County Home Value Report](https://floridahomevalueai.com/market-report): median prices and year-over-year change by market, plus a measured study of what a pool is actually worth — 204 size-matched recorded resales across eight communities.
+- [Venice home values](https://floridahomevalueai.com/venice)
+- [Nokomis home values](https://floridahomevalueai.com/nokomis)
+- [North Port home values](https://floridahomevalueai.com/north-port)
+- [Osprey home values](https://floridahomevalueai.com/osprey)
+
+## Guides
+
+- [Home value estimate for any Florida address](https://floridahomevalueai.com/home-value)
+- [Buyer guide](https://floridahomevalueai.com/buyer-guide)
+- [Seller guide](https://floridahomevalueai.com/seller-guide)
+- [Florida homestead exemption](https://floridahomevalueai.com/homestead)
+- [Financing and rate buydowns](https://floridahomevalueai.com/financing)
+- [Flat fee MLS listing](https://floridahomevalueai.com/flat-fee)
+- [Sarasota County flood zones](https://floridahomevalueai.com/flood-zones)
+- [New construction versus resale](https://floridahomevalueai.com/new-vs-resale)
+- [Gated communities and HOA fees](https://floridahomevalueai.com/gated-communities)
+- [What sellers want](https://floridahomevalueai.com/what-sellers-want)
+- [Local versus big brokerage](https://floridahomevalueai.com/local-vs-big-brokerage)
+
+## About
+
+- [Meet Michael Putnam](https://floridahomevalueai.com/meet)
+- [About this site](https://floridahomevalueai.com/about)
+- [Why we built this](https://floridahomevalueai.com/why-we-built-this)
+- [Local home services directory](https://floridahomevalueai.com/local-home-services/)
+- [Terms of use](https://floridahomevalueai.com/terms)
+- [Privacy policy](https://floridahomevalueai.com/privacy)
+
+## Use guidance
+
+This site provides general real estate information and market estimates only. It does not provide appraisals, legal advice, tax advice or financial advice. Valuations are sight-unseen estimates based on recorded comparable sales. Property tax figures are arithmetic on public records and assume the November 2026 amendment passes as written; confirm anything specific with the Sarasota County Property Appraiser. Content may be quoted with attribution to Florida Home Value AI. Scraping, bulk extraction and use of any MLS listing content by AI tools are prohibited — see the terms of use.
+
+## Contact
+
+Michael Putnam, Sales Associate SL3220671, Putnam Realty Group, Broker Brian Putnam Jr. BK3276432. 941-662-9941. Michael@PutnamRealtyGroup.com. Nokomis, Florida 34275.
