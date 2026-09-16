@@ -546,6 +546,27 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
       return h;
     }
 
+    /* ── the number first, then what does not move, then the detail ─────────
+       This used to open with the three-column table, which made people hunt
+       for the one figure they came for. The order below is the order that
+       worked in the emails: the saving, then the part of the bill that is
+       untouched, then the table for anyone who wants the arithmetic. */
+    var saving = now.nonschool - y28.nonschool;
+    h += '<div style="background:var(--warm);border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:0 0 1rem;border-radius:var(--radius);">';
+    if(y28.nsTaxable === 0){
+      h += '<div style="font-size:1.35rem;font-weight:800;line-height:1.2;">' + money(saving) + ' a year less by 2028</div>'
+         + '<p style="margin:0.4rem 0 0;">Your non-school ad valorem tax would reach <strong>zero</strong>. '
+         + 'It goes from ' + money(now.nonschool) + ' now to ' + money(y27.nonschool) + ' in 2027 and nothing in 2028.</p>';
+    } else {
+      h += '<div style="font-size:1.35rem;font-weight:800;line-height:1.2;">' + money(saving) + ' a year less by 2028</div>'
+         + '<p style="margin:0.4rem 0 0;">Your non-school ad valorem tax goes from ' + money(now.nonschool)
+         + ' now to ' + money(y27.nonschool) + ' in 2027 and ' + money(y28.nonschool) + ' in 2028. '
+         + 'It does not reach zero: ' + money(y28.nsTaxable) + ' of assessed value would still be taxable.</p>';
+    }
+    h += '<p style="margin:0.6rem 0 0;"><strong>What does not change.</strong> Your school tax of about '
+       + money(now.school) + ' a year stays where it is, and so does everything on the non-ad valorem side '
+       + 'of your bill: CDD, fire, solid waste, stormwater.</p></div>';
+
     h += '<table class="data-table"><thead><tr><th>Line</th><th>Now</th><th>2027</th><th>2028</th></tr></thead><tbody>';
     h += '<tr><td>Non-school ad valorem<br><span style="font-size:0.85rem;color:var(--ink-faint);">county, hospital, water district, city if any</span></td>'
        + '<td>' + money(now.nonschool) + '</td><td>' + money(y27.nonschool) + '</td><td><strong>' + money(y28.nonschool) + '</strong></td></tr>';
@@ -555,17 +576,6 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
        + '<td colspan="3">on your TRIM notice, unchanged</td></tr>';
     h += '</tbody></table>';
 
-    var saving = now.nonschool - y28.nonschool;
-    if(y28.nsTaxable === 0){
-      h += '<p><strong>Your non-school ad valorem tax would reach zero in 2028.</strong> That is about '
-         + money(saving) + ' a year off your bill.</p>';
-    } else {
-      h += '<p>Your non-school ad valorem tax would fall by about <strong>' + money(saving)
-         + '</strong> a year by 2028, but not to zero. ' + money(y28.nsTaxable)
-         + ' of assessed value would still be taxable.</p>';
-    }
-    h += '<p>Your school tax of about ' + money(now.school)
-       + ' does not change, and neither does anything on the non-ad valorem side of your bill.</p>';
     h += navHtml(com);
 
     /* ── what moving would cost, if they have built up a Save Our Homes gap ──
