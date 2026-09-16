@@ -465,6 +465,21 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
        + ' &middot; ' + esc(d.name) + ' &middot; assessed ' + money(row[3])
        + (hx ? ' &middot; homesteaded' : ' &middot; <strong>no homestead exemption on file</strong>') + '</div>';
 
+    /* ── bought after the roll was taken ──────────────────────────────────
+       The county roll is a snapshot from 1 January. A parcel that changed
+       hands after that still carries the PREVIOUS owner's assessed value,
+       exemption and Save Our Homes benefit. 7,292 Sarasota parcels are in
+       this position and the page used to show them stale figures with
+       nothing on screen saying so. */
+    if(row[16]){
+      h += '<div style="background:#fff4e6;border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:0 0 1rem;border-radius:var(--radius);">'
+         + '<div style="font-weight:800;margin-bottom:0.35rem;">These are the previous owner\'s numbers, not yours</div>'
+         + '<p style="margin:0 0 0.6rem;">The county roll is a snapshot taken on 1 January 2026. This home sold on '
+         + esc(row[14]) + (row[15] > 1000 ? ' for ' + money(row[15]) : '') + ', after that date, so everything below still shows what the seller had: their assessed value, their exemption, and any Save Our Homes benefit they had built up over the years.</p>'
+         + '<p style="margin:0 0 0.6rem;"><strong>That benefit does not transfer.</strong> In 2027 the assessed value resets toward market, so the real bill will be higher than the figures below, often by thousands.</p>'
+         + '<p style="margin:0;">Two dates matter now. Homestead has to be filed by <strong>1 March</strong> for the year you want it, and you had to own the home on 1 January of that year. And if either owner became a Florida resident recently, being a permanent resident by <strong>31 December 2026</strong> is worth four years of the larger exemption. The Property Appraiser on 941-861-8200 confirms both, free.</p></div>';
+    }
+
     /* ── not homesteaded ──────────────────────────────────────────────────
        Show the bill as it stands, then what homesteading would do to it.
        That second number is the one worth having: it is the case for making
@@ -506,14 +521,15 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
         h += '<p>The county roll shows this parcel held in a trust. Florida homestead can be available to property in certain trusts and not others, '
            + 'and it turns on how the trust is written. Worth asking the Property Appraiser or the attorney who drafted it.</p>';
       }
-      h += '<p><strong>And there is a deadline.</strong> Anyone who is a permanent Florida resident by 31 December 2026 is eligible for the larger exemption from the start. '
+      h += '<p><strong>Filing has its own deadline: 1 March.</strong> That is the cut-off for the tax year you want it to apply to, and you have to have owned the home on 1 January of that year. It is free, it is done once, and it also drops the annual assessment cap from 10% to 5%.</p>';
+      h += '<p><strong>And there is a second deadline.</strong> Anyone who is a permanent Florida resident by 31 December 2026 is eligible for the larger exemption from the start. '
          + 'Anyone establishing residency on or after 1 January 2027 begins at $50,000 and waits four years for the full amount.</p>';
       h += '<p style="font-size:0.9rem;color:var(--ink-faint);">Based on the Sarasota County certified roll and the county\'s published 2025 millage for '
          + esc(d.name) + '. The homesteaded figures assume the amendment passes as written and that this parcel would qualify. Not tax or legal advice.</p>';
       var MM = 'mailme-look';
     h += '<div id="'+MM+'" style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--border);">'
-       + '<div style="font-weight:700;margin-bottom:0.4rem;">Want this breakdown emailed to you?</div>'
-       + '<div style="font-size:0.92rem;opacity:0.85;margin-bottom:0.7rem;">The numbers above, on your address, so you have them when the TRIM notice arrives. Nothing else, and your address is never sold or shared.</div>'
+       + '<div style="font-weight:700;margin-bottom:0.4rem;">Want a reminder before the 1 March deadline?</div>'
+       + '<div style="font-size:0.92rem;opacity:0.85;margin-bottom:0.7rem;">The numbers above now, and one reminder before 1 March so the date does not pass you by. Nothing else, and your address is never sold or shared.</div>'
        + '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">'
        + '<input id="'+MM+'-em" type="email" inputmode="email" autocomplete="email" placeholder="your email" '
        + 'style="flex:1 1 200px;padding:11px;border:1px solid var(--border);border-radius:var(--radius);font-size:1rem;">'
@@ -561,7 +577,14 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
          + '<p style="margin:0 0 0.6rem;"><strong>That benefit resets when the home sells.</strong> An identical home bought at market value today would be taxed on the full '
          + money(just) + ', which at 2028 rates is roughly ' + money(resetTax) + ' a year against your ' + money(keepTax) + '.</p>'
          + '<p style="margin:0;">Florida portability lets you carry up to $500,000 of that benefit to a new Florida homestead, which in your case would cover '
-         + (gap <= 500000 ? 'all of it' : 'most of it') + '. It is not automatic and it has its own deadline, so ask the Property Appraiser before you list anything.</p></div>';
+         + (gap <= 500000 ? 'all of it' : 'most of it') + '. It is not automatic and it has its own deadline, so ask the Property Appraiser before you list anything.</p>'
+         + (gap >= 100000
+            ? '<p style="margin:0.7rem 0 0;padding-top:0.7rem;border-top:1px solid var(--border);">'
+              + '<strong>A lot of people here believe a move would double or triple their taxes.</strong> With ' + money(gap)
+              + ' of benefit carrying over, it is usually far less than that. If you want the real number on a particular house, '
+              + 'text the address to <a href="tel:9416629941">941-662-9941</a> and I will work it out. Portability travels anywhere in Florida, not just Sarasota County.</p>'
+            : '')
+         + '</div>';
     }
     h += '<p style="font-size:0.9rem;color:var(--ink-faint);">Based on the Sarasota County certified roll and the county\'s published 2025 millage for '
        + esc(d.name) + '. 2026 rates are not final until the September budget hearings, so expect a difference of a few dollars either way. '
