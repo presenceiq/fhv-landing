@@ -341,6 +341,13 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
   var NEW_2027 = 150000, NEW_2028 = 250000;
 
   function money(n){ return '$' + Math.round(n).toLocaleString(); }
+  var MONTHS = ['January','February','March','April','May','June','July',
+                'August','September','October','November','December'];
+  function niceDate(iso){
+    var m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(!m) return iso || '';
+    return MONTHS[parseInt(m[2],10)-1] + ' ' + parseInt(m[3],10) + ', ' + m[1];
+  }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
@@ -475,7 +482,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
       h += '<div style="background:#fff4e6;border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:0 0 1rem;border-radius:var(--radius);">'
          + '<div style="font-weight:800;margin-bottom:0.35rem;">These are the previous owner\'s numbers, not yours</div>'
          + '<p style="margin:0 0 0.6rem;">The county roll is a snapshot taken on 1 January 2026. This home sold on '
-         + esc(row[14]) + (row[15] > 1000 ? ' for ' + money(row[15]) : '') + ', after that date, so everything below still shows what the seller had: their assessed value, their exemption, and any Save Our Homes benefit they had built up over the years.</p>'
+         + esc(niceDate(row[14])) + (row[15] > 1000 ? ' for ' + money(row[15]) : '') + ', after that date, so everything below still shows what the seller had: their assessed value, their exemption, and any Save Our Homes benefit they had built up over the years.</p>'
          + '<p style="margin:0 0 0.6rem;"><strong>That benefit does not transfer.</strong> In 2027 the assessed value resets toward market, so the real bill will be higher than the figures below, often by thousands.</p>'
          + '<p style="margin:0;">Two dates matter now. Homestead has to be filed by <strong>1 March</strong> for the year you want it, and you had to own the home on 1 January of that year. And if either owner became a Florida resident recently, being a permanent resident by <strong>31 December 2026</strong> is worth four years of the larger exemption. The Property Appraiser on 941-861-8200 confirms both, free.</p></div>';
     }
@@ -565,8 +572,11 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
        The cap resets to market value on sale. Portability carries up to
        $500,000 of the accumulated benefit to a new Florida homestead, and
        most people have never heard of it.                                   */
+    /* On a parcel that sold after the roll snapshot this benefit belonged to
+       the SELLER and died with the sale, so showing it as "your" benefit
+       would contradict the warning at the top of the result. */
     var just = row[10], gap = Math.max(0, just - row[3]);
-    if(gap > 15000){
+    if(gap > 15000 && !row[16]){
       var resetTax = Math.max(0, just - 250000) * d.nonschool/1000 + Math.max(0, just - 25000) * d.school/1000;
       var keepTax  = y28.nonschool + y28.school;
       h += '<div style="background:var(--warm);border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:1rem 0;border-radius:var(--radius);">'
