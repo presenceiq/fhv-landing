@@ -966,10 +966,10 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
   /* The suggestion list shows the town, because countywide there are 348
      street names that appear in more than one place and a visitor cannot
      tell which is theirs from the street alone. */
-  var ZIPCITY = P.zipCity || {};
+  function zipCity(){ return (P && P.zipCity) || {}; }
   function label(r){ return r[0] + ' ' + r[1] + (r[2] ? ' ' + r[2] : ''); }
   function labelFull(r){
-    var t = ZIPCITY[r[8]];
+    var t = zipCity()[r[8]];
     return label(r) + (t ? '  \u00b7  ' + t + ' ' + r[8] : '');
   }
 
