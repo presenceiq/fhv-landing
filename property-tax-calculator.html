@@ -84,6 +84,36 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
 .cta-section .btn{display:inline-block;padding:14px 32px;background:var(--gold);color:#fff;border-radius:var(--radius);font-size:15px;font-weight:700;text-decoration:none;margin:0 0.5rem 1rem;}
 .site-footer{padding:1.5rem;text-align:center;font-size:12px;color:var(--ink-faint);background:var(--surface);border-top:1px solid var(--border);line-height:1.9;}
 @media(max-width:600px){.hero{padding:2.5rem 1.1rem;}.container{padding:0 1.1rem;}}
+
+/* ── PRINTING ─────────────────────────────────────────────────────────────
+   People print their own result and keep it, or hand it to a neighbour.
+   Printed as-is they got the banner, the menus and twenty-odd footer links
+   wrapped around the one thing they wanted. This strips the furniture and
+   leaves the address, the numbers, the disclaimer and a line saying where it
+   came from and who to call.
+   NOTHING IS BLOCKED. Print and screenshot both work exactly as they always
+   did - a page that fights the visitor contradicts everything else here. */
+@media print {
+  #fhv-amd, .hero, nav[aria-label="Breadcrumb"], footer,
+  #addr, #hits, #buyprice, #buycom, #buygo, .btn,
+  #mailme-look, #mailme-buy, #mailme-pdf { display:none !important; }
+  body { background:#fff !important; color:#000; font-size:11.5pt; }
+  .container, .card { max-width:100% !important; padding:0 !important;
+                      margin:0 !important; box-shadow:none !important; }
+  .data-table { page-break-inside:avoid; width:100%; }
+  .data-table th, .data-table td { padding:5px 7px !important; }
+  a { text-decoration:none; color:#000; }
+  h2, h3 { page-break-after:avoid; }
+  /* a line that only exists on paper, so the sheet says whose it is */
+  #out::after {
+    content:"Florida Home Value AI \2014 floridahomevalueai.com/property-tax-calculator \2014 "
+            "Michael Putnam, Sales Associate SL3220671, Putnam Realty Group, "
+            "broker Brian Putnam Jr. \2014 941-662-9941. Arithmetic on public records: "
+            "not tax advice, not legal advice, not an appraisal.";
+    display:block; margin-top:14pt; padding-top:8pt;
+    border-top:1px solid #999; font-size:9pt; color:#333; line-height:1.5;
+  }
+}
 </style>
 
 <!-- Google Analytics 4 -->
