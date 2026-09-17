@@ -423,7 +423,21 @@ async function runSync(env, maxPages) {
   backlog is a couple of days either way — not worth a minimum one-month
   commitment, especially given Cloudflare's own community threads about people
   struggling to cancel it. */
-const MEDIA_PER_RUN = 80;
+/* ★ RAISED FROM 80 TO 150 on 16 Sep 2026, after measuring where the time
+   actually went. A run of 80 photos spends 88 seconds sleeping between
+   requests and then sits idle for the remaining 800 seconds of its 15-minute
+   window. The cap was never protecting anything - it was leaving most of the
+   allowance unused.
+   THE ARITHMETIC, and check it before raising this again:
+     150 photos x 96 runs = 14,400 a day
+     at ~2 MLS Grid requests each = 28,800 of a 40,000 daily ceiling
+     150 x 1.1s = 165 seconds of a 900-second window
+   200 per run would be 38,400 requests and would starve the listings sync,
+   which needs a few hundred a day of its own. 150 keeps a real margin.
+   ★ DO NOT TOUCH GAP_MS. The 1.1 second gap exists because MLS Grid sent an
+   API Access Warning on 26 Aug 2026 for exceeding 2 requests per second.
+   More photos per run is safe. More photos per SECOND is not. */
+const MEDIA_PER_RUN = 150;
 const MEDIA_MAX_ATTEMPTS = 3;
 
 /* ★ HOW MANY LISTINGS DISCOVERY QUEUES PER RUN. This was 3, and once the
@@ -963,7 +977,7 @@ export default {
      }
      try {
        const n = parseInt(url.searchParams.get('n') || '', 10);
-       return new Response(JSON.stringify(await runMedia(env, (n > 0 && n <= 24) ? n : undefined)), { headers: CORS });
+       return new Response(JSON.stringify(await runMedia(env, (n > 0 && n <= 150) ? n : undefined)), { headers: CORS });
      } catch (err) {
        return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: CORS });
      }
