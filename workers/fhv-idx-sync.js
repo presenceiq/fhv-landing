@@ -100,13 +100,21 @@ const FHV_COMMUNITIES = {
    each photo costs about two requests. Check the count first:
      SELECT COUNT(*), SUM(photos_count) FROM idx_listings
       WHERE postal_code = '34xxx' AND status IN ('Active','Pending');
-   34275 Nokomis    ~418 listings, ~16,300 photos  -> about 2 days   [ADDED 15 Sep 2026]
+   34275 Nokomis    ~418 listings, ~16,300 photos                 [ADDED 15 Sep 2026]
+   34229 Osprey     4,171 parcels, roughly 9,500 photos           [ADDED 16 Sep 2026]
+   ★ SIZING THE REST BEFORE ADDING IT. Measured: about 42 photos per listing.
+     Sarasota county alone is 540,656 photos = 19 days at 28,800/day.
+     All three counties is roughly 1.08 million = 38 days.
+     Storage is trivial either way, under $3/month. TIME is the whole cost,
+     and the listings sync shares the same 40,000 daily requests - running
+     photos flat out for weeks leaves it on a thin margin, and the sync is
+     what keeps the listings pages accurate.
    34285/34292/34293 Venice  next
    34286/34287/34288/34291 North Port  after that
    Sarasota County as a whole is ~530,000 photos, which is a month of the
    entire daily budget with the listings sync starved alongside it. Do not
    add it in one go. */
-const PHOTO_ZIPS = ['34275'];
+const PHOTO_ZIPS = ['34275', '34229'];
 
 const SUFFIXES = {
  STREET: 1, ST: 1, DRIVE: 1, DR: 1, LANE: 1, LN: 1, COURT: 1, CT: 1,
@@ -429,15 +437,27 @@ async function runSync(env, maxPages) {
    window. The cap was never protecting anything - it was leaving most of the
    allowance unused.
    THE ARITHMETIC, and check it before raising this again:
-     150 photos x 96 runs = 14,400 a day
-     at ~2 MLS Grid requests each = 28,800 of a 40,000 daily ceiling
-     150 x 1.1s = 165 seconds of a 900-second window
-   200 per run would be 38,400 requests and would starve the listings sync,
-   which needs a few hundred a day of its own. 150 keeps a real margin.
+   ★ CORRECTED: A PHOTO COSTS **ONE** MLS GRID REQUEST, NOT TWO. The fetch
+   goes to MLS Grid; the R2 write and the D1 update are Cloudflare-internal
+   and never touch their API. An earlier note here conflated Cloudflare's
+   subrequest ceiling with MLS Grid's request count and halved the apparent
+   headroom.
+   300 IS THE CEILING WHERE ALL FOUR PUBLISHED LIMITS STILL HOLD:
+     window    300 x 1.1s = 330s of a 900s cron cycle
+     per hour  300 x 4 runs = 1,200 of 7,200
+     per day   300 x 96 runs = 28,800 of 40,000, leaving ~11,000 for the
+               listings sync and discovery, which both need some
+     bandwidth 0.21 GB/hour of 4 GB
+   600 per run breaks the DAILY cap (57,600). 1000 breaks the daily cap AND
+   overruns the 15-minute window (1,100s of sleeping in a 900s cycle), so the
+   run gets cut off partway and the next starts before it finished.
+   The only way past 300 is asking MLS Grid to raise the daily cap. They
+   document the process: email support@mlsgrid.com in advance for guidance
+   where limits must be exceeded.
    ★ DO NOT TOUCH GAP_MS. The 1.1 second gap exists because MLS Grid sent an
    API Access Warning on 26 Aug 2026 for exceeding 2 requests per second.
    More photos per run is safe. More photos per SECOND is not. */
-const MEDIA_PER_RUN = 150;
+const MEDIA_PER_RUN = 300;
 const MEDIA_MAX_ATTEMPTS = 3;
 
 /* ★ HOW MANY LISTINGS DISCOVERY QUEUES PER RUN. This was 3, and once the
@@ -977,7 +997,7 @@ export default {
      }
      try {
        const n = parseInt(url.searchParams.get('n') || '', 10);
-       return new Response(JSON.stringify(await runMedia(env, (n > 0 && n <= 150) ? n : undefined)), { headers: CORS });
+       return new Response(JSON.stringify(await runMedia(env, (n > 0 && n <= 300) ? n : undefined)), { headers: CORS });
      } catch (err) {
        return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: CORS });
      }
