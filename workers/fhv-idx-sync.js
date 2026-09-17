@@ -464,10 +464,17 @@ const MEDIA_MAX_ATTEMPTS = 3;
    downloader was fixed to work through several listings per run instead of
    one, DISCOVERY became the bottleneck instead: the queue was draining faster
    than it was being filled and pending fell from 165 to 81 inside an hour.
-   Each listing costs ONE MLS Grid request here, so 10 per run across 96 runs
-   is 960 requests a day against a 40,000 ceiling. Raise it further if pending
-   keeps hitting zero while a town is still unfinished. */
-const DISCOVER_PER_RUN = 10;  // a dead URL is parked, never blocks the queue
+   Each listing costs ONE MLS Grid request here.
+   ★ RAISED 10 -> 25 on 17 Sep. With MEDIA_PER_RUN at 300 the downloader
+   cleared 6,329 photos overnight at 491 an hour, and pending fell to 19 -
+   discovery could not keep the queue fed and the downloader was about to
+   start idling.
+   25 per run x 96 runs = 2,400 requests a day. Added to 28,800 for photos
+   that is 31,200 of a 40,000 ceiling, leaving room for the listings sync.
+   If pending still approaches zero while a town is unfinished, the next
+   move is fewer photos per run rather than more discovery, because the
+   daily total is what binds. */
+const DISCOVER_PER_RUN = 25;  // a dead URL is parked, never blocks the queue
 
 
 
