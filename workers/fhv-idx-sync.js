@@ -601,81 +601,126 @@ async function runMedia(env, limit) {
  }
 
 
- const listingKey = pick.listing_key;
+
+ /* ★ MULTIPLE LISTINGS PER RUN. This used to process exactly ONE listing and
+    stop, however few photos that listing had left. Early on that was fine -
+    the listings with forty pending photos were picked first and a run filled
+    its budget easily. Once those were done, each run was getting through
+    whatever handful one listing had left, and the download rate HALVED from
+    188 photos an hour to 77 while the account sat at a fraction of its
+    allowance.
+    MLS Grid permits 40,000 requests per 24 hours and each photo costs about
+    two, so 80 photos across 96 runs a day is roughly 15,360 requests - well
+    inside it. The cap was never the constraint. This was.
+    Now the run keeps taking listings until the budget is actually spent. */
  const errors = [];
  let stored = 0, failed = 0, attempted = 0;
+ const listingsDone = [];
+
+ while (pick && attempted < cap) {
+   const listingKey = pick.listing_key;
+   listingsDone.push(listingKey);
+
+  
+  
 
 
- /* Fresh media for this one listing. ListingKey is not searchable, but
-    ListingId is — so look it up. */
- let fresh = {};
- try {
-   const row = await env.DB.prepare(
-     'SELECT listing_id FROM idx_listings WHERE listing_key = ?'
-   ).bind(listingKey).first();
+   /* Fresh media for this one listing. ListingKey is not searchable, but
+      ListingId is — so look it up. */
+   let fresh = {};
+   try {
+     const row = await env.DB.prepare(
+       'SELECT listing_id FROM idx_listings WHERE listing_key = ?'
+     ).bind(listingKey).first();
 
 
-   if (row && row.listing_id) {
-     const f = `OriginatingSystemName eq '${OSN}' and ListingId eq '${String(row.listing_id).replace(/'/g, "''")}'`;
-     const data = await grid(
-       `${BASE}/Property?$filter=${encodeURIComponent(f)}&$expand=Media&$top=1`, token);
-     const rec = (data.value || [])[0];
-     for (const m of ((rec && rec.Media) || [])) {
-       if (m.MediaKey && m.MediaURL) fresh[m.MediaKey] = m.MediaURL;
+     if (row && row.listing_id) {
+       const f = `OriginatingSystemName eq '${OSN}' and ListingId eq '${String(row.listing_id).replace(/'/g, "''")}'`;
+       const data = await grid(
+         `${BASE}/Property?$filter=${encodeURIComponent(f)}&$expand=Media&$top=1`, token);
+       const rec = (data.value || [])[0];
+       for (const m of ((rec && rec.Media) || [])) {
+         if (m.MediaKey && m.MediaURL) fresh[m.MediaKey] = m.MediaURL;
+       }
+     }
+   } catch (err) {
+     errors.push('refresh: ' + String(err).slice(0, 120));
+   }
+
+
+   const { results } = await env.DB.prepare(
+     `SELECT media_key, listing_key, media_url, ord FROM idx_media
+       WHERE listing_key = ? AND status = 'pending' AND attempts < ?
+       ORDER BY ord LIMIT ?`
+   ).bind(listingKey, MEDIA_MAX_ATTEMPTS, cap - attempted).all();
+
+
+   for (const m of (results || [])) {
+     attempted++;
+     const url = fresh[m.media_key] || m.media_url;   // fresh first, stored as fallback
+     try {
+       const res = await fetch(url, {
+         headers: {
+           /* Not a browser string — MLS Grid requires the access token here. */
+           'User-Agent': token,
+           'Accept': 'image/*'
+         }
+       });
+       if (!res.ok) throw new Error('HTTP ' + res.status + (fresh[m.media_key] ? ' (fresh url)' : ' (stored url)'));
+
+
+       const type = res.headers.get('Content-Type') || 'image/jpeg';
+       const ext = type.includes('png') ? 'png' : type.includes('webp') ? 'webp' : 'jpg';
+       const key = m.listing_key + '/' + String(m.ord).padStart(3, '0') + '-' + m.media_key + '.' + ext;
+
+
+       await env.PHOTOS.put(key, res.body, { httpMetadata: { contentType: type } });
+
+
+       await env.DB.prepare(
+         `UPDATE idx_media SET status='stored', r2_key=?, media_url=?, stored_at=?, last_error=NULL
+           WHERE media_key=?`
+       ).bind(key, url, new Date().toISOString(), m.media_key).run();
+       stored++;
+     } catch (err) {
+       const msg = String(err).slice(0, 180);
+       if (errors.length < 5) errors.push(msg);
+       await env.DB.prepare(
+         `UPDATE idx_media SET attempts = attempts + 1, last_error = ?,
+                 status = CASE WHEN attempts + 1 >= ? THEN 'failed' ELSE 'pending' END
+           WHERE media_key = ?`
+       ).bind(msg, MEDIA_MAX_ATTEMPTS, m.media_key).run();
+       failed++;
+     }
+     await sleep(GAP_MS);
+   }
+
+
+
+   /* Take the next listing, if the budget allows another. */
+   pick = null;
+   if (attempted < cap) {
+     for (const z of PHOTO_ZIPS) {
+       if (pick) break;
+       pick = await env.DB.prepare(
+         `SELECT m.listing_key, COUNT(*) AS n
+            FROM idx_media m JOIN idx_listings l ON l.listing_key = m.listing_key
+           WHERE m.status = 'pending' AND m.attempts < ?
+             AND l.postal_code = ? AND l.status IN ('Active','Pending')
+             AND m.listing_key NOT IN (${listingsDone.map(function(){return '?';}).join(',')})
+           GROUP BY m.listing_key ORDER BY n DESC LIMIT 1`
+       ).bind(MEDIA_MAX_ATTEMPTS, z, ...listingsDone).first();
+     }
+     if (!pick) {
+       pick = await env.DB.prepare(
+         `SELECT listing_key, COUNT(*) AS n FROM idx_media
+           WHERE status = 'pending' AND attempts < ?
+             AND listing_key NOT IN (${listingsDone.map(function(){return '?';}).join(',')})
+           GROUP BY listing_key ORDER BY n DESC LIMIT 1`
+       ).bind(MEDIA_MAX_ATTEMPTS, ...listingsDone).first();
      }
    }
- } catch (err) {
-   errors.push('refresh: ' + String(err).slice(0, 120));
  }
-
-
- const { results } = await env.DB.prepare(
-   `SELECT media_key, listing_key, media_url, ord FROM idx_media
-     WHERE listing_key = ? AND status = 'pending' AND attempts < ?
-     ORDER BY ord LIMIT ?`
- ).bind(listingKey, MEDIA_MAX_ATTEMPTS, cap).all();
-
-
- for (const m of (results || [])) {
-   attempted++;
-   const url = fresh[m.media_key] || m.media_url;   // fresh first, stored as fallback
-   try {
-     const res = await fetch(url, {
-       headers: {
-         /* Not a browser string — MLS Grid requires the access token here. */
-         'User-Agent': token,
-         'Accept': 'image/*'
-       }
-     });
-     if (!res.ok) throw new Error('HTTP ' + res.status + (fresh[m.media_key] ? ' (fresh url)' : ' (stored url)'));
-
-
-     const type = res.headers.get('Content-Type') || 'image/jpeg';
-     const ext = type.includes('png') ? 'png' : type.includes('webp') ? 'webp' : 'jpg';
-     const key = m.listing_key + '/' + String(m.ord).padStart(3, '0') + '-' + m.media_key + '.' + ext;
-
-
-     await env.PHOTOS.put(key, res.body, { httpMetadata: { contentType: type } });
-
-
-     await env.DB.prepare(
-       `UPDATE idx_media SET status='stored', r2_key=?, media_url=?, stored_at=?, last_error=NULL
-         WHERE media_key=?`
-     ).bind(key, url, new Date().toISOString(), m.media_key).run();
-     stored++;
-   } catch (err) {
-     const msg = String(err).slice(0, 180);
-     if (errors.length < 5) errors.push(msg);
-     await env.DB.prepare(
-       `UPDATE idx_media SET attempts = attempts + 1, last_error = ?,
-               status = CASE WHEN attempts + 1 >= ? THEN 'failed' ELSE 'pending' END
-         WHERE media_key = ?`
-     ).bind(msg, MEDIA_MAX_ATTEMPTS, m.media_key).run();
-     failed++;
-   }
-   await sleep(GAP_MS);
- }
-
 
  const left = await env.DB.prepare(
    "SELECT COUNT(*) AS n FROM idx_media WHERE status='pending' AND attempts < ?"
@@ -684,7 +729,7 @@ async function runMedia(env, limit) {
 
  /* Errors are returned as well as stored, so a failure is visible immediately
     rather than needing a database query to diagnose. */
- return { listing: listingKey, attempted, stored, failed,
+ return { listings: listingsDone.length, attempted, stored, failed,
           remaining: left ? left.n : 0,
           errors: errors.length ? errors : undefined };
 }
