@@ -424,7 +424,16 @@ async function runSync(env, maxPages) {
   commitment, especially given Cloudflare's own community threads about people
   struggling to cancel it. */
 const MEDIA_PER_RUN = 80;
-const MEDIA_MAX_ATTEMPTS = 3;  // a dead URL is parked, never blocks the queue
+const MEDIA_MAX_ATTEMPTS = 3;
+
+/* ★ HOW MANY LISTINGS DISCOVERY QUEUES PER RUN. This was 3, and once the
+   downloader was fixed to work through several listings per run instead of
+   one, DISCOVERY became the bottleneck instead: the queue was draining faster
+   than it was being filled and pending fell from 165 to 81 inside an hour.
+   Each listing costs ONE MLS Grid request here, so 10 per run across 96 runs
+   is 960 requests a day against a 40,000 ceiling. Raise it further if pending
+   keeps hitting zero while a town is still unfinished. */
+const DISCOVER_PER_RUN = 10;  // a dead URL is parked, never blocks the queue
 
 
 
@@ -454,7 +463,7 @@ async function runMediaDiscover(env, limit) {
 
  /* Whole-town ZIPs first: no street list, so one query covers the town. */
  for (const z of PHOTO_ZIPS) {
-   if (missing.length >= (limit || 3)) break;
+   if (missing.length >= (limit || DISCOVER_PER_RUN)) break;
    const { results } = await env.DB.prepare(
      `SELECT l.listing_key, l.listing_id, l.street_number, l.street_name
         FROM idx_listings l
@@ -463,11 +472,11 @@ async function runMediaDiscover(env, limit) {
          AND l.postal_code = ?
          AND m.listing_key IS NULL
        LIMIT ?`
-   ).bind(z, (limit || 3) - missing.length).all();
+   ).bind(z, (limit || DISCOVER_PER_RUN) - missing.length).all();
    missing = missing.concat(results || []);
  }
 
- for (let i = 0; i < streets.length && missing.length < (limit || 3); i += 40) {
+ for (let i = 0; i < streets.length && missing.length < (limit || DISCOVER_PER_RUN); i += 40) {
    const chunk = streets.slice(i, i + 40);
    const sm = chunk.map(function () { return '?'; }).join(',');
    const zm = zips.map(function () { return '?'; }).join(',');
@@ -479,7 +488,7 @@ async function runMediaDiscover(env, limit) {
          AND l.postal_code IN (${zm}) AND l.street_name IN (${sm})
          AND m.listing_key IS NULL
        LIMIT ?`
-   ).bind(...zips, ...chunk, (limit || 3) - missing.length).all();
+   ).bind(...zips, ...chunk, (limit || DISCOVER_PER_RUN) - missing.length).all();
    missing = missing.concat(results || []);
  }
 
@@ -941,7 +950,7 @@ export default {
      }
      try {
        const n = parseInt(url.searchParams.get('n') || '', 10);
-       return new Response(JSON.stringify(await runMediaDiscover(env, (n > 0 && n <= 8) ? n : undefined)), { headers: CORS });
+       return new Response(JSON.stringify(await runMediaDiscover(env, (n > 0 && n <= 40) ? n : undefined)), { headers: CORS });
      } catch (err) {
        return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: CORS });
      }
