@@ -102,6 +102,12 @@ const FHV_COMMUNITIES = {
       WHERE postal_code = '34xxx' AND status IN ('Active','Pending');
    34275 Nokomis    ~418 listings, ~16,300 photos                 [ADDED 15 Sep 2026]
    34229 Osprey     4,171 parcels, roughly 9,500 photos           [ADDED 16 Sep 2026]
+   34285 Venice, 34292 Venice, 34293 Venice                      [ADDED 17 Sep 2026]
+   ★ Venice is the biggest market FHV covers and 34293 alone contains Gran
+     Paradiso, IslandWalk, Sarasota National, Renaissance, Sunstone and
+     Brightmore. At the rate the worker now runs - about 1,000 photos an hour
+     after the three fixes on 16-17 Sep - this is days rather than the month
+     it would have taken at the old 77 an hour.
    ★ SIZING THE REST BEFORE ADDING IT. Measured: about 42 photos per listing.
      Sarasota county alone is 540,656 photos = 19 days at 28,800/day.
      All three counties is roughly 1.08 million = 38 days.
@@ -114,7 +120,7 @@ const FHV_COMMUNITIES = {
    Sarasota County as a whole is ~530,000 photos, which is a month of the
    entire daily budget with the listings sync starved alongside it. Do not
    add it in one go. */
-const PHOTO_ZIPS = ['34275', '34229'];
+const PHOTO_ZIPS = ['34275', '34229', '34285', '34292', '34293'];
 
 const SUFFIXES = {
  STREET: 1, ST: 1, DRIVE: 1, DR: 1, LANE: 1, LN: 1, COURT: 1, CT: 1,
