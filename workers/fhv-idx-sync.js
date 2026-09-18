@@ -471,6 +471,10 @@ const MEDIA_MAX_ATTEMPTS = 3;
    one, DISCOVERY became the bottleneck instead: the queue was draining faster
    than it was being filled and pending fell from 165 to 81 inside an hour.
    Each listing costs ONE MLS Grid request here.
+   ★ RAISED 25 -> 60 on 18 Sep, after Venice was added. Pending collapsed from
+   5,738 to 79 overnight and the download rate fell from ~1,000/hour to 576 -
+   the downloader was starving, not slowing. 60 x 96 runs = 5,760 requests a
+   day; with photos at roughly 14,000 that is about 20,000 of a 40,000 ceiling.
    ★ RAISED 10 -> 25 on 17 Sep. With MEDIA_PER_RUN at 300 the downloader
    cleared 6,329 photos overnight at 491 an hour, and pending fell to 19 -
    discovery could not keep the queue fed and the downloader was about to
@@ -480,7 +484,7 @@ const MEDIA_MAX_ATTEMPTS = 3;
    If pending still approaches zero while a town is unfinished, the next
    move is fewer photos per run rather than more discovery, because the
    daily total is what binds. */
-const DISCOVER_PER_RUN = 25;  // a dead URL is parked, never blocks the queue
+const DISCOVER_PER_RUN = 60;  // a dead URL is parked, never blocks the queue
 
 
 
