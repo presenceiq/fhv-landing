@@ -21,7 +21,9 @@
   dbg.style.cssText='font:12px monospace;color:#b8722a;margin-top:6px;';
   dbg.textContent='[suggest] script running';
   box.parentNode.insertBefore(dbg, box.nextSibling);
-  function say(t){ dbg.textContent='[suggest] '+t; }
+  var LOG=[];
+  function say(t){ LOG.push(t); if(LOG.length>6) LOG.shift();
+                   dbg.innerHTML='[suggest] '+LOG.join('<br>[suggest] '); }
   box.parentNode.style.position = 'relative';
   box.parentNode.insertBefore(hits, box.nextSibling);
 
@@ -47,7 +49,7 @@
     var want=[],k;
     if(!STREETS) return want;
     for(k in STREETS){
-      if(k.indexOf(st)===0){
+      if(k.indexOf(st)===0 || (k.length>3 && st.indexOf(k)===0)){
         for(var i=0;i<STREETS[k].length;i++){
           var tag=STREETS[k][i];
           if(tag && want.indexOf(tag)===-1) want.push(tag);
@@ -82,6 +84,7 @@
   function ensure(st, cb){
     loadIndex(function(){
       var tags=shardsFor(st), left=tags.length;
+      say('street "'+st+'" -> '+(tags.length?tags.join(','):'NO SHARD'));
       if(!left) return cb();
       tags.forEach(function(t){ loadShard(t, function(){ if(--left===0) cb(); }); });
     });
