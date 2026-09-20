@@ -71,6 +71,28 @@
           || document.getElementById('estimate');
     if(!host||document.getElementById('fhv-assess')) return;
 
+    /* Only ask about a number the visitor can actually see. RPR renders into
+       `host` asynchronously, so poll briefly and give up quietly if nothing
+       arrives. Without this the rating block and the lead fired on every
+       failed lookup. */
+    var tries=0;
+    (function waitForEstimate(){
+      var filled = host && host.textContent && host.textContent.replace(/\s/g,'').length > 40;
+      if(!filled){
+        if(++tries > 40) return;          /* ~10s, then stop silently */
+        return setTimeout(waitForEstimate, 250);
+      }
+      renderAssess();
+    })();
+    return;
+  }
+
+  function renderAssess(){
+    var host=document.getElementById('rprWidgetContainer') || document.getElementById('rprAvmWidget') || document.getElementById('estimate');
+    if(!host||document.getElementById('fhv-assess')) return;
+    var qs=new URLSearchParams(window.location.search);
+    var addr=decodeURIComponent(qs.get('address')||qs.get('addr')||'');
+
     var css='<style>'
       +'#fhv-assess{max-width:620px;margin:1.25rem auto 0;background:#fff;border:1px solid #e8e2d8;border-left:3px solid #b8722a;border-radius:12px;padding:1.25rem 1.35rem;font-family:Lato,sans-serif;box-shadow:0 2px 16px rgba(26,24,20,.08);}'
       +'#fhv-assess .q{font-size:1.05rem;font-weight:700;color:#1a1814;margin-bottom:.25rem;}'
