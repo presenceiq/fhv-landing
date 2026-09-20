@@ -33,9 +33,13 @@
 </head>
 <body>
 <!-- FHV-AMENDMENT-BANNER start · one block, identical on every page · see truth file 13gi -->
-<a href="https://floridahomevalueai.com/property-tax-calculator" id="fhv-amd" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.5rem .9rem;background:#b8722a;color:#fff;text-decoration:none;padding:.7rem 1rem;font-family:'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.4;text-align:center;"> <span><strong>November 3 ballot.</strong> What does the homestead amendment do to <em>your</em> tax bill?<span id="fhv-amd-d" style="opacity:.85;"></span></span> <span style="background:#fff;color:#b8722a;font-weight:700;padding:.35rem .9rem;border-radius:999px;white-space:nowrap;font-size:14px;">See your bill &rarr;</span>
+<a href="https://floridahomevalueai.com/property-tax-calculator" id="fhv-amd" style="display:block;background:#b8722a;color:#fff;text-decoration:none;padding:1.1rem 1rem;font-family:'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.45;text-align:center;">
+  <span style="display:block;font-weight:700;font-size:18px;">November 3 ballot.</span>
+  <span style="display:block;font-size:17px;margin-top:.15rem;">What does the homestead amendment do to <em>your</em> tax bill?</span>
+  <span id="fhv-amd-d" style="display:block;font-size:15px;opacity:.9;margin-top:.15rem;"></span>
+  <span style="display:inline-block;background:#fff;color:#b8722a;font-weight:700;padding:.4rem 1.1rem;border-radius:999px;white-space:nowrap;font-size:15px;margin-top:.6rem;">See your bill &rarr;</span>
 </a>
-<script>(function(){var d=Math.ceil((new Date('2026-11-03T00:00:00-05:00')-new Date())/864e5);var e=document.getElementById('fhv-amd-d');if(e&&d>0){e.textContent=' \u00b7 '+d+(d===1?' day left':' days left');}})();</script>
+<script>(function(){var d=Math.ceil((new Date('2026-11-03T00:00:00-05:00')-new Date())/864e5);var e=document.getElementById('fhv-amd-d');if(e&&d>0){e.textContent=d+(d===1?' day left':' days left');}})();</script>
 <!-- FHV-AMENDMENT-BANNER end --> <div class="topbar"> <div class="wrap"> <a class="backlink" href="/">&larr; Florida Home Value AI</a> <span class="brand-name">Any U.S. Address</span> </div>
 </div> <div class="wrap"> <header class="hero"> <div class="eyebrow">Anywhere in the United States</div> <h1>What's your home worth?</h1> <p class="lede">Type any U.S. address for an estimated value range from RPR. About a minute, and it uses recorded sales rather than a national average.</p> </header> <div id="estimate" class="tool"> <label for="rpr-address">Enter the full address &mdash; include city, state and ZIP for the best match:</label> <input id="rpr-address" type="text" placeholder="e.g. 742 Evergreen Ter, Springfield, IL 62704"> <button onclick="goRpr()" class="cta-btn">Get value</button> <div class="rpr-slot" style="margin-top:14px;"> <script>
         (function(){
