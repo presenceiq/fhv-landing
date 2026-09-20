@@ -15,15 +15,6 @@
                      + 'box-shadow:0 6px 24px rgba(26,24,20,.13);max-height:320px;overflow:auto;'
                      + 'margin:0 0 10px;';
 
-  /* TEMPORARY DIAGNOSTIC - remove once the cause is known. Writes what the
-     script can see directly onto the page, because the console showed nothing. */
-  var dbg=document.createElement('div');
-  dbg.style.cssText='font:12px monospace;color:#b8722a;margin-top:6px;';
-  dbg.textContent='[suggest] script running';
-  box.parentNode.insertBefore(dbg, box.nextSibling);
-  var LOG=[];
-  function say(t){ LOG.push(t); if(LOG.length>6) LOG.shift();
-                   dbg.innerHTML='[suggest] '+LOG.join('<br>[suggest] '); }
   box.parentNode.style.position = 'relative';
   box.parentNode.insertBefore(hits, box.nextSibling);
 
@@ -37,11 +28,10 @@
     sc.src='/fhv-streets.js?v=20260916a';
     sc.onload=function(){
       var H=window.FHV_INDEX||null;
-      if(H){ STREETS=H.streets; SHARDS=H.shardList||[]; P=H; say('index v'+H.v+' loaded, '+Object.keys(H.streets).length+' streets'); }
-      else { say('index script loaded but FHV_INDEX missing'); }
+      if(H){ STREETS=H.streets; SHARDS=H.shardList||[]; P=H; }
       cb();
     };
-    sc.onerror=function(){ say('index FAILED to load'); cb(); };
+    sc.onerror=function(){ cb(); };
     document.head.appendChild(sc);
   }
 
@@ -69,7 +59,7 @@
     sc.onload=function(){
       LOADED[tag]=1;
       var pack=window.FHV_P && window.FHV_P[tag];
-      if(pack && pack.rows){ R=R.concat(pack.rows); say('shard '+tag+' loaded, '+R.length+' parcels'); } else { say('shard '+tag+' loaded but no rows'); }
+      if(pack && pack.rows){ R=R.concat(pack.rows); }
       var q=PENDING[tag]; delete PENDING[tag];
       for(var i=0;i<q.length;i++) q[i]();
     };
@@ -84,7 +74,6 @@
   function ensure(st, cb){
     loadIndex(function(){
       var tags=shardsFor(st), left=tags.length;
-      say('street "'+st+'" -> '+(tags.length?tags.join(','):'NO SHARD'));
       if(!left) return cb();
       tags.forEach(function(t){ loadShard(t, function(){ if(--left===0) cb(); }); });
     });
@@ -125,7 +114,6 @@
 
   function show(){
     var res=search(box.value);
-    say('typed "'+box.value+'" - '+R.length+' parcels in memory - '+res.length+' matches');
     if(!res.length){ hits.style.display='none'; return; }
     hits.innerHTML='';
     res.forEach(function(r){
