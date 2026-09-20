@@ -195,7 +195,7 @@
       +'border:1px solid #e8e2d8;background:#fff;color:#1a1814;text-decoration:none;">Call 941-662-9941</a></div>';
   }
 
-  function askEmail(addr){
+  function askEmail(addr, community){
     var box=document.getElementById('fhv-email').parentNode;
     if(document.getElementById('fhv-em')) return;
     var d=document.createElement('div');
@@ -211,7 +211,7 @@
     document.getElementById('fhv-em-go').onclick=function(){
       var v=(document.getElementById('fhv-em-in').value||'').trim();
       if(v.indexOf('@')<1) return;
-      lead(addr,'',v);
+      lead(addr, community||'', v);
       d.innerHTML='<div style="font-size:16px;">Sent. Check your inbox in a minute.</div>';
     };
   }
@@ -222,7 +222,7 @@
         method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
         body: JSON.stringify({
           address: addr,
-          subdivision: community || '',
+          subdivision: community || 'Florida',
           territory_id: 'HOME PAGE - address lookup with comps',
           wants: email ? 'HOME PAGE - emailed the result to themselves' : 'HOME PAGE - address lookup with comps',
           email: email || '',
@@ -269,6 +269,26 @@
   };
   box.onblur=function(){ setTimeout(function(){ hits.style.display='none'; },180); };
 
+
+  /* ---- print only the result sheet ---------------------------------------
+     visibility rather than display: hiding body's children would hide the
+     sheet too, because it sits inside them. */
+  (function(){
+    var st=document.createElement('style');
+    st.textContent='@media print{'
+      +'body *{visibility:hidden !important;}'
+      +'#fhv-sheet,#fhv-sheet *{visibility:visible !important;}'
+      +'#fhv-sheet{position:absolute !important;left:0 !important;top:0 !important;width:100% !important;'
+      +'border:0 !important;box-shadow:none !important;padding:0 !important;margin:0 !important;}'
+      +'#fhv-sheet table{width:100% !important;font-size:11pt !important;}'
+      +'#fhv-sheet .fhv-actions{display:none !important;}'
+      +'#fhv-sheet .fhv-brand{border-bottom:1px solid #000 !important;}'
+      +'#fhv-sheet a{text-decoration:none !important;color:#000 !important;}'
+      +'@page{margin:0.6in;}'
+      +'}';
+    document.head.appendChild(st);
+  })();
+
   /* ---- on arrival with an address, draw the comps -------------------------- */
   (function(){
     var q=new URLSearchParams(location.search);
@@ -301,7 +321,8 @@
         + 'usually what separates two homes that look identical on paper.</p>'
         + actions() + '</div>';
       document.getElementById('fhv-print').onclick=function(){ window.print(); };
-      document.getElementById('fhv-email').onclick=function(){ askEmail(addr); };
+      document.getElementById('fhv-email').onclick=function(){ askEmail(addr, subj.com); };
+      lead(addr, subj.com);
     });
   })();
 })();
