@@ -19,7 +19,7 @@
 :root{--cream:#faf7f2;--warm:#f4f0e8;--gold:#b8722a;--ink:#1a1814;--ink-mid:#4a4640;--ink-faint:#9a948e;--border:#e8e2d8;--surface:#ffffff;--sage:#4a7c59;--radius:12px;}
 body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font-size:19px;line-height:1.75;}
 .site-header{border-bottom:1px solid var(--border);background:var(--surface);}
-.site-header-inner{max-width:860px;margin:0 auto;padding:1.4rem 1.75rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.7rem;}
+.site-header-inner{max-width:860px;margin:0 auto;padding:1.1rem 1.75rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;}
 @media (max-width:720px){.site-header-inner{flex-direction:column;align-items:center;text-align:center;gap:.6rem;padding:1rem;}.brand-name{font-size:1.9rem;}.brand-sub{font-size:16px;}}
 .brand-name{font-family:'Playfair Display',serif;font-size:2.55rem;font-weight:700;line-height:1.15;}.brand-name span{color:var(--gold);}
 .brand-sub{font-size:19px;color:var(--ink-mid);letter-spacing:0.03em;margin-top:0.2rem;}
@@ -27,7 +27,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
 .hero{background:var(--ink);color:#fff;padding:3.5rem 1.75rem;text-align:center;}
 .hero-tag{font-family:'DM Mono',monospace;font-size:17px;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
 .hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.1rem,4.6vw,3.2rem);font-weight:600;line-height:1.2;margin-bottom:1rem;}
-.hero-sub{font-size:15px;color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto 2rem;font-weight:300;}
+.hero-sub{font-size:19px;line-height:1.6;color:#fff;max-width:640px;margin:0 auto 2rem;font-weight:400;}
 .hero-cta{margin-top:1.25rem;}
 .container{max-width:860px;margin:0 auto;padding:0 1.75rem;}
 .section{padding:3rem 0;border-bottom:1px solid var(--border);}
@@ -87,12 +87,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
 <!-- FHV-AMENDMENT-BANNER start · one block, identical on every page · see truth file 13gi -->
 
 <!-- FHV-AMENDMENT-BANNER end --> <!-- Breadcrumb Nav --> <nav aria-label="Breadcrumb" style="max-width:860px;margin:0 auto;padding:0.75rem 2rem;font-size:17px;font-family:monospace;text-align:center;"> <a href="https://floridahomevalueai.com/" style="color:#b8722a;text-decoration:none;">Home</a> › <span style="color:#4a4640;">Property Tax Calculator</span> </nav>
-<header class="site-header">
- <div class="site-header-inner">
-  <div class="brand-name">Putnam <span>Realty</span> Group</div>
-  <div class="brand-sub">Michael Putnam &middot; Sarasota &middot; Charlotte &middot; Manatee counties</div>
-  <a class="header-cta" href="https://floridahomevalueai.com">Get My Home Value &rarr;</a>
- </div>
+<header class="site-header"> <div class="site-header-inner"> <div><div class="brand-name">Putnam <span>Realty</span> Group</div><div class="brand-sub">Michael Putnam · Sarasota · Charlotte · Manatee counties</div></div> <a class="header-cta" href="https://floridahomevalueai.com">Get My Home Value →</a> </div>
 </header>
 <section class="hero"> <div class="container"> <div class="hero-tag">Sarasota &middot; Charlotte &middot; Manatee &middot; built from each county's parcel roll</div> <h1>What the homestead change actually does to your tax bill</h1> <p class="hero-sub">The exemption on the November ballot does not touch your CDD, your fire assessment, or your school tax. Type your address and see your own bill, line by line, before and after.</p>  </div>
 </section> <div class="container"> <div class="section" id="calc"> <div class="section-tag">Your address</div> <h2>Your bill, line by line</h2> <p>Every figure comes from your own parcel record on your county's tax roll and that county's published millage rates. Nothing is estimated and nothing is guessed.</p> <div style="position:relative;"> <input id="addr" name="street-address" type="text" autocomplete="street-address" placeholder="Start typing your house number" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:var(--radius);font-size:1.05rem;box-sizing:border-box;"> <div id="hits" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:50;background:#fff;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);max-height:240px;overflow-y:auto;box-shadow:0 8px 18px rgba(0,0,0,0.10);"></div> </div> <div style="font-size:0.82rem;color:var(--ink-faint);margin-top:0.35rem;">Start typing your house number and pick your address from the list.</div> <div id="out" style="margin-top:1.25rem;"></div> <div style="margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--border);"> <div style="font-weight:800;margin-bottom:0.35rem;">Buying here instead?</div> <p style="margin:0 0 0.75rem;font-size:1.05rem;">A purchase resets the assessed value to what you pay. Put in a price and pick where.</p> <div style="display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center;"> <input id="buyprice" type="text" inputmode="numeric" placeholder="purchase price" style="flex:1 1 180px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);font-size:1rem;"> <select id="buycom" style="flex:1 1 220px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);font-size:1rem;background:#fff;"><option>Gran Paradiso</option><option>IslandWalk</option><option>Palmero</option><option>Talon Preserve</option><option>Grand Palm</option><option>Sarasota National</option><option>Renaissance</option><option>Sunstone</option><option>Brightmore</option><option>Sunrise Preserve</option><option>Gulf Gate Woods</option></select> <button type="button" class="btn" id="buygo" style="flex:0 0 auto;">Work it out</button> </div> <div id="buyout" style="margin-top:1rem;"></div> </div>
