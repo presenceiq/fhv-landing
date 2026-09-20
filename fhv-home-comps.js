@@ -222,6 +222,16 @@
     };
   }
 
+  var LAST={comps:[], window:'', subj:null};
+  function compsNote(){
+    if(!LAST.comps.length) return 'No comparable sale in the last twelve months.';
+    var t='Recorded sales in '+LAST.subjCom+' over '+LAST.window+': ';
+    t+=LAST.comps.map(function(s){
+      return s[0]+' '+s[1]+', '+s[2]+' sq ft, '+(TYPE[s[3]]||s[3])+(s[4]?' with pool':'')
+             +', sold '+s[5]+' for '+money(s[6]);
+    }).join(' | ');
+    return t;
+  }
   function lead(addr, community, email){
     try{
       fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
@@ -230,6 +240,12 @@
           address: addr,
           subdivision: community || 'Florida',
           territory_id: 'HOME PAGE - address lookup with comps',
+          estimated_value: rprValue() || '',
+          sqft: LAST.subj ? String(LAST.subj[3]) : '',
+          year_built: LAST.subj ? String(LAST.subj[6]) : '',
+          property_type: LAST.subj ? (TYPE[LAST.subj[4]]||LAST.subj[4]) + (LAST.subj[5]?', pool':'') : '',
+          homeowner_note: compsNote(),
+          insight: rprRange() ? ('RPR range '+rprRange()) : '',
           wants: email ? 'HOME PAGE - emailed the result to themselves' : 'HOME PAGE - address lookup with comps',
           email: email || '',
           agent_name:'Michael Putnam', agent_email:'michael@putnamrealtygroup.com'
@@ -276,6 +292,27 @@
   box.onblur=function(){ setTimeout(function(){ hits.style.display='none'; },180); };
 
 
+
+  /* RPR draws its own markup into #rprAvmWidget. If it lands in the page we can
+     read it and both print it and send it. If they switch to a cross-origin
+     frame one day, this returns nothing and the rest still works. */
+  function rprNode(){ return document.getElementById('rprAvmWidget') || document.getElementById('rprWidgetContainer'); }
+  function rprText(){
+    var n=rprNode(); if(!n) return '';
+    if(n.querySelector('iframe')) return '';          /* their frame, not ours to read */
+    return (n.innerText||n.textContent||'').replace(/\s+/g,' ').trim();
+  }
+  function rprValue(){
+    var t=rprText(); if(!t) return '';
+    var m=t.match(/\$[\d,]{6,}/);                     /* the headline estimate */
+    return m ? m[0] : '';
+  }
+  function rprRange(){
+    var t=rprText(); if(!t) return '';
+    var m=t.match(/\$[\d.]+K?\s*[–-]\s*\$[\d.]+K?/);
+    return m ? m[0].replace(/\s+/g,' ') : '';
+  }
+
   /* ---- print ---------------------------------------------------------------
      The sheet is copied into a hidden frame and that frame is printed. The
      page the visitor is looking at is never touched, so nothing moves. */
@@ -294,6 +331,26 @@
       var body=sheet.cloneNode(true);
       var acts=body.querySelector('.fhv-actions');
       if(acts) acts.parentNode.removeChild(acts);
+
+      /* the estimate lives outside the sheet on the page, so copy it in */
+      var rn=rprNode();
+      if(rn){
+        var blk=document.createElement('div');
+        blk.style.cssText='margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid #999;';
+        blk.innerHTML='<div style="font-weight:700;font-size:12pt;margin-bottom:6px;">'
+          +'Estimated value, from RPR</div>';
+        var clone=rn.cloneNode(true);
+        if(clone.querySelector && clone.querySelector('iframe')){
+          var v=rprValue(), r=rprRange();
+          clone=document.createElement('div');
+          clone.innerHTML = v ? ('<div style="font-size:16pt;font-weight:700;">'+v+'</div>'
+                                 + (r?'<div>Range '+r+'</div>':''))
+                              : '<div>See the estimate on floridahomevalueai.com</div>';
+        }
+        blk.appendChild(clone);
+        var br=body.querySelector('.fhv-brand');
+        if(br && br.nextSibling) body.insertBefore(blk, br.nextSibling); else body.appendChild(blk);
+      }
 
       var css='@page{margin:0.6in;}'
         +'body{font-family:Lato,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
@@ -339,8 +396,9 @@
           if(subj){ tag=tags[i]; break; }
         }
       }
-      if(!subj){ lead(addr,''); return; }   /* outside the comp data, still a real lookup */
+      if(!subj){ LAST={comps:[],window:'',subj:null,subjCom:''}; setTimeout(function(){ lead(addr,''); },1800); return; }
       var res=comps(tag, subj);
+      LAST={comps:res.rows, window:res.window||'', subj:subj.row, subjCom:subj.com};
       out.innerHTML = '<div id="fhv-sheet" style="background:#fff;border:1px solid #e8e2d8;border-radius:12px;'
         + 'padding:1.4rem 1.5rem;margin-top:1.6rem;text-align:left;box-shadow:0 2px 16px rgba(26,24,20,.07);">'
         + brandHeader(addr)
@@ -352,7 +410,7 @@
         + actions() + '</div>';
       document.getElementById('fhv-print').onclick=function(){ window.fhvPrint(); };
       document.getElementById('fhv-email').onclick=function(){ askEmail(addr, subj.com); };
-      lead(addr, subj.com);
+      setTimeout(function(){ lead(addr, subj.com); }, 1800);
     });
   })();
 })();
