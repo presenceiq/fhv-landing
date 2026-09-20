@@ -276,46 +276,46 @@
   box.onblur=function(){ setTimeout(function(){ hits.style.display='none'; },180); };
 
 
-  /* ---- print only the result sheet ---------------------------------------
-     Hiding by visibility leaves the layout in place and prints blank pages.
-     Mark every element that is not the sheet, an ancestor of it, or inside
-     it, and remove those for the print only. */
+  /* ---- print ---------------------------------------------------------------
+     The sheet is copied into a hidden frame and that frame is printed. The
+     page the visitor is looking at is never touched, so nothing moves. */
   (function(){
-    var st=document.createElement('style');
-    st.textContent='@media print{'
-      +'.fhv-noprint{display:none !important;}'
-      +'#fhv-sheet{border:0 !important;box-shadow:none !important;padding:0 !important;margin:0 !important;'
-      +'width:100% !important;max-width:100% !important;position:static !important;}'
-      +'#fhv-sheet,#fhv-sheet *{overflow:visible !important;}'
-      +'#fhv-sheet table{width:100% !important;font-size:11pt !important;}'
-      +'#fhv-sheet .fhv-actions{display:none !important;}'
-      +'#fhv-sheet .fhv-brand{border-bottom:1px solid #000 !important;}'
-      +'#fhv-sheet a{text-decoration:none !important;color:#000 !important;}'
-      +'@page{margin:0.6in;}'
-      +'}';
-    document.head.appendChild(st);
     window.fhvPrint=function(){
       var sheet=document.getElementById('fhv-sheet');
-      if(!sheet){ window.print(); return; }
-      var keep=[], n=sheet;
-      while(n && n!==document.documentElement){ keep.push(n); n=n.parentNode; }
-      var all=document.body.querySelectorAll('*'), marked=[];
-      for(var i=0;i<all.length;i++){
-        var e=all[i];
-        if(keep.indexOf(e)!==-1) continue;
-        if(sheet.contains(e)) continue;
-        e.classList.add('fhv-noprint'); marked.push(e);
-      }
-      var saved=[];
-      for(var k=0;k<keep.length;k++){
-        saved.push([keep[k], keep[k].style.maxWidth, keep[k].style.width]);
-        keep[k].style.maxWidth='100%'; keep[k].style.width='100%';
-      }
-      window.print();
-      setTimeout(function(){
-        for(var i=0;i<marked.length;i++) marked[i].classList.remove('fhv-noprint');
-        for(var j=0;j<saved.length;j++){ saved[j][0].style.maxWidth=saved[j][1]; saved[j][0].style.width=saved[j][2]; }
-      }, 600);
+      if(!sheet) return;
+      var old=document.getElementById('fhv-print-frame');
+      if(old) old.parentNode.removeChild(old);
+
+      var f=document.createElement('iframe');
+      f.id='fhv-print-frame';
+      f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+      document.body.appendChild(f);
+
+      var body=sheet.cloneNode(true);
+      var acts=body.querySelector('.fhv-actions');
+      if(acts) acts.parentNode.removeChild(acts);
+
+      var css='@page{margin:0.6in;}'
+        +'body{font-family:Lato,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+        +'font-size:11pt;line-height:1.5;color:#000;margin:0;}'
+        +'table{width:100%;border-collapse:collapse;font-size:10.5pt;}'
+        +'th{text-align:left;border-bottom:2px solid #000;padding:7px 6px;}'
+        +'td{border-bottom:1px solid #999;padding:8px 6px;}'
+        +'a{color:#000;text-decoration:none;}'
+        +'.fhv-brand{border-bottom:1px solid #000 !important;padding-bottom:10px;margin-bottom:14px;}';
+
+      var d=f.contentWindow.document;
+      d.open();
+      d.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'
+        +document.title.replace(/[<>]/g,'')+'</title><style>'+css+'</style></head><body></body></html>');
+      d.close();
+      d.body.appendChild(d.importNode(body, true));
+
+      var go=function(){
+        try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){}
+        setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); }, 1500);
+      };
+      if(d.readyState==='complete') setTimeout(go,60); else f.onload=function(){ setTimeout(go,60); };
     };
   })();
 
