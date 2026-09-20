@@ -11,9 +11,9 @@
   var STREETS=null, SHARDS=[], P=null, R=[], LOADED={}, PENDING={}, INDEXING=false;
 
   var hits = document.createElement('div');
-  hits.style.cssText = 'display:none;position:absolute;z-index:40;background:#fff;border:1px solid #e8e2d8;'
-                     + 'border-radius:8px;box-shadow:0 6px 24px rgba(26,24,20,.13);max-height:320px;'
-                     + 'overflow:auto;left:0;right:0;margin-top:-8px;';
+  hits.style.cssText = 'display:none;background:#fff;border:1px solid #e8e2d8;border-radius:8px;'
+                     + 'box-shadow:0 6px 24px rgba(26,24,20,.13);max-height:320px;overflow:auto;'
+                     + 'margin:0 0 10px;';
 
   /* TEMPORARY DIAGNOSTIC - remove once the cause is known. Writes what the
      script can see directly onto the page, because the console showed nothing. */
