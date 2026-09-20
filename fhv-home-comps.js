@@ -306,9 +306,16 @@
         if(sheet.contains(e)) continue;
         e.classList.add('fhv-noprint'); marked.push(e);
       }
-      for(var k=0;k<keep.length;k++){ keep[k].style.maxWidth='100%'; keep[k].style.width='100%'; }
+      var saved=[];
+      for(var k=0;k<keep.length;k++){
+        saved.push([keep[k], keep[k].style.maxWidth, keep[k].style.width]);
+        keep[k].style.maxWidth='100%'; keep[k].style.width='100%';
+      }
       window.print();
-      setTimeout(function(){ for(var i=0;i<marked.length;i++) marked[i].classList.remove('fhv-noprint'); }, 600);
+      setTimeout(function(){
+        for(var i=0;i<marked.length;i++) marked[i].classList.remove('fhv-noprint');
+        for(var j=0;j<saved.length;j++){ saved[j][0].style.maxWidth=saved[j][1]; saved[j][0].style.width=saved[j][2]; }
+      }, 600);
     };
   })();
 
