@@ -215,7 +215,10 @@
       var v=(document.getElementById('fhv-em-in').value||'').trim();
       if(v.indexOf('@')<1) return;
       lead(addr, community||'', v);
-      d.innerHTML='<div style="font-size:16px;">Sent. Check your inbox in a minute.</div>';
+      /* Michael sends this himself from his own inbox. Do not claim an
+         automatic email until the lead vault knows about this lead type. */
+      d.innerHTML='<div style="font-size:16px;">Got it. I will send this to you, '
+        +'usually within the hour. If you want it sooner, call 941-662-9941.</div>';
     };
   }
 
