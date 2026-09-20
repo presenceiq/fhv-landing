@@ -8,7 +8,7 @@
   var box = document.getElementById('rpr-address');
   if(!box) return;
 
-  var STREETS=null, P=null, R=[], LOADED={}, PENDING={}, INDEXING=false;
+  var STREETS=null, SHARDS=[], P=null, R=[], LOADED={}, PENDING={}, INDEXING=false;
 
   var hits = document.createElement('div');
   hits.style.cssText = 'display:none;position:absolute;z-index:40;background:#fff;border:1px solid #e8e2d8;'
@@ -37,7 +37,7 @@
     sc.src='/fhv-streets.js?v=20260916a';
     sc.onload=function(){
       var H=window.FHV_INDEX||null;
-      if(H){ STREETS=H.streets; P=H; say('index loaded, '+Object.keys(H.streets).length+' streets'); }
+      if(H){ STREETS=H.streets; SHARDS=H.shardList||[]; P=H; say('index v'+H.v+' loaded, '+Object.keys(H.streets).length+' streets'); }
       else { say('index script loaded but FHV_INDEX missing'); }
       cb();
     };
@@ -51,7 +51,7 @@
     for(k in STREETS){
       if(k.indexOf(st)===0 || (k.length>3 && st.indexOf(k)===0)){
         for(var i=0;i<STREETS[k].length;i++){
-          var tag=STREETS[k][i];
+          var tag=SHARDS[STREETS[k][i]];
           if(tag && want.indexOf(tag)===-1) want.push(tag);
         }
       }
