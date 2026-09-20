@@ -281,7 +281,9 @@
     var st=document.createElement('style');
     st.textContent='@media print{'
       +'.fhv-noprint{display:none !important;}'
-      +'#fhv-sheet{border:0 !important;box-shadow:none !important;padding:0 !important;margin:0 !important;}'
+      +'#fhv-sheet{border:0 !important;box-shadow:none !important;padding:0 !important;margin:0 !important;'
+      +'width:100% !important;max-width:100% !important;position:static !important;}'
+      +'#fhv-sheet,#fhv-sheet *{overflow:visible !important;}'
       +'#fhv-sheet table{width:100% !important;font-size:11pt !important;}'
       +'#fhv-sheet .fhv-actions{display:none !important;}'
       +'#fhv-sheet .fhv-brand{border-bottom:1px solid #000 !important;}'
@@ -301,6 +303,7 @@
         if(sheet.contains(e)) continue;
         e.classList.add('fhv-noprint'); marked.push(e);
       }
+      for(var k=0;k<keep.length;k++){ keep[k].style.maxWidth='100%'; keep[k].style.width='100%'; }
       window.print();
       setTimeout(function(){ for(var i=0;i<marked.length;i++) marked[i].classList.remove('fhv-noprint'); }, 600);
     };
@@ -326,7 +329,7 @@
           if(subj){ tag=tags[i]; break; }
         }
       }
-      if(!subj) return;
+      if(!subj){ lead(addr,''); return; }   /* outside the comp data, still a real lookup */
       var res=comps(tag, subj);
       out.innerHTML = '<div id="fhv-sheet" style="background:#fff;border:1px solid #e8e2d8;border-radius:12px;'
         + 'padding:1.4rem 1.5rem;margin-top:1.6rem;text-align:left;box-shadow:0 2px 16px rgba(26,24,20,.07);">'
