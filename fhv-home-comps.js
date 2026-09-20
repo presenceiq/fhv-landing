@@ -87,7 +87,10 @@
       var r=ROWS[i];
       if(m){
         if(String(r[0]).indexOf(m[1])!==0) continue;
-        if(m[2] && r[1].toUpperCase().indexOf(m[2])!==0) continue;
+        if(m[2]){
+          var rs=r[1].toUpperCase();
+          if(rs.indexOf(m[2])!==0 && m[2].indexOf(rs)!==0) continue;
+        }
       } else if(String(r[1]).toUpperCase().indexOf(q)!==0) continue;
       res.push(r);
     }
@@ -271,15 +274,14 @@
 
 
   /* ---- print only the result sheet ---------------------------------------
-     visibility rather than display: hiding body's children would hide the
-     sheet too, because it sits inside them. */
+     Hiding by visibility leaves the layout in place and prints blank pages.
+     Mark every element that is not the sheet, an ancestor of it, or inside
+     it, and remove those for the print only. */
   (function(){
     var st=document.createElement('style');
     st.textContent='@media print{'
-      +'body *{visibility:hidden !important;}'
-      +'#fhv-sheet,#fhv-sheet *{visibility:visible !important;}'
-      +'#fhv-sheet{position:absolute !important;left:0 !important;top:0 !important;width:100% !important;'
-      +'border:0 !important;box-shadow:none !important;padding:0 !important;margin:0 !important;}'
+      +'.fhv-noprint{display:none !important;}'
+      +'#fhv-sheet{border:0 !important;box-shadow:none !important;padding:0 !important;margin:0 !important;}'
       +'#fhv-sheet table{width:100% !important;font-size:11pt !important;}'
       +'#fhv-sheet .fhv-actions{display:none !important;}'
       +'#fhv-sheet .fhv-brand{border-bottom:1px solid #000 !important;}'
@@ -287,6 +289,21 @@
       +'@page{margin:0.6in;}'
       +'}';
     document.head.appendChild(st);
+    window.fhvPrint=function(){
+      var sheet=document.getElementById('fhv-sheet');
+      if(!sheet){ window.print(); return; }
+      var keep=[], n=sheet;
+      while(n && n!==document.documentElement){ keep.push(n); n=n.parentNode; }
+      var all=document.body.querySelectorAll('*'), marked=[];
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(keep.indexOf(e)!==-1) continue;
+        if(sheet.contains(e)) continue;
+        e.classList.add('fhv-noprint'); marked.push(e);
+      }
+      window.print();
+      setTimeout(function(){ for(var i=0;i<marked.length;i++) marked[i].classList.remove('fhv-noprint'); }, 600);
+    };
   })();
 
   /* ---- on arrival with an address, draw the comps -------------------------- */
@@ -320,7 +337,7 @@
         + 'Not an appraisal. County records cannot see condition, upgrades, roof age or view, and those are '
         + 'usually what separates two homes that look identical on paper.</p>'
         + actions() + '</div>';
-      document.getElementById('fhv-print').onclick=function(){ window.print(); };
+      document.getElementById('fhv-print').onclick=function(){ window.fhvPrint(); };
       document.getElementById('fhv-email').onclick=function(){ askEmail(addr, subj.com); };
       lead(addr, subj.com);
     });
