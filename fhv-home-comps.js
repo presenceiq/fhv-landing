@@ -235,8 +235,8 @@
       lead(addr, community||'', v);
       /* Michael sends this himself from his own inbox. Do not claim an
          automatic email until the lead vault knows about this lead type. */
-      d.innerHTML='<div style="font-size:16px;">Got it. I will send this to you, '
-        +'usually within the hour. If you want it sooner, call 941-662-9941.</div>';
+      d.innerHTML='<div style="font-size:16px;">Got it. I\'ll send this to you myself, '
+        +'usually the same day. If you\'d like it sooner, call or text 941-662-9941.</div>';
     };
   }
 
