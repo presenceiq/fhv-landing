@@ -69,7 +69,7 @@
       for(var i=0;i<q.length;i++) q[i]();
     };
     script('/fhv-p-'+tag+'.js?v=20260916a', fin);
-    script('/fhv-c-'+tag+'.js?v=20260920b', fin);
+    script('/fhv-c-'+tag+'.js?v=20260921c', fin);
   }
 
   function ensure(st, cb){
@@ -108,12 +108,16 @@
      product. Within 500 sq ft. Same pool status. Qualified arm's-length
      sales only. Six months, widening to twelve only when short. Five max.
      Type, size and pool are NEVER relaxed - only the window moves. */
-  function findSubject(tag, num, street){
+  /* Several condo units share one building address, so the unit decides which
+     home this is. Audit on 5,000 addresses: ignoring it picked the wrong unit
+     for 62% of unit owners. */
+  function findSubject(tag, num, street, unit){
     var c=COMP[tag]; if(!c) return null;
+    unit=unit||'';
     for(var com in c){
       var p=c[com].p;
       for(var i=0;i<p.length;i++)
-        if(p[i][0]===num && p[i][1]===street) return { com:com, row:p[i] };
+        if(p[i][0]===num && p[i][1]===street && (p[i][2]||'')===unit) return { com:com, row:p[i] };
     }
     return null;
   }
@@ -121,21 +125,21 @@
   function comps(tag, subj){
     var set=COMP[tag] && COMP[tag][subj.com];
     if(!set) return { rows:[], window:null };
-    var L=subj.row[3], K=subj.row[4], P=subj.row[5], N=subj.row[0], S=subj.row[1];
+    var L=subj.row[3], K=subj.row[4], P=subj.row[5], N=subj.row[0], S=subj.row[1], U=subj.row[2]||'';
     var windows=[['2026-02-18','the last six months'],['2025-08-18','the last twelve months']];
     for(var w=0;w<windows.length;w++){
       var cut=windows[w][0], hit=[];
       for(var i=0;i<set.s.length;i++){
         var s=set.s[i];
-        if(s[5] < cut) continue;
-        if(s[0]===N && s[1]===S) continue;
-        if(s[3]!==K) continue;
-        if(Math.abs(s[2]-L) > 500) continue;
-        if(s[4]!==P) continue;
+        if(s[6] < cut) continue;
+        if(s[0]===N && s[1]===S && (s[2]||'')===U) continue;   /* their own home only */
+        if(s[4]!==K) continue;
+        if(Math.abs(s[3]-L) > 500) continue;
+        if(s[5]!==P) continue;
         hit.push(s);
       }
       if(hit.length>=2){
-        hit.sort(function(a,b){ return a[5]<b[5]?1:-1; });
+        hit.sort(function(a,b){ return a[6]<b[6]?1:-1; });
         return { rows:hit.slice(0,5), window:windows[w][1] };
       }
     }
@@ -156,11 +160,11 @@
       +'<th style="padding:9px 8px;text-align:right;">Price</th></tr>';
     res.rows.forEach(function(s){
       h+='<tr style="border-bottom:1px solid #e8e2d8;">'
-        +'<td style="padding:10px 8px;">'+esc(s[0]+' '+s[1])+'</td>'
-        +'<td style="padding:10px 8px;">'+s[2].toLocaleString()+' sq ft</td>'
-        +'<td style="padding:10px 8px;">'+esc(TYPE[s[3]]||s[3])+(s[4]?', pool':'')+'</td>'
-        +'<td style="padding:10px 8px;">'+esc(s[5])+'</td>'
-        +'<td style="padding:10px 8px;text-align:right;font-weight:700;">'+money(s[6])+'</td></tr>';
+        +'<td style="padding:10px 8px;">'+esc(s[0]+' '+s[1]+(s[2]?' #'+s[2]:''))+'</td>'
+        +'<td style="padding:10px 8px;">'+s[3].toLocaleString()+' sq ft</td>'
+        +'<td style="padding:10px 8px;">'+esc(TYPE[s[4]]||s[4])+(s[5]?', pool':'')+'</td>'
+        +'<td style="padding:10px 8px;">'+esc(s[6])+'</td>'
+        +'<td style="padding:10px 8px;text-align:right;font-weight:700;">'+money(s[7])+'</td></tr>';
     });
     h+='</table></div>';
     return h;
@@ -227,8 +231,8 @@
     if(!LAST.comps.length) return 'No comparable sale in the last twelve months.';
     var t='Recorded sales in '+LAST.subjCom+' over '+LAST.window+': ';
     t+=LAST.comps.map(function(s){
-      return s[0]+' '+s[1]+', '+s[2]+' sq ft, '+(TYPE[s[3]]||s[3])+(s[4]?' with pool':'')
-             +', sold '+s[5]+' for '+money(s[6]);
+      return s[0]+' '+s[1]+(s[2]?' #'+s[2]:'')+', '+s[3]+' sq ft, '+(TYPE[s[4]]||s[4])+(s[5]?' with pool':'')
+             +', sold '+s[6]+' for '+money(s[7]);
     }).join(' | ');
     return t;
   }
@@ -387,17 +391,36 @@
     if(!m) return;
     var num=m[1], rest=m[2];
     ensure(rest, function(){
-      var tags=tagsFor(rest), subj=null, tag=null;
-      for(var i=0;i<tags.length && !subj;i++){
-        for(var j=0;j<ROWS.length;j++){
-          var r=ROWS[j];
-          if(String(r[0])!==num) continue;
-          if(rest.indexOf(r[1].toUpperCase())!==0) continue;
-          subj=findSubject(tags[i], r[0], r[1]);
-          if(subj){ tag=tags[i]; break; }
+      var tags=tagsFor(rest), subj=null, tag=null, best=null, bestLen=-1;
+      for(var j=0;j<ROWS.length;j++){
+        var r=ROWS[j];
+        if(String(r[0])!==num) continue;
+        var key=tidy(r[0]+' '+r[1]+(r[2]?' '+r[2]:''));
+        if(t!==key && t.indexOf(key+' ')!==0) continue;
+        if(key.length>bestLen){ best=r; bestLen=key.length; }
+      }
+      if(best){
+        for(var i=0;i<tags.length && !subj;i++){
+          subj=findSubject(tags[i], best[0], best[1], best[2]);
+          if(subj) tag=tags[i];
         }
       }
-      if(!subj){ LAST={comps:[],window:'',subj:null,subjCom:''}; setTimeout(function(){ lead(addr,''); },1800); return; }
+      if(!subj){
+        /* 6% of houses sit in subdivisions the comp data doesn't cover. Say so,
+           rather than showing the estimate and then nothing. */
+        out.innerHTML = '<div id="fhv-sheet" style="background:#fff;border:1px solid #e8e2d8;border-radius:12px;'
+          + 'padding:1.4rem 1.5rem;margin-top:1.6rem;text-align:left;box-shadow:0 2px 16px rgba(26,24,20,.07);">'
+          + brandHeader(addr)
+          + '<p style="font-size:17px;margin:0;">I don\'t have recorded sales mapped for this address yet, so there '
+          + 'are no comparable sales to show here. The estimate above still applies. If you want to know what '
+          + 'the nearest sales say about your home, call or text me and I\'ll pull them myself.</p>'
+          + actions() + '</div>';
+        document.getElementById('fhv-print').onclick=function(){ window.fhvPrint(); };
+        document.getElementById('fhv-email').onclick=function(){ askEmail(addr, ''); };
+        LAST={comps:[],window:'',subj:null,subjCom:''};
+        setTimeout(function(){ lead(addr,''); },1800);
+        return;
+      }
       var res=comps(tag, subj);
       LAST={comps:res.rows, window:res.window||'', subj:subj.row, subjCom:subj.com};
       out.innerHTML = '<div id="fhv-sheet" style="background:#fff;border:1px solid #e8e2d8;border-radius:12px;'
