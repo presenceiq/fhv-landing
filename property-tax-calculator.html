@@ -420,7 +420,16 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
        untouched, then the table for anyone who wants the arithmetic. */
     var saving = now.nonschool - y28.nonschool;
     h += '<div style="background:var(--warm);border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:0 0 1rem;border-radius:var(--radius);">';
-    if(y28.nsTaxable === 0){
+    /* A parcel whose other exemptions (disability, veteran, senior, widow)
+       already cover all of its non-school value has nothing left for the
+       increased homestead exemption to reduce. Saying "$0 a year less" and
+       "from $0 to $0" read as broken, so say what is actually true. */
+    if(now.nonschool === 0){
+      h += '<div style="font-size:1.35rem;font-weight:800;line-height:1.2;">No change to your non-school tax</div>'
+         + '<p style="margin:0.4rem 0 0;">Your non-school ad valorem tax is already <strong>zero</strong>, '
+         + 'because other exemptions on this parcel cover all of its taxable value. The increased homestead '
+         + 'exemption has nothing left to reduce, so this part of your bill stays at zero either way.</p>';
+    } else if(y28.nsTaxable === 0){
       h += '<div style="font-size:1.35rem;font-weight:800;line-height:1.2;">' + money(saving) + ' a year less by 2028</div>'
          + '<p style="margin:0.4rem 0 0;">Your non-school ad valorem tax would reach <strong>zero</strong>. '
          + 'It goes from ' + money(now.nonschool) + ' now to ' + money(y27.nonschool) + ' in 2027 and nothing in 2028.</p>';
