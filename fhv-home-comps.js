@@ -197,8 +197,15 @@
       +esc(addr)+'</div></div>';
   }
 
-  function actions(){
-    return '<div class="fhv-actions" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.5rem;">'
+  function actions(addr){
+    /* From their value straight to their own tax bill, with the address already
+       in. utm_source makes the calculator's lead say where they came from. */
+    var tax = addr ? ('<a href="/property-tax-calculator?addr=' + encodeURIComponent(addr)
+      + '&utm_source=home%20page%20result" style="display:block;width:100%;box-sizing:border-box;'
+      + 'text-align:center;font-size:17px;font-weight:700;padding:.85rem 1.3rem;border-radius:8px;'
+      + 'background:#1a1814;color:#fff;text-decoration:none;margin-bottom:.2rem;">'
+      + 'See what the amendment does to your tax bill &rarr;</a>') : '';
+    return '<div class="fhv-actions" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.5rem;">' + tax
       +'<button type="button" id="fhv-print" style="font-size:16px;font-weight:700;padding:.7rem 1.3rem;'
       +'border-radius:8px;border:1px solid #e8e2d8;background:#fff;cursor:pointer;">Print this</button>'
       +'<button type="button" id="fhv-email" style="font-size:16px;font-weight:700;padding:.7rem 1.3rem;'
@@ -431,7 +438,7 @@
           + '<p style="font-size:17px;margin:0;">I don\'t have recorded sales mapped for this address yet, so there '
           + 'are no comparable sales to show here. The estimate above still applies. If you want to know what '
           + 'the nearest sales say about your home, call or text me and I\'ll pull them myself.</p>'
-          + actions() + '</div>';
+          + actions(addr) + '</div>';
         document.getElementById('fhv-print').onclick=function(){ window.fhvPrint(); };
         document.getElementById('fhv-email').onclick=function(){ askEmail(addr, ''); };
         LAST={comps:[],window:'',subj:null,subjCom:''};
@@ -448,7 +455,7 @@
         + 'Recorded transactions from Sarasota County public records, owner to owner, builder sales excluded. '
         + 'Not an appraisal. County records cannot see condition, upgrades, roof age or view, and those are '
         + 'usually what separates two homes that look identical on paper.</p>'
-        + actions() + '</div>';
+        + actions(addr) + '</div>';
       document.getElementById('fhv-print').onclick=function(){ window.fhvPrint(); };
       document.getElementById('fhv-email').onclick=function(){ askEmail(addr, subj.com); };
       setTimeout(function(){ lead(addr, subj.com); }, 1800);
