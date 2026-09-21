@@ -963,10 +963,9 @@ const PALMERO_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What Palmero homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records:
-    what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
-    Builder closings are excluded, because a builder base price is not a comparable sale for an
-    existing home.</p>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
 
     <table>
       <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
@@ -980,10 +979,12 @@ const PALMERO_TAIL = `
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>27</strong> owner-to-owner resales in the past two years, the Palmero median ran <strong>$575,000</strong> ($249 per square foot). By type: single-family <strong>$607,500</strong> and townhomes <strong>$325,000</strong>. Builder closings are excluded, which is how the industry reports existing-home sales: a builder's first sale is a new-home sale, not a comparable for an existing home. Two of the sales above are worth a second look: 5601 and 5604 Blue Reef Place sold one day apart, both 2,410 square feet, on the same street. The one with a pool sold for $31,000 more, on the smaller lot.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>25</strong> owner-to-owner resales over the past two years, the Palmero median ran <strong>$575,000</strong> ($252 a square foot). By type: single-family <strong>$607,500</strong> ($256 a square foot, 18 sales) and townhomes <strong>$325,000</strong> ($224 a square foot, 7 sales).</p>
+    <p class="note">Builder or owner resale? Palmero's builder closed 44 single-family homes at a median $213 a square foot, while owners resold 18 at a median $256 a square foot, about 20% more. On a 2,632 square foot home, that's roughly $113,000.</p>
+    <p class="note">Two sales worth a second look: 5601 and 5604 Blue Reef Place sold one day apart in April 2026, both 2,410 square feet, on the same street. The one with a pool sold for $31,000 more, on the smaller lot.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Palmero's typical single-family resale price of <strong>$607,500</strong>, yearly property tax would be about <strong>$6,204</strong> without a homestead exemption, or about <strong>$5,775</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Palmero is taxed as unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
 
-    <p class="muted">Sarasota County public records, qualified owner-to-owner resales only, 24-month
-    window. Figures are for general market awareness and are not appraisals.
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2024 through August 18, 2026 (24 months, because Palmero is small). Figures are for general market awareness and are not appraisals.
     <a href="https://palmero.floridahomevalueai.com/"><strong>See every recorded Palmero sale, and look up what your own Palmero home is worth &rarr;</strong></a></p>
   </section>
 
@@ -1331,10 +1332,9 @@ const TALON_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What Talon Preserve homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records:
-    what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
-    Builder closings are excluded, because a builder base price is not a comparable sale for an
-    existing home.</p>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
 
     <table>
       <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
@@ -1342,15 +1342,17 @@ const TALON_TAIL = `
         <tr><td>Jul 24, 2026</td><td>6013 Silver Grass Ct</td><td>Single-family</td><td>2,085 sqft</td><td><strong>$675,000</strong></td></tr>
         <tr><td>Jul 20, 2026</td><td>6270 Crested Eagle Ln</td><td>Single-family</td><td>2,890 sqft</td><td><strong>$1,079,000</strong></td></tr>
         <tr><td>Jul 16, 2026</td><td>6304 Winding Pine Dr</td><td>Single-family</td><td>2,663 sqft</td><td><strong>$710,000</strong></td></tr>
-        <tr><td>Jul 6, 2026</td><td>6272 Winding Pine Dr</td><td>Single-family</td><td>2,627 sqft</td><td><strong>$618,000</strong></td></tr>
         <tr><td>Jun 30, 2026</td><td>6166 Winding Pine Dr</td><td>Single-family</td><td>1,704 sqft</td><td><strong>$629,000</strong></td></tr>
         <tr><td>Jun 24, 2026</td><td>14704 Golden Grass Ter</td><td>Single-family</td><td>2,074 sqft</td><td><strong>$703,000</strong></td></tr>
+        <tr><td>Jun 15, 2026</td><td>6266 Crested Eagle Ln</td><td>Single-family</td><td>1,909 sqft</td><td><strong>$745,000</strong></td></tr>
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>39</strong> owner-to-owner resales in the past year, the Talon Preserve median ran <strong>$568,000</strong> ($324 per square foot). By type: single-family <strong>$608,000</strong> and villas <strong>$399,000</strong>. Builder closings are excluded. One thing the listings above show that recorded sales cannot: <strong>Pulte is still selling here</strong>, and its HOA runs about $316 to $350 a month against roughly $110 for the 2022 resales. That is a real difference in the cost of owning, and it does not appear in any sale price.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>31</strong> owner-to-owner resales in the past year, the Talon Preserve median ran <strong>$598,000</strong> ($343 a square foot). By type: single-family <strong>$657,000</strong> ($348 a square foot, 26 sales) and villas <strong>$430,000</strong> ($271 a square foot, 5 sales).</p>
+    <p class="note">Builder or owner resale? Talon Preserve's builder closed 69 single-family homes at a median $344 a square foot, and owners resold 26 at $348 a square foot, about the same rate per foot.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Talon Preserve's typical single-family resale price of <strong>$657,000</strong>, yearly property tax would be about <strong>$6,709</strong> without a homestead exemption, or about <strong>$6,280</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Talon Preserve is taxed as unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
 
-    <p class="muted">Sarasota County public records, qualified owner-to-owner resales only, 12-month window. Figures are for general market awareness and are not appraisals.
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
     <a href="https://talonpreserve.floridahomevalueai.com/"><strong>See every recorded Talon Preserve sale, and look up what your own Talon Preserve home is worth &rarr;</strong></a></p>
   </section>
 
@@ -1698,26 +1700,28 @@ const GP_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What Gran Paradiso homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records:
-    what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
-    Builder closings are excluded, because a builder base price is not a comparable sale for an
-    existing home.</p>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
 
     <table>
       <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
       <tbody>
-        <tr><td>Jun 22, 2026</td><td>20230 Granlago Dr</td><td>Single-family</td><td>2,243 sqft</td><td><strong>$500,000</strong></td></tr>
-        <tr><td>Jun 15, 2026</td><td>20794 Valprato Ct</td><td>Single-family</td><td>2,365 sqft</td><td><strong>$550,000</strong></td></tr>
-        <tr><td>Jun 12, 2026</td><td>13794 Vancanza Dr</td><td>Single-family</td><td>2,440 sqft</td><td><strong>$677,500</strong></td></tr>
-        <tr><td>Jun 12, 2026</td><td>20362 Benissimo Dr</td><td>Villa</td><td>1,572 sqft</td><td><strong>$285,000</strong></td></tr>
-        <tr><td>Jun 12, 2026</td><td>12568 Felice Dr</td><td>Villa</td><td>1,568 sqft</td><td><strong>$345,000</strong></td></tr>
-        <tr><td>Jun 11, 2026</td><td>13195 Amerigo Ln</td><td>Single-family</td><td>2,254 sqft</td><td><strong>$598,000</strong></td></tr>
+        <tr><td>Jul 17, 2026</td><td>20080 Ragazza Cir #202</td><td>Coach home</td><td>2,187 sqft</td><td><strong>$350,000</strong></td></tr>
+        <tr><td>Jul 14, 2026</td><td>12550 Ghiberti Cir #101</td><td>Coach home</td><td>1,706 sqft</td><td><strong>$360,000</strong></td></tr>
+        <tr><td>Jul 13, 2026</td><td>12300 Canavese Ln</td><td>Single-family</td><td>2,035 sqft</td><td><strong>$509,000</strong></td></tr>
+        <tr><td>Jul 10, 2026</td><td>12675 Richezza Dr</td><td>Single-family</td><td>2,025 sqft</td><td><strong>$450,000</strong></td></tr>
+        <tr><td>Jul 10, 2026</td><td>12450 Ghiberti Cir #202</td><td>Coach home</td><td>2,187 sqft</td><td><strong>$405,000</strong></td></tr>
+        <tr><td>Jul 1, 2026</td><td>20149 Lagente Cir</td><td>Townhome</td><td>1,889 sqft</td><td><strong>$275,400</strong></td></tr>
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>121</strong> owner-to-owner resales in the past year, the Gran Paradiso median ran <strong>$405,000</strong> ($215 per square foot). By type: single-family <strong>$599,000</strong>, villas <strong>$320,000</strong>, coach homes <strong>$350,000</strong> and townhomes <strong>$280,000</strong>. Builder closings are excluded. Gran Paradiso is one of the few communities here with four distinct home types, and the gap between them is wider than most buyers expect: a villa and a single-family home on the same street can be nearly $280,000 apart.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>119</strong> owner-to-owner resales in the past year, the Gran Paradiso median ran <strong>$393,000</strong> ($214 a square foot). By type: single-family <strong>$599,000</strong> ($260 a square foot, 58 sales), villas <strong>$320,000</strong> ($206 a square foot, 30 sales), coach homes <strong>$350,000</strong> ($188 a square foot, 17 sales) and townhomes <strong>$280,000</strong> ($144 a square foot, 14 sales).</p>
+    <p class="note">Every recorded sale in Gran Paradiso over this period was an owner resale. None were builder closings.</p>
+    <p class="note">Gran Paradiso is one of the few communities here with four distinct home types, and they sell far apart: the single-family median ran $279,000 above the villa median.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Gran Paradiso's typical single-family resale price of <strong>$599,000</strong>, yearly property tax would be about <strong>$7,736</strong> without a homestead exemption, or about <strong>$7,151</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Gran Paradiso sits inside the City of North Port for tax purposes, which carries a higher rate than unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
 
-    <p class="muted">Sarasota County public records, qualified recorded sales only. Figures are for general market awareness and are not appraisals.
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
     <a href="https://granparadiso.floridahomevalueai.com/"><strong>See every recorded Gran Paradiso sale, and look up what your own Gran Paradiso home is worth &rarr;</strong></a></p>
   </section>
 
@@ -2064,26 +2068,28 @@ const IW_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What IslandWalk homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records:
-    what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
-    Builder closings are excluded, because a builder base price is not a comparable sale for an
-    existing home.</p>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
 
     <table>
       <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
       <tbody>
-        <tr><td>Jun 11, 2026</td><td>13240 Guyana St</td><td>Single-family</td><td>2,000 sqft</td><td><strong>$460,000</strong></td></tr>
-        <tr><td>Jun 11, 2026</td><td>13874 Botteri St</td><td>Villa</td><td>1,450 sqft</td><td><strong>$360,000</strong></td></tr>
-        <tr><td>Jun 9, 2026</td><td>19396 Solarzano St</td><td>Single-family</td><td>2,516 sqft</td><td><strong>$701,200</strong></td></tr>
-        <tr><td>Jun 5, 2026</td><td>13351 Esposito St</td><td>Single-family</td><td>1,893 sqft</td><td><strong>$755,000</strong></td></tr>
-        <tr><td>Jun 2, 2026</td><td>13927 Vadini St</td><td>Villa</td><td>1,611 sqft</td><td><strong>$433,000</strong></td></tr>
-        <tr><td>May 27, 2026</td><td>13146 Borrego St</td><td>Single-family</td><td>1,792 sqft</td><td><strong>$550,600</strong></td></tr>
+        <tr><td>Jul 23, 2026</td><td>13850 Lido St</td><td>Single-family</td><td>1,437 sqft</td><td><strong>$370,000</strong></td></tr>
+        <tr><td>Jul 20, 2026</td><td>19720 Ortona St</td><td>Single-family</td><td>1,688 sqft</td><td><strong>$490,000</strong></td></tr>
+        <tr><td>Jul 14, 2026</td><td>13920 Campoleone St</td><td>Single-family</td><td>1,436 sqft</td><td><strong>$499,000</strong></td></tr>
+        <tr><td>Jun 30, 2026</td><td>19361 Jalisca St</td><td>Single-family</td><td>1,702 sqft</td><td><strong>$502,500</strong></td></tr>
+        <tr><td>Jun 26, 2026</td><td>19138 Kirella St</td><td>Single-family</td><td>2,418 sqft</td><td><strong>$570,000</strong></td></tr>
+        <tr><td>Jun 22, 2026</td><td>18819 Lanuvio St</td><td>Villa</td><td>1,443 sqft</td><td><strong>$363,000</strong></td></tr>
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>115</strong> owner-to-owner resales in the past year, the IslandWalk median ran <strong>$455,000</strong> ($272 per square foot): single-family <strong>$520,000</strong> and villas <strong>$400,000</strong>. Builder closings are excluded. One thing the recorded sales show clearly: among single-family homes, those with a pool sold at <strong>$341 per square foot against $289 without</strong>. That is an 18 percent difference, measured from what buyers actually paid.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>107</strong> owner-to-owner resales in the past year, the IslandWalk median ran <strong>$450,000</strong> ($271 a square foot). By type: single-family <strong>$520,000</strong> ($282 a square foot, 78 sales) and villas <strong>$400,000</strong> ($256 a square foot, 29 sales).</p>
+    <p class="note">Every recorded sale in IslandWalk over this period was an owner resale. None were builder closings.</p>
+    <p class="note">One thing the recorded sales show clearly: among single-family homes, those with a pool sold at a median $327 a square foot against $271 without, about 20% more, from 24 pool sales and 54 without.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At IslandWalk's typical single-family resale price of <strong>$520,000</strong>, yearly property tax would be about <strong>$6,715</strong> without a homestead exemption, or about <strong>$6,130</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. IslandWalk sits inside the City of North Port for tax purposes, which carries a higher rate than unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
 
-    <p class="muted">Sarasota County public records, qualified recorded sales only. Figures are for general market awareness and are not appraisals.
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
     <a href="https://islandwalk.floridahomevalueai.com/"><strong>See every recorded IslandWalk sale, and look up what your own IslandWalk home is worth &rarr;</strong></a></p>
   </section>
 
