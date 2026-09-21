@@ -335,22 +335,18 @@
       var acts=body.querySelector('.fhv-actions');
       if(acts) acts.parentNode.removeChild(acts);
 
-      /* the estimate lives outside the sheet on the page, so copy it in */
-      var rn=rprNode();
-      if(rn){
+      /* the estimate lives outside the sheet on the page. Copying the whole
+         widget brought its chart area along and pushed the comps onto page
+         two, so print a compact line instead. */
+      var v=rprValue(), r=rprRange();
+      if(v){
+        var t=rprText(), asof=(t.match(/as of\s*([0-9\/]+)/i)||[])[1]||'';
         var blk=document.createElement('div');
-        blk.style.cssText='margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid #999;';
-        blk.innerHTML='<div style="font-weight:700;font-size:12pt;margin-bottom:6px;">'
-          +'Estimated value, from RPR</div>';
-        var clone=rn.cloneNode(true);
-        if(clone.querySelector && clone.querySelector('iframe')){
-          var v=rprValue(), r=rprRange();
-          clone=document.createElement('div');
-          clone.innerHTML = v ? ('<div style="font-size:16pt;font-weight:700;">'+v+'</div>'
-                                 + (r?'<div>Range '+r+'</div>':''))
-                              : '<div>See the estimate on floridahomevalueai.com</div>';
-        }
-        blk.appendChild(clone);
+        blk.style.cssText='margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid #999;';
+        blk.innerHTML='<div style="font-size:10pt;margin-bottom:2px;">Estimated value from RPR'
+          +(asof?', as of '+asof:'')+'</div>'
+          +'<div style="font-size:18pt;font-weight:700;line-height:1.2;">'+v+'</div>'
+          +(r?'<div style="font-size:10.5pt;">Range '+r+'</div>':'');
         var br=body.querySelector('.fhv-brand');
         if(br && br.nextSibling) body.insertBefore(blk, br.nextSibling); else body.appendChild(blk);
       }
