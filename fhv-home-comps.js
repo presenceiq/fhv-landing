@@ -69,7 +69,7 @@
       for(var i=0;i<q.length;i++) q[i]();
     };
     script('/fhv-p-'+tag+'.js?v=20260916a', fin);
-    script('/fhv-c-'+tag+'.js?v=20260921d', fin);
+    script('/fhv-c-'+tag+'.js?v=20260921e', fin);
   }
 
   function ensure(st, cb){
