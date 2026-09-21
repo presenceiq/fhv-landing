@@ -19,7 +19,7 @@
    The first version fetched listings in the browser after the page loaded. A
    crawler asking for the HTML received an empty <div> and the words "Loading
    current listings". A pre-rendering specialist describes that exact failure:
-   "neighbourhood pages often depend on client-side inventory hydration, which
+   "neighborhood pages often depend on client-side inventory hydration, which
    leaves Googlebot with an attractive shell and weak first HTML."
    This renders the listings INTO the HTML before it is sent, so the visitor and
    the crawler receive the same finished page. No JavaScript is needed on the
@@ -590,7 +590,7 @@ async function renderSearch(env, url, saved) {
   const html = SEARCH_HEAD
     + '<form method="get" class="filters">'
     +   '<label>Area<input name="city" list="fl-cities" autocomplete="off" '
-    +     'placeholder="Any area: or type a city" value="' + esc(city ? nice(city) : '') + '">'
+    +     'placeholder="Any area, or type a city" value="' + esc(city ? nice(city) : '') + '">'
     +     '<datalist id="fl-cities">' + cityList + '</datalist></label>'
     +   '<label>Type<select name="type">'
     +     opt('', type, 'Any type')
@@ -979,7 +979,7 @@ const PALMERO_TAIL = `
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>27</strong> owner-to-owner resales in the past two years, the Palmero median ran <strong>$575,000</strong> ($249 per square foot). By type: single-family <strong>$607,500</strong> and townhomes <strong>$325,000</strong>. Builder closings are excluded, which is how the industry reports existing-home sales: a builder's first sale is a new-home sale, not a comparable for an existing home. Two of the sales above are worth a second look: 5601 and 5604 Blue Reef Place sold one day apart, both 2,410 square feet, on the same street. The one with a pool sold for $31,000 more: on the smaller lot.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>27</strong> owner-to-owner resales in the past two years, the Palmero median ran <strong>$575,000</strong> ($249 per square foot). By type: single-family <strong>$607,500</strong> and townhomes <strong>$325,000</strong>. Builder closings are excluded, which is how the industry reports existing-home sales: a builder's first sale is a new-home sale, not a comparable for an existing home. Two of the sales above are worth a second look: 5601 and 5604 Blue Reef Place sold one day apart, both 2,410 square feet, on the same street. The one with a pool sold for $31,000 more, on the smaller lot.</p>
 
     <p class="muted">Sarasota County public records, qualified owner-to-owner resales only, 24-month
     window. Figures are for general market awareness and are not appraisals.
