@@ -20,8 +20,8 @@
   function esc(s){ var d=document.createElement('div'); d.textContent=s==null?'':s; return d.innerHTML; }
 
   var TYPE={'0100':'detached','TH':'townhome','0402':'villa or duplex condo',
-            '0403':'condo, 2-3 storeys','0404':'condo, 4-6 storeys',
-            '0405':'condo, 7+ storeys','0407':'condo row house','0401':'detached condo'};
+            '0403':'condo, 2-3 stories','0404':'condo, 4-6 stories',
+            '0405':'condo, 7+ stories','0407':'condo row house','0401':'detached condo'};
 
   function script(src, done){
     var s=document.createElement('script'); s.src=src;
@@ -126,6 +126,11 @@
     var set=COMP[tag] && COMP[tag][subj.com];
     if(!set) return { rows:[], window:null };
     var L=subj.row[3], K=subj.row[4], P=subj.row[5], N=subj.row[0], S=subj.row[1], U=subj.row[2]||'';
+    /* Condo buildings have fixed floor plans, often exactly two sizes (Gran
+       Paradiso: 1,706 downstairs, 2,187 upstairs, 481 apart). A 500 sq ft band
+       let one plan comp against the other, so condos get 250. Houses and
+       townhomes keep 500. Michael's call, 21 Sep 2026. */
+    var BAND = (String(K).indexOf('04')===0) ? 250 : 500;
     var windows=[['2026-02-18','the last six months'],['2025-08-18','the last twelve months']];
     for(var w=0;w<windows.length;w++){
       var cut=windows[w][0], hit=[];
@@ -134,7 +139,7 @@
         if(s[6] < cut) continue;
         if(s[0]===N && s[1]===S && (s[2]||'')===U) continue;   /* their own home only */
         if(s[4]!==K) continue;
-        if(Math.abs(s[3]-L) > 500) continue;
+        if(Math.abs(s[3]-L) > BAND) continue;
         if(s[5]!==P) continue;
         hit.push(s);
       }
@@ -151,7 +156,7 @@
     h+='<div style="font-family:\'Playfair Display\',serif;font-size:1.45rem;font-weight:700;margin-bottom:.2rem;">'
       +'What sold near you</div>';
     h+='<p style="font-size:16px;color:var(--ink-mid,#4a4640);margin:0 0 .9rem;">'
-      +'Recorded sales in '+esc(subj.com)+' over '+res.window+'. Same property type, within 500 square feet of yours, '
+      +'Recorded sales in '+esc(subj.com)+' over '+res.window+'. Same property type, within '+(String(subj.row[4]).indexOf('04')===0?'250':'500')+' square feet of yours, '
       +'and matching on whether there is a pool. Owner-to-owner sales only, straight from the Sarasota County roll.</p>';
     h+='<table style="width:100%;border-collapse:collapse;font-size:17px;">';
     h+='<tr style="text-align:left;border-bottom:2px solid #1a1814;">'
