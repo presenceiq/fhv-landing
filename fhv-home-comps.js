@@ -245,7 +245,10 @@
           year_built: LAST.subj ? String(LAST.subj[6]) : '',
           property_type: LAST.subj ? (TYPE[LAST.subj[4]]||LAST.subj[4]) + (LAST.subj[5]?', pool':'') : '',
           homeowner_note: compsNote(),
-          insight: rprRange() ? ('RPR range '+rprRange()) : '',
+          /* `insight` is the field the notification email actually prints, so the
+             comps go there as well as in homeowner_note. */
+          insight: (rprValue() ? ('RPR '+rprValue()+(rprRange()?', range '+rprRange():'')+'. ') : '')
+                   + compsNote(),
           wants: email ? 'HOME PAGE - emailed the result to themselves' : 'HOME PAGE - address lookup with comps',
           email: email || '',
           agent_name:'Michael Putnam', agent_email:'michael@putnamrealtygroup.com'
