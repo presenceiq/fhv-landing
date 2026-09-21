@@ -242,6 +242,18 @@
     return t;
   }
   function lead(addr, community, email){
+    /* The page fires on every load with ?addr= in it, so the back button, a
+       refresh or reopening a saved link each sent another email about the same
+       visit (Michael got four in a row, 21 Sep 2026). An anonymous lookup now
+       sends once per address per browser every twelve hours. A visitor
+       handing over their email always goes through. */
+    if(!email){
+      try{
+        var k='fhv-lead:'+tidy(addr), last=+(localStorage.getItem(k)||0);
+        if(Date.now()-last < 12*3600*1000) return;
+        localStorage.setItem(k, String(Date.now()));
+      }catch(e){}
+    }
     try{
       fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
         method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
