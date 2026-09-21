@@ -19,7 +19,7 @@
    The first version fetched listings in the browser after the page loaded. A
    crawler asking for the HTML received an empty <div> and the words "Loading
    current listings". A pre-rendering specialist describes that exact failure:
-   "neighbourhood pages often depend on client-side inventory hydration, which
+   "neighborhood pages often depend on client-side inventory hydration, which
    leaves Googlebot with an attractive shell and weak first HTML."
    This renders the listings INTO the HTML before it is sent, so the visitor and
    the crawler receive the same finished page. No JavaScript is needed on the
@@ -74,6 +74,48 @@ const COMMUNITIES = {
     streets: ['ALAFAYA','ATTAVIANO','BASTIANO','BIANCHI','BORREGO','BOTTERI','CALIMENTO','CAMPOLEONE','COLUCCIO','CORRADINO','DIMARCO','ERICE','ESPOSITO','FASSIO','FERNANDO','FORMOSA','GUYANA','HUERTA','IPOLITA','ISADORA','JACINDA','JALISCA','KARINA','KIRELLA','LANUVIO','LAPPACIO','LIDO','MANGIERI','MAZZARA','MIRANESE','NAVARRO','NEVIANO','NOBILIO','ORIAGO','ORINO','ORTONA','PACCHIO','PELTO','PETRINO','PIERO','POSADA','QUINTA','QUISTO','RICCI','RINELLA','RINUCCIO','RIZZUTO','ROSALIA','ROSAMARIA','SALINAS','SAYDA','SERAFINA','SOLARZANO','TOMARO','TRENTINO','UMBRIA','VADINI','VERANDI','YELMA'],
     empty: 'There are no homes listed for sale in IslandWalk at the moment. '
          + 'Call 941-662-9941 and I will tell you what is coming before it reaches the market.'
+  },
+  '/grand-palm-homes-for-sale': {
+    name: 'Grand Palm',
+    zip: '34293',
+    streets: ['ALACHUA', 'ANCLOTE', 'AVON PARK', 'CALHOUN', 'CALLAWAY', 'COLLIER', 'DAVIE', 'DESTIN', 'FAKAHATCHEE', 'FORT LAUDERDALE', 'FORT MYERS', 'GAINESVILLE', 'HUNTERS CREEK', 'MARATHON', 'OKALOOSA', 'SAGEWOOD', 'SEBRING', 'SHIMMERING OAK', 'STILL RIVER', 'STUART', 'WAKULLA', 'WINTER PARK'],
+    empty: 'There are no homes listed for sale in Grand Palm at the moment. '
+         + 'Call 941-662-9941 and I\'ll tell you what\'s coming before it reaches the market.'
+  },
+  '/sarasota-national-homes-for-sale': {
+    name: 'Sarasota National',
+    zip: '34293',
+    streets: ['AWABUKI', 'BANBURY', 'BULLRUSH', 'CANTERWOOD', 'COLUBRINA', 'COPPERLEAF', 'CORKWOOD', 'COZY GROVE', 'CROOKED CREEK', 'EUPHORIA', 'FIDDLEWOOD', 'GALLBERRY', 'IRONBRIDGE', 'LANTANA', 'MEDJOOL', 'SKYFLOWER', 'SPARTINA', 'STAGGERBUSH', 'TARFLOWER', 'WAVERLY', 'WHISK FERN'],
+    empty: 'There are no homes listed for sale in Sarasota National at the moment. '
+         + 'Call 941-662-9941 and I\'ll tell you what\'s coming before it reaches the market.'
+  },
+  '/renaissance-homes-for-sale': {
+    name: 'Renaissance',
+    zip: '34293',
+    streets: ['ALESSANDRO', 'BANDERA', 'BOHEMIAN', 'CONCERTO', 'GALILEO', 'MINUET', 'OVID', 'RENAISSANCE', 'REVIVAL', 'SANZIO', 'SISTINE', 'SYMPHONY', 'TAPESTRY'],
+    empty: 'There are no homes listed for sale in Renaissance at the moment. '
+         + 'Call 941-662-9941 and I\'ll tell you what\'s coming before it reaches the market.'
+  },
+  '/sunstone-homes-for-sale': {
+    name: 'Sunstone',
+    zip: '34293',
+    streets: ['ARBOR VISTA', 'ASANA', 'ETHOS', 'GRAND PROSPERITY', 'HEARTS EASE', 'MANDALA', 'MEDITATION', 'NEW TRANQUILITY', 'SEALIGHT', 'SOLSTICE', 'SOMATIC', 'STARBRIGHT', 'STILLNESS', 'VISTA PARK', 'WELLSPRING'],
+    empty: 'There are no homes listed for sale in Sunstone at the moment. '
+         + 'Call 941-662-9941 and I\'ll tell you what\'s coming before it reaches the market.'
+  },
+  '/brightmore-homes-for-sale': {
+    name: 'Brightmore',
+    zip: '34293',
+    streets: ['BOUNDLESS', 'CHROMATA', 'GREEN GARDEN', 'LIVEWELL', 'MYAKKA BLUE', 'ROSE GOLD', 'WATERCOLOR'],
+    empty: 'There are no homes listed for sale in Brightmore at the moment. '
+         + 'Call 941-662-9941 and I\'ll tell you what\'s coming before it reaches the market.'
+  },
+  '/sunrise-preserve-homes-for-sale': {
+    name: 'Sunrise Preserve',
+    zip: '34238',
+    streets: ['BAY MEADOW', 'BLUE WATER', 'FALL MOON', 'HOPE SOUND', 'LONG SHORE', 'MORNING SUN', 'RAIN SONG', 'SEPTEMBER SKY', 'SUNDANCE'],
+    empty: 'There are no homes listed for sale in Sunrise Preserve at the moment. '
+         + 'Call 941-662-9941 and I\'ll tell you what\'s coming before it reaches the market.'
   }
 };
 
@@ -305,13 +347,25 @@ const COMMUNITY_STREETS = {
   'Palmero': ['ARCHIPELAGO','BLUE REEF','EQUATOR','HAVEN','ISLA PALMA','SHADY PALMS','WINDY BAY'],
   'Talon Preserve': ['BALD CYPRESS','CRESTED EAGLE','CYPRESS WOOD','EAGLE BRANCH','FISH EAGLE','GOLDEN GRASS','GRANDE TALON','HIDDEN SAWGRASS','LITTLE EAGLE','MISTY POND','MOSSY PINE','SAWGRASS LAKE','SILVER GRASS','TALON PRESERVE','RIVER BIRCH','WINDING PINE','WIRE GRASS'],
   'Gran Paradiso': ['AMERIGO','AMICA','BASILICA','BENISSIMO','BRILLIANTE','BUONO','CAMPANILE','CANAVESE','CARAVAGGIO','CINQUETERRE','CLASSICO','CRISTOFORO','DUOMO','ELEGANTE','FAMIGLIA','FELICE','GARIBALDI','GHIBERTI','GRANLAGO','GRAZIE','LAGENTE','LOGGIA','PASSAGIO','PORTENZA','PREGO','RAGAZZA','REALE','RICHEZZA','ROMAGNA','SALUTI','TESORO','TRATTORIA','UFFIZI','VALORE','VALPRATO','VANCANZA','VITA'],
-  'IslandWalk': ['ALAFAYA','ATTAVIANO','BASTIANO','BIANCHI','BORREGO','BOTTERI','CALIMENTO','CAMPOLEONE','COLUCCIO','CORRADINO','DIMARCO','ERICE','ESPOSITO','FASSIO','FERNANDO','FORMOSA','GUYANA','HUERTA','IPOLITA','ISADORA','JACINDA','JALISCA','KARINA','KIRELLA','LANUVIO','LAPPACIO','LIDO','MANGIERI','MAZZARA','MIRANESE','NAVARRO','NEVIANO','NOBILIO','ORIAGO','ORINO','ORTONA','PACCHIO','PELTO','PETRINO','PIERO','POSADA','QUINTA','QUISTO','RICCI','RINELLA','RINUCCIO','RIZZUTO','ROSALIA','ROSAMARIA','SALINAS','SAYDA','SERAFINA','SOLARZANO','TOMARO','TRENTINO','UMBRIA','VADINI','VERANDI','YELMA']
+  'IslandWalk': ['ALAFAYA','ATTAVIANO','BASTIANO','BIANCHI','BORREGO','BOTTERI','CALIMENTO','CAMPOLEONE','COLUCCIO','CORRADINO','DIMARCO','ERICE','ESPOSITO','FASSIO','FERNANDO','FORMOSA','GUYANA','HUERTA','IPOLITA','ISADORA','JACINDA','JALISCA','KARINA','KIRELLA','LANUVIO','LAPPACIO','LIDO','MANGIERI','MAZZARA','MIRANESE','NAVARRO','NEVIANO','NOBILIO','ORIAGO','ORINO','ORTONA','PACCHIO','PELTO','PETRINO','PIERO','POSADA','QUINTA','QUISTO','RICCI','RINELLA','RINUCCIO','RIZZUTO','ROSALIA','ROSAMARIA','SALINAS','SAYDA','SERAFINA','SOLARZANO','TOMARO','TRENTINO','UMBRIA','VADINI','VERANDI','YELMA'],
+  'Grand Palm': ['ALACHUA', 'ANCLOTE', 'AVON PARK', 'CALHOUN', 'CALLAWAY', 'COLLIER', 'DAVIE', 'DESTIN', 'FAKAHATCHEE', 'FORT LAUDERDALE', 'FORT MYERS', 'GAINESVILLE', 'HUNTERS CREEK', 'MARATHON', 'OKALOOSA', 'SAGEWOOD', 'SEBRING', 'SHIMMERING OAK', 'STILL RIVER', 'STUART', 'WAKULLA', 'WINTER PARK'],
+  'Sarasota National': ['AWABUKI', 'BANBURY', 'BULLRUSH', 'CANTERWOOD', 'COLUBRINA', 'COPPERLEAF', 'CORKWOOD', 'COZY GROVE', 'CROOKED CREEK', 'EUPHORIA', 'FIDDLEWOOD', 'GALLBERRY', 'IRONBRIDGE', 'LANTANA', 'MEDJOOL', 'SKYFLOWER', 'SPARTINA', 'STAGGERBUSH', 'TARFLOWER', 'WAVERLY', 'WHISK FERN'],
+  'Renaissance': ['ALESSANDRO', 'BANDERA', 'BOHEMIAN', 'CONCERTO', 'GALILEO', 'MINUET', 'OVID', 'RENAISSANCE', 'REVIVAL', 'SANZIO', 'SISTINE', 'SYMPHONY', 'TAPESTRY'],
+  'Sunstone': ['ARBOR VISTA', 'ASANA', 'ETHOS', 'GRAND PROSPERITY', 'HEARTS EASE', 'MANDALA', 'MEDITATION', 'NEW TRANQUILITY', 'SEALIGHT', 'SOLSTICE', 'SOMATIC', 'STARBRIGHT', 'STILLNESS', 'VISTA PARK', 'WELLSPRING'],
+  'Brightmore': ['BOUNDLESS', 'CHROMATA', 'GREEN GARDEN', 'LIVEWELL', 'MYAKKA BLUE', 'ROSE GOLD', 'WATERCOLOR'],
+  'Sunrise Preserve': ['BAY MEADOW', 'BLUE WATER', 'FALL MOON', 'HOPE SOUND', 'LONG SHORE', 'MORNING SUN', 'RAIN SONG', 'SEPTEMBER SKY', 'SUNDANCE']
 };
 const COMMUNITY_PAGE = {
   'Palmero': '/palmero-homes-for-sale',
   'Talon Preserve': '/talon-preserve-homes-for-sale',
   'Gran Paradiso': '/gran-paradiso-homes-for-sale',
-  'IslandWalk': '/islandwalk-homes-for-sale'
+  'IslandWalk': '/islandwalk-homes-for-sale',
+  'Grand Palm': '/grand-palm-homes-for-sale',
+  'Sarasota National': '/sarasota-national-homes-for-sale',
+  'Renaissance': '/renaissance-homes-for-sale',
+  'Sunstone': '/sunstone-homes-for-sale',
+  'Brightmore': '/brightmore-homes-for-sale',
+  'Sunrise Preserve': '/sunrise-preserve-homes-for-sale'
 };
 /* ★ Keyed on STREET + ZIP. Street name alone is not unique across the state:
    a "Haven" exists in Tarpon Springs, Orlando, Arcadia, Cape San Blas and New
@@ -319,7 +373,13 @@ const COMMUNITY_PAGE = {
    Before this, fifteen out-of-area listings were appearing on the Palmero and
    Talon pages. */
 const COMMUNITY_ZIP = { 'Palmero': '34275', 'Talon Preserve': '34275',
-                        'Gran Paradiso': '34293', 'IslandWalk': '34293' };
+                        'Gran Paradiso': '34293', 'IslandWalk': '34293',
+                        'Grand Palm': '34293',
+                        'Sarasota National': '34293',
+                        'Renaissance': '34293',
+                        'Sunstone': '34293',
+                        'Brightmore': '34293',
+                        'Sunrise Preserve': '34238' };
 const STREET_TO_COMMUNITY = (() => {
   const m = {};
   for (const c in COMMUNITY_STREETS)
@@ -457,7 +517,7 @@ async function renderSearch(env, url, saved) {
     results = '<p class="note">Choose what matters to you and press Search.</p>';
   } else if (!rows.length) {
     results = '<p class="note">Nothing currently matches. Try widening the price range or removing a filter '
-      + '&mdash; or call <a href="tel:9416629941">941-662-9941</a> and I will look for you.</p>';
+      + ', or call <a href="tel:9416629941">941-662-9941</a> and I\'ll look for you.</p>';
   } else {
     const pages = Math.ceil(total / PER_PAGE);
     const from = (page - 1) * PER_PAGE + 1;
@@ -517,7 +577,7 @@ async function renderSearch(env, url, saved) {
     alertBlock = '<div class="alertbox">'
       + '<h3>Want to know the moment a new one comes up?</h3>'
       + '<p>New listings appear before most people are looking. Leave your email and I will tell '
-      + 'you when a home matches' + (desc ? ' &mdash; <em>' + esc(desc) + '</em>' : ' this search') + '.</p>'
+      + 'you when a home matches' + (desc ? ': <em>' + esc(desc) + '</em>' : ' this search') + '.</p>'
       + '<form method="post" action="/home-search">' + hidden
       + '<input type="email" name="email" placeholder="you@example.com" required>'
       + '<button type="submit">Email me new matches</button>'
@@ -530,7 +590,7 @@ async function renderSearch(env, url, saved) {
   const html = SEARCH_HEAD
     + '<form method="get" class="filters">'
     +   '<label>Area<input name="city" list="fl-cities" autocomplete="off" '
-    +     'placeholder="Any area &mdash; or type a city" value="' + esc(city ? nice(city) : '') + '">'
+    +     'placeholder="Any area, or type a city" value="' + esc(city ? nice(city) : '') + '">'
     +     '<datalist id="fl-cities">' + cityList + '</datalist></label>'
     +   '<label>Type<select name="type">'
     +     opt('', type, 'Any type')
@@ -856,7 +916,7 @@ const PALMERO_HEAD = `<!DOCTYPE html>
 <div class="masthead">
   <div class="wrap">
     <div class="brand">Putnam Realty Group
-      <small>Michael Putnam &middot; Sales Associate SL3220671 &middot; Broker: Brian Putnam Jr. BK3276432</small>
+      <small>Michael Putnam &middot; Sales Associate</small>
     </div>
     <a href="tel:9416629941">941-662-9941</a>
   </div>
@@ -902,7 +962,7 @@ const PALMERO_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What Palmero homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records &mdash;
+    <p class="note">These are recorded closing prices from Sarasota County public records:
     what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
     Builder closings are excluded, because a builder base price is not a comparable sale for an
     existing home.</p>
@@ -919,7 +979,7 @@ const PALMERO_TAIL = `
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>27</strong> owner-to-owner resales in the past two years, the Palmero median ran <strong>$575,000</strong> ($249 per square foot). By type: single-family <strong>$607,500</strong> and townhomes <strong>$325,000</strong>. Builder closings are excluded, which is how the industry reports existing-home sales &mdash; a builder's first sale is a new-home sale, not a comparable for an existing home. Two of the sales above are worth a second look: 5601 and 5604 Blue Reef Place sold one day apart, both 2,410 square feet, on the same street. The one with a pool sold for $31,000 more &mdash; on the smaller lot.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>27</strong> owner-to-owner resales in the past two years, the Palmero median ran <strong>$575,000</strong> ($249 per square foot). By type: single-family <strong>$607,500</strong> and townhomes <strong>$325,000</strong>. Builder closings are excluded, which is how the industry reports existing-home sales: a builder's first sale is a new-home sale, not a comparable for an existing home. Two of the sales above are worth a second look: 5601 and 5604 Blue Reef Place sold one day apart, both 2,410 square feet, on the same street. The one with a pool sold for $31,000 more, on the smaller lot.</p>
 
     <p class="muted">Sarasota County public records, qualified owner-to-owner resales only, 24-month
     window. Figures are for general market awareness and are not appraisals.
@@ -934,14 +994,19 @@ const PALMERO_TAIL = `
   </div>
 
   <footer>
-    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate SL3220671 &middot;
-    Broker: Brian Putnam Jr. BK3276432<br>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
     941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
     <p class="muted">
       <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
       <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
       <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
       <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
       <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
@@ -1218,7 +1283,7 @@ const TALON_HEAD = `<!DOCTYPE html>
 <div class="masthead">
   <div class="wrap">
     <div class="brand">Putnam Realty Group
-      <small>Michael Putnam &middot; Sales Associate SL3220671 &middot; Broker: Brian Putnam Jr. BK3276432</small>
+      <small>Michael Putnam &middot; Sales Associate</small>
     </div>
     <a href="tel:9416629941">941-662-9941</a>
   </div>
@@ -1264,7 +1329,7 @@ const TALON_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What Talon Preserve homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records &mdash;
+    <p class="note">These are recorded closing prices from Sarasota County public records:
     what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
     Builder closings are excluded, because a builder base price is not a comparable sale for an
     existing home.</p>
@@ -1295,14 +1360,19 @@ const TALON_TAIL = `
   </div>
 
   <footer>
-    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate SL3220671 &middot;
-    Broker: Brian Putnam Jr. BK3276432<br>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
     941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
     <p class="muted">
       <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
       <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
       <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
       <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
       <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
@@ -1579,7 +1649,7 @@ const GP_HEAD = `<!DOCTYPE html>
 <div class="masthead">
   <div class="wrap">
     <div class="brand">Putnam Realty Group
-      <small>Michael Putnam &middot; Sales Associate SL3220671 &middot; Broker: Brian Putnam Jr. BK3276432</small>
+      <small>Michael Putnam &middot; Sales Associate</small>
     </div>
     <a href="tel:9416629941">941-662-9941</a>
   </div>
@@ -1625,7 +1695,7 @@ const GP_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What Gran Paradiso homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records &mdash;
+    <p class="note">These are recorded closing prices from Sarasota County public records:
     what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
     Builder closings are excluded, because a builder base price is not a comparable sale for an
     existing home.</p>
@@ -1642,9 +1712,9 @@ const GP_TAIL = `
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>121</strong> owner-to-owner resales in the past year, the Gran Paradiso median ran <strong>$405,000</strong> ($215 per square foot). By type: single-family <strong>$599,000</strong>, villas <strong>$320,000</strong>, coach homes <strong>$350,000</strong> and townhomes <strong>$280,000</strong>. Builder closings are excluded. Gran Paradiso is one of the few communities here with four distinct home types, and the gap between them is wider than most buyers expect &mdash; a villa and a single-family home on the same street can be nearly $280,000 apart.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>121</strong> owner-to-owner resales in the past year, the Gran Paradiso median ran <strong>$405,000</strong> ($215 per square foot). By type: single-family <strong>$599,000</strong>, villas <strong>$320,000</strong>, coach homes <strong>$350,000</strong> and townhomes <strong>$280,000</strong>. Builder closings are excluded. Gran Paradiso is one of the few communities here with four distinct home types, and the gap between them is wider than most buyers expect: a villa and a single-family home on the same street can be nearly $280,000 apart.</p>
 
-    <p class="muted">Sarasota County public records, qualified recorded sales only.. Figures are for general market awareness and are not appraisals.
+    <p class="muted">Sarasota County public records, qualified recorded sales only. Figures are for general market awareness and are not appraisals.
     <a href="https://granparadiso.floridahomevalueai.com/"><strong>See every recorded Gran Paradiso sale, and look up what your own Gran Paradiso home is worth &rarr;</strong></a></p>
   </section>
 
@@ -1656,14 +1726,19 @@ const GP_TAIL = `
   </div>
 
   <footer>
-    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate SL3220671 &middot;
-    Broker: Brian Putnam Jr. BK3276432<br>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
     941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
     <p class="muted">
       <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
       <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
       <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
       <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
       <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
@@ -1939,7 +2014,7 @@ const IW_HEAD = `<!DOCTYPE html>
 <div class="masthead">
   <div class="wrap">
     <div class="brand">Putnam Realty Group
-      <small>Michael Putnam &middot; Sales Associate SL3220671 &middot; Broker: Brian Putnam Jr. BK3276432</small>
+      <small>Michael Putnam &middot; Sales Associate</small>
     </div>
     <a href="tel:9416629941">941-662-9941</a>
   </div>
@@ -1985,7 +2060,7 @@ const IW_TAIL = `
   <section class="section src-county">
     <div class="section-label">Source: Sarasota County public records</div>
     <h2>What IslandWalk homes have actually sold for</h2>
-    <p class="note">These are recorded closing prices from Sarasota County public records &mdash;
+    <p class="note">These are recorded closing prices from Sarasota County public records:
     what buyers paid, not what sellers asked. <strong>This section contains no MLS data.</strong>
     Builder closings are excluded, because a builder base price is not a comparable sale for an
     existing home.</p>
@@ -2002,9 +2077,9 @@ const IW_TAIL = `
       </tbody>
     </table>
 
-    <p class="note" style="margin-top:1rem;">Across <strong>115</strong> owner-to-owner resales in the past year, the IslandWalk median ran <strong>$455,000</strong> ($272 per square foot) &mdash; single-family <strong>$520,000</strong> and villas <strong>$400,000</strong>. Builder closings are excluded. One thing the recorded sales show clearly: among single-family homes, those with a pool sold at <strong>$341 per square foot against $289 without</strong>. That is an 18 percent difference, measured from what buyers actually paid.</p>
+    <p class="note" style="margin-top:1rem;">Across <strong>115</strong> owner-to-owner resales in the past year, the IslandWalk median ran <strong>$455,000</strong> ($272 per square foot): single-family <strong>$520,000</strong> and villas <strong>$400,000</strong>. Builder closings are excluded. One thing the recorded sales show clearly: among single-family homes, those with a pool sold at <strong>$341 per square foot against $289 without</strong>. That is an 18 percent difference, measured from what buyers actually paid.</p>
 
-    <p class="muted">Sarasota County public records, qualified recorded sales only.. Figures are for general market awareness and are not appraisals.
+    <p class="muted">Sarasota County public records, qualified recorded sales only. Figures are for general market awareness and are not appraisals.
     <a href="https://islandwalk.floridahomevalueai.com/"><strong>See every recorded IslandWalk sale, and look up what your own IslandWalk home is worth &rarr;</strong></a></p>
   </section>
 
@@ -2016,14 +2091,19 @@ const IW_TAIL = `
   </div>
 
   <footer>
-    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate SL3220671 &middot;
-    Broker: Brian Putnam Jr. BK3276432<br>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
     941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
     <p class="muted">
       <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
       <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
       <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
       <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
       <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
@@ -2130,11 +2210,2200 @@ document.addEventListener('click', function (e) {
 </html>
 `;
 
+const GPALM_HEAD = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand Palm Homes for Sale, Venice FL | Putnam Realty Group</title>
+<meta name="description" content="Current homes for sale in Grand Palm, the gated Neal Communities community in Venice near Wellen Park, Venice FL, from Putnam Realty Group. Live Stellar MLS listings alongside what Grand Palm homes have actually sold for, and what a buyer would pay in property tax, from Sarasota County public records.">
+<link rel="canonical" href="https://floridahomevalueai.com/grand-palm-homes-for-sale">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Grand Palm Homes for Sale, Venice FL | Putnam Realty Group">
+<meta property="og:description" content="Current Grand Palm listings from Stellar MLS, alongside recorded Sarasota County sale prices. Putnam Realty Group, Nokomis.">
+<meta property="og:url" content="https://floridahomevalueai.com/grand-palm-homes-for-sale">
+<meta property="og:image" content="https://floridahomevalueai.com/grand-palm-og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://floridahomevalueai.com/grand-palm-og.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=DM+Mono:wght@400&display=optional" rel="stylesheet">
+
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+
+<!-- RealEstateAgent entity. Deliberately NOT a listing schema: marking up another
+     brokerage's listings as our own structured data would misrepresent them. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent",
+"name":"Putnam Realty Group",
+"url":"https://floridahomevalueai.com/grand-palm-homes-for-sale",
+"telephone":"+1-941-662-9941",
+"email":"Michael@PutnamRealtyGroup.com",
+"areaServed":[{"@type":"Place","name":"Nokomis, Florida"},{"@type":"Place","name":"Venice, Florida"},{"@type":"Place","name":"Sarasota County, Florida"}],
+"employee":{"@type":"RealEstateAgent","name":"Michael Putnam","jobTitle":"Sales Associate","identifier":"SL3220671"},
+"parentOrganization":{"@type":"Organization","name":"Putnam Realty Group LLC"}}
+</script>
+
+<style>
+  :root{ --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --ink:#1a1814;
+         --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8; --surface:#fff; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);
+       min-height:100vh;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem;}
+  a{color:var(--gold);}
+
+  /* Article 19.06 requires brokerage branding to be the most prominent on any page
+     showing Stellar MLS data. Putnam Realty Group is therefore the masthead here,
+     not Florida Home Value AI. The valuation pages, which carry no MLS data, keep
+     their own identity. */
+  .masthead{background:var(--ink);color:#fff;padding:1.1rem 0;}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .brand{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;}
+  .brand small{display:block;font-family:'DM Mono',monospace;font-size:10px;
+       letter-spacing:.14em;text-transform:uppercase;color:#c9c2b8;font-weight:400;margin-top:3px;}
+  .masthead a{color:#fff;text-decoration:none;font-weight:700;font-size:15px;}
+
+  header{text-align:center;padding:3.5rem 0 2.5rem;}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,3.5rem);
+     font-weight:600;line-height:1.15;margin-bottom:1.4rem;}
+  .lede{font-size:16px;color:var(--ink-mid);max-width:560px;margin:0 auto;
+        font-weight:300;line-height:1.75;}
+
+  .section{padding:3rem 0;}
+  .section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;
+       color:var(--ink-faint);text-transform:uppercase;margin-bottom:.6rem;text-align:center;}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;
+     text-align:center;margin-bottom:1rem;color:var(--ink);}
+  .note{font-size:16px;color:var(--ink-mid);margin:0 auto 1.75rem;max-width:640px;
+        text-align:center;}
+
+  /* The two data sources are kept in visually distinct, separately headed blocks.
+     Ben Martin (Stellar, Data & Technology Compliance): "if the listing search
+     results contains data from any other source than Stellar MLS then the Stellar
+     MLS portions must have Stellar MLS branding on them. Portions that are from
+     public records should also be identifiable as such. Typically, we recommend
+     doing this by creating a separate section with a header or other identifier
+     for the public records portion." */
+  .src-mls .section-label{color:var(--gold);}
+  .src-county .section-label{color:#6b7f6b;}
+  .src-county{background:var(--warm);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1rem;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:1.05rem 1.15rem;}
+  
+  .shot{margin:-1.05rem -1.15rem .8rem;border-radius:12px 12px 0 0;overflow:hidden;
+    background:var(--warm);aspect-ratio:4/3;}
+  .shot{position:relative;cursor:zoom-in;}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+  .viewall{position:absolute;right:.6rem;bottom:.6rem;background:rgba(26,24,20,.82);
+    color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;
+    padding:5px 10px;border-radius:6px;pointer-events:none;}
+
+  /* Lightbox. Full screen on a phone, arrows and swipe, Escape to close. */
+  .lb{position:fixed;inset:0;background:rgba(12,11,9,.96);z-index:9999;display:none;
+    flex-direction:column;align-items:center;justify-content:center;}
+  .lb.open{display:flex;}
+  .lb img{max-width:94vw;max-height:78vh;object-fit:contain;border-radius:6px;}
+  .lb-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:.9rem 1.1rem;color:#e8e2d8;font-size:14px;}
+  .lb-close{background:none;border:0;color:#e8e2d8;font-size:30px;line-height:1;
+    cursor:pointer;padding:0 .4rem;font-family:inherit;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);
+    border:0;color:#fff;font-size:26px;width:52px;height:52px;border-radius:50%;
+    cursor:pointer;line-height:1;}
+  .lb-prev{left:1rem;} .lb-next{right:1rem;}
+  .lb-count{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;}
+  @media(max-width:560px){ .lb-nav{width:44px;height:44px;font-size:22px;}
+    .lb-prev{left:.4rem;} .lb-next{right:.4rem;} }
+  .strip{display:flex;gap:4px;margin:-.4rem 0 .7rem;align-items:center;}
+  .strip{flex-wrap:wrap;}
+  .strip img{width:52px;height:40px;object-fit:cover;border-radius:5px;display:block;
+    background:var(--warm);
+    cursor:pointer;opacity:.62;transition:opacity .12s;border:2px solid transparent;}
+  .strip img:hover,.strip img.on{opacity:1;border-color:var(--gold);}
+  .more{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);
+    padding-left:.3rem;}
+  .price{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;}
+  .addr{font-size:15.5px;margin-top:.1rem;}
+  .sub{font-size:13px;color:var(--ink-faint);margin-top:.15rem;}
+  .specs{font-size:14.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .tags{font-size:13px;color:var(--ink-faint);margin-top:.4rem;}
+  .fees{font-size:13.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .courtesy{font-size:12px;color:var(--ink-faint);margin-top:.6rem;padding-top:.55rem;
+        border-top:1px solid var(--border);line-height:1.5;}
+  
+  .pager{display:flex;align-items:center;justify-content:center;gap:1rem;
+    margin:2rem auto 0;max-width:640px;flex-wrap:wrap;}
+  .pg{display:inline-block;padding:.7rem 1.25rem;border-radius:8px;font-weight:700;
+    font-size:15px;text-decoration:none;background:var(--gold);color:#fff;}
+  .pg-off{background:var(--warm);color:var(--ink-faint);border:1px solid var(--border);}
+  .pg-now{font-size:14px;color:var(--ink-mid);}
+  .pill{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;
+        letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+        background:var(--warm);border:1px solid var(--border);color:var(--ink-mid);margin-left:.4rem;}
+
+  table{width:100%;max-width:820px;margin:0 auto;border-collapse:collapse;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        overflow:hidden;font-size:15px;}
+  th{text-align:left;padding:.55rem .7rem;font-weight:400;color:var(--ink-mid);font-size:13.5px;}
+  td{padding:.55rem .7rem;border-top:1px solid var(--border);}
+
+  .attrib{font-size:12.5px;color:var(--ink-faint);line-height:1.7;
+        margin:1.5rem auto 0;max-width:680px;text-align:center;}
+  .cta{background:var(--ink);color:#fff;border-radius:14px;padding:2rem 1.75rem;margin:2.5rem auto;max-width:900px;text-align:center;}
+  .cta h2{color:#fff;}
+  .cta p{color:#d8d2c8;font-size:16px;margin:0 auto 1.25rem;max-width:560px;}
+  .btn{display:inline-block;background:var(--gold);color:#fff;text-decoration:none;
+       padding:.8rem 1.6rem;border-radius:8px;font-weight:700;}
+  footer{border-top:1px solid var(--border);margin-top:3rem;padding:2rem 0 3rem;
+         font-size:13.5px;color:var(--ink-mid);line-height:1.7;text-align:center;}
+  footer a{color:var(--ink-mid);}
+  .muted{font-size:12.5px;color:var(--ink-faint);margin-top:.7rem;line-height:1.7;max-width:680px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">Putnam Realty Group
+      <small>Michael Putnam &middot; Sales Associate</small>
+    </div>
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Venice, Florida 34293</div>
+    <h1>Grand Palm Homes for Sale</h1>
+    <p class="lede">Every home currently on the market in Grand Palm, the gated Neal Communities community in Venice near Wellen Park, shown alongside what Grand Palm homes have actually sold for. Two separate sources, kept separate, so you can see the difference between what sellers are asking and what buyers have paid.</p>
+  </header>
+
+  <!-- ============ SECTION 1: STELLAR MLS ============ -->
+  <section class="section src-mls">
+    <div class="section-label">Source: Stellar MLS</div>
+    <h2>On the market now</h2>
+    <p class="note">Current listings in Grand Palm. Some may be listed by brokerages other than
+    Putnam Realty Group; each listing names its own.</p>
+
+    `;
+
+const GPALM_TAIL = `
+
+    <!-- Article 19.23: source identification where listings appear.
+         Article 19.15: a contact for reporting inaccuracies. -->
+    <p class="attrib">
+      Listings courtesy of <strong>Stellar MLS</strong> as distributed by <strong>MLS GRID</strong>.
+      Information is deemed reliable but is not guaranteed accurate by Stellar MLS, MLS GRID, or
+      Putnam Realty Group, and should be independently verified. This information is provided
+      exclusively for consumers' personal, non-commercial use and may not be used for any purpose
+      other than to identify prospective properties consumers may be interested in purchasing.
+      Properties may be listed by brokerages other than Putnam Realty Group.
+      To report an inaccuracy, contact Michael Putnam at
+      <a href="tel:9416629941">941-662-9941</a> or Michael@PutnamRealtyGroup.com.
+      <span id="idx-updated"></span>
+    </p>
+  </section>
+
+  <!-- ============ SECTION 2: COUNTY PUBLIC RECORDS ============ -->
+  <section class="section src-county">
+    <div class="section-label">Source: Sarasota County public records</div>
+    <h2>What Grand Palm homes have actually sold for</h2>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
+
+    <table>
+      <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>Jul 24, 2026</td><td>11446 Fort Lauderdale</td><td>Single-family</td><td>1,875 sqft</td><td><strong>$475,000</strong></td></tr>
+        <tr><td>Jul 10, 2026</td><td>12240 Stuart Dr</td><td>Single-family</td><td>1,954 sqft</td><td><strong>$490,000</strong></td></tr>
+        <tr><td>Jun 29, 2026</td><td>12386 Sagewood Dr</td><td>Single-family</td><td>2,237 sqft</td><td><strong>$660,000</strong></td></tr>
+        <tr><td>Jun 24, 2026</td><td>12520 Shimmering Oak Cir</td><td>Single-family</td><td>1,850 sqft</td><td><strong>$350,000</strong></td></tr>
+        <tr><td>Jun 22, 2026</td><td>12471 Sagewood Dr</td><td>Single-family</td><td>1,255 sqft</td><td><strong>$280,000</strong></td></tr>
+        <tr><td>Jun 18, 2026</td><td>11442 Fort Lauderdale</td><td>Single-family</td><td>1,511 sqft</td><td><strong>$515,000</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="note" style="margin-top:1rem;">Across <strong>65</strong> owner-to-owner resales in the past year, the Grand Palm median ran <strong>$447,500</strong> ($257 a square foot). By type: single-family <strong>$495,000</strong> ($265 a square foot, 47 sales) and villas <strong>$409,500</strong> ($253 a square foot, 18 sales).</p>
+    <p class="note">Almost every sale in Grand Palm over the past year was an owner resale; the builder closed only 2.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Grand Palm's typical single-family resale price of <strong>$495,000</strong>, yearly property tax would be about <strong>$5,055</strong> without a homestead exemption, or about <strong>$4,626</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Grand Palm is taxed as unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
+
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
+    <a href="https://floridahomevalueai.com/grand-palm"><strong>Look up what your own Grand Palm home is worth &rarr;</strong></a></p>
+  </section>
+
+  <div class="cta">
+    <h2>Thinking about buying or selling in Grand Palm?</h2>
+    <p>Michael Putnam works Grand Palm and the surrounding Venice market constantly.
+    You get a straight read from a local agent who answers the phone, not a call center.</p>
+    <a class="btn" href="tel:9416629941">Call or text 941-662-9941</a>
+  </div>
+
+  <footer>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
+    941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
+    <p class="muted">
+      <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
+      <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
+      <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
+      <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
+      <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm">Grand Palm home values</a> &middot;
+      <a href="https://floridahomevalueai.com/">Florida Home Value AI</a>
+    </p>
+    <p class="muted">Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act.
+    This is not a solicitation of property currently listed with another broker.</p>
+  </footer>
+
+</div>
+
+<script>
+/* Thumbnails past the third load only when their card reaches the screen. */
+(function () {
+  var lazy = document.querySelectorAll('img[data-src]');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < lazy.length; i++) lazy[i].src = lazy[i].dataset.src;
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var img = e.target;
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+      io.unobserve(img);
+    });
+  }, { rootMargin: '300px' });
+  for (var j = 0; j < lazy.length; j++) io.observe(lazy[j]);
+})();
+
+/* Thumbnail clicks swap the main image. One listener for the whole page rather
+   than one per card — a page can carry 24 listings and 240 thumbnails. */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.g) return;
+  var main = document.getElementById(t.dataset.g);
+  if (!main) return;
+  main.src = t.dataset.full;
+  var strip = t.parentNode;
+  for (var i = 0; i < strip.children.length; i++) {
+    strip.children[i].classList && strip.children[i].classList.remove('on');
+  }
+  t.classList.add('on');
+});
+</script>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Property photos">
+  <div class="lb-bar"><span class="lb-count" id="lb-count"></span>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button></div>
+  <img id="lb-img" alt="">
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next photo">&#8250;</button>
+</div>
+<script>
+/* Lightbox. Every photo for a listing, opened from the main image.
+   One instance for the whole page rather than one per card. */
+(function () {
+  var BASE = 'https://fhv-idx-sync.cleirshusband.workers.dev/photo/';
+  var lb = document.getElementById('lb'), img = document.getElementById('lb-img'),
+      cnt = document.getElementById('lb-count');
+  var keys = [], at = 0, addr = '';
+
+  function show() {
+    img.src = BASE + keys[at];
+    img.alt = addr + ' \\u2014 photo ' + (at + 1);
+    cnt.textContent = addr + '  \\u00b7  ' + (at + 1) + ' of ' + keys.length;
+  }
+  function open(shot) {
+    keys = (shot.dataset.all || '').split('|').filter(Boolean);
+    if (!keys.length) return;
+    addr = shot.dataset.addr || '';
+    at = 0; show();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function step(n) { at = (at + n + keys.length) % keys.length; show(); }
+
+  document.addEventListener('click', function (e) {
+    var shot = e.target.closest && e.target.closest('.shot');
+    if (shot) { open(shot); return; }
+    if (e.target.id === 'lb-close' || e.target === lb) close();
+    if (e.target.id === 'lb-next') step(1);
+    if (e.target.id === 'lb-prev') step(-1);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+  /* Swipe, because most of this traffic is a phone. */
+  var x0 = null;
+  lb.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
+`;
+
+const SNAT_HEAD = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sarasota National Homes for Sale, Venice FL | Putnam Realty Group</title>
+<meta name="description" content="Current homes for sale in Sarasota National, the gated golf community in Wellen Park, Venice FL, from Putnam Realty Group. Live Stellar MLS listings alongside what Sarasota National homes have actually sold for, and what a buyer would pay in property tax, from Sarasota County public records.">
+<link rel="canonical" href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sarasota National Homes for Sale, Venice FL | Putnam Realty Group">
+<meta property="og:description" content="Current Sarasota National listings from Stellar MLS, alongside recorded Sarasota County sale prices. Putnam Realty Group, Nokomis.">
+<meta property="og:url" content="https://floridahomevalueai.com/sarasota-national-homes-for-sale">
+<meta property="og:image" content="https://floridahomevalueai.com/sarasota-national-og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://floridahomevalueai.com/sarasota-national-og.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=DM+Mono:wght@400&display=optional" rel="stylesheet">
+
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+
+<!-- RealEstateAgent entity. Deliberately NOT a listing schema: marking up another
+     brokerage's listings as our own structured data would misrepresent them. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent",
+"name":"Putnam Realty Group",
+"url":"https://floridahomevalueai.com/sarasota-national-homes-for-sale",
+"telephone":"+1-941-662-9941",
+"email":"Michael@PutnamRealtyGroup.com",
+"areaServed":[{"@type":"Place","name":"Nokomis, Florida"},{"@type":"Place","name":"Venice, Florida"},{"@type":"Place","name":"Sarasota County, Florida"}],
+"employee":{"@type":"RealEstateAgent","name":"Michael Putnam","jobTitle":"Sales Associate","identifier":"SL3220671"},
+"parentOrganization":{"@type":"Organization","name":"Putnam Realty Group LLC"}}
+</script>
+
+<style>
+  :root{ --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --ink:#1a1814;
+         --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8; --surface:#fff; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);
+       min-height:100vh;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem;}
+  a{color:var(--gold);}
+
+  /* Article 19.06 requires brokerage branding to be the most prominent on any page
+     showing Stellar MLS data. Putnam Realty Group is therefore the masthead here,
+     not Florida Home Value AI. The valuation pages, which carry no MLS data, keep
+     their own identity. */
+  .masthead{background:var(--ink);color:#fff;padding:1.1rem 0;}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .brand{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;}
+  .brand small{display:block;font-family:'DM Mono',monospace;font-size:10px;
+       letter-spacing:.14em;text-transform:uppercase;color:#c9c2b8;font-weight:400;margin-top:3px;}
+  .masthead a{color:#fff;text-decoration:none;font-weight:700;font-size:15px;}
+
+  header{text-align:center;padding:3.5rem 0 2.5rem;}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,3.5rem);
+     font-weight:600;line-height:1.15;margin-bottom:1.4rem;}
+  .lede{font-size:16px;color:var(--ink-mid);max-width:560px;margin:0 auto;
+        font-weight:300;line-height:1.75;}
+
+  .section{padding:3rem 0;}
+  .section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;
+       color:var(--ink-faint);text-transform:uppercase;margin-bottom:.6rem;text-align:center;}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;
+     text-align:center;margin-bottom:1rem;color:var(--ink);}
+  .note{font-size:16px;color:var(--ink-mid);margin:0 auto 1.75rem;max-width:640px;
+        text-align:center;}
+
+  /* The two data sources are kept in visually distinct, separately headed blocks.
+     Ben Martin (Stellar, Data & Technology Compliance): "if the listing search
+     results contains data from any other source than Stellar MLS then the Stellar
+     MLS portions must have Stellar MLS branding on them. Portions that are from
+     public records should also be identifiable as such. Typically, we recommend
+     doing this by creating a separate section with a header or other identifier
+     for the public records portion." */
+  .src-mls .section-label{color:var(--gold);}
+  .src-county .section-label{color:#6b7f6b;}
+  .src-county{background:var(--warm);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1rem;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:1.05rem 1.15rem;}
+  
+  .shot{margin:-1.05rem -1.15rem .8rem;border-radius:12px 12px 0 0;overflow:hidden;
+    background:var(--warm);aspect-ratio:4/3;}
+  .shot{position:relative;cursor:zoom-in;}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+  .viewall{position:absolute;right:.6rem;bottom:.6rem;background:rgba(26,24,20,.82);
+    color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;
+    padding:5px 10px;border-radius:6px;pointer-events:none;}
+
+  /* Lightbox. Full screen on a phone, arrows and swipe, Escape to close. */
+  .lb{position:fixed;inset:0;background:rgba(12,11,9,.96);z-index:9999;display:none;
+    flex-direction:column;align-items:center;justify-content:center;}
+  .lb.open{display:flex;}
+  .lb img{max-width:94vw;max-height:78vh;object-fit:contain;border-radius:6px;}
+  .lb-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:.9rem 1.1rem;color:#e8e2d8;font-size:14px;}
+  .lb-close{background:none;border:0;color:#e8e2d8;font-size:30px;line-height:1;
+    cursor:pointer;padding:0 .4rem;font-family:inherit;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);
+    border:0;color:#fff;font-size:26px;width:52px;height:52px;border-radius:50%;
+    cursor:pointer;line-height:1;}
+  .lb-prev{left:1rem;} .lb-next{right:1rem;}
+  .lb-count{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;}
+  @media(max-width:560px){ .lb-nav{width:44px;height:44px;font-size:22px;}
+    .lb-prev{left:.4rem;} .lb-next{right:.4rem;} }
+  .strip{display:flex;gap:4px;margin:-.4rem 0 .7rem;align-items:center;}
+  .strip{flex-wrap:wrap;}
+  .strip img{width:52px;height:40px;object-fit:cover;border-radius:5px;display:block;
+    background:var(--warm);
+    cursor:pointer;opacity:.62;transition:opacity .12s;border:2px solid transparent;}
+  .strip img:hover,.strip img.on{opacity:1;border-color:var(--gold);}
+  .more{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);
+    padding-left:.3rem;}
+  .price{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;}
+  .addr{font-size:15.5px;margin-top:.1rem;}
+  .sub{font-size:13px;color:var(--ink-faint);margin-top:.15rem;}
+  .specs{font-size:14.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .tags{font-size:13px;color:var(--ink-faint);margin-top:.4rem;}
+  .fees{font-size:13.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .courtesy{font-size:12px;color:var(--ink-faint);margin-top:.6rem;padding-top:.55rem;
+        border-top:1px solid var(--border);line-height:1.5;}
+  
+  .pager{display:flex;align-items:center;justify-content:center;gap:1rem;
+    margin:2rem auto 0;max-width:640px;flex-wrap:wrap;}
+  .pg{display:inline-block;padding:.7rem 1.25rem;border-radius:8px;font-weight:700;
+    font-size:15px;text-decoration:none;background:var(--gold);color:#fff;}
+  .pg-off{background:var(--warm);color:var(--ink-faint);border:1px solid var(--border);}
+  .pg-now{font-size:14px;color:var(--ink-mid);}
+  .pill{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;
+        letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+        background:var(--warm);border:1px solid var(--border);color:var(--ink-mid);margin-left:.4rem;}
+
+  table{width:100%;max-width:820px;margin:0 auto;border-collapse:collapse;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        overflow:hidden;font-size:15px;}
+  th{text-align:left;padding:.55rem .7rem;font-weight:400;color:var(--ink-mid);font-size:13.5px;}
+  td{padding:.55rem .7rem;border-top:1px solid var(--border);}
+
+  .attrib{font-size:12.5px;color:var(--ink-faint);line-height:1.7;
+        margin:1.5rem auto 0;max-width:680px;text-align:center;}
+  .cta{background:var(--ink);color:#fff;border-radius:14px;padding:2rem 1.75rem;margin:2.5rem auto;max-width:900px;text-align:center;}
+  .cta h2{color:#fff;}
+  .cta p{color:#d8d2c8;font-size:16px;margin:0 auto 1.25rem;max-width:560px;}
+  .btn{display:inline-block;background:var(--gold);color:#fff;text-decoration:none;
+       padding:.8rem 1.6rem;border-radius:8px;font-weight:700;}
+  footer{border-top:1px solid var(--border);margin-top:3rem;padding:2rem 0 3rem;
+         font-size:13.5px;color:var(--ink-mid);line-height:1.7;text-align:center;}
+  footer a{color:var(--ink-mid);}
+  .muted{font-size:12.5px;color:var(--ink-faint);margin-top:.7rem;line-height:1.7;max-width:680px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">Putnam Realty Group
+      <small>Michael Putnam &middot; Sales Associate</small>
+    </div>
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Venice, Florida 34293</div>
+    <h1>Sarasota National Homes for Sale</h1>
+    <p class="lede">Every home currently on the market in Sarasota National, the gated golf community in Wellen Park, shown alongside what Sarasota National homes have actually sold for. Two separate sources, kept separate, so you can see the difference between what sellers are asking and what buyers have paid.</p>
+  </header>
+
+  <!-- ============ SECTION 1: STELLAR MLS ============ -->
+  <section class="section src-mls">
+    <div class="section-label">Source: Stellar MLS</div>
+    <h2>On the market now</h2>
+    <p class="note">Current listings in Sarasota National. Some may be listed by brokerages other than
+    Putnam Realty Group; each listing names its own.</p>
+
+    `;
+
+const SNAT_TAIL = `
+
+    <!-- Article 19.23: source identification where listings appear.
+         Article 19.15: a contact for reporting inaccuracies. -->
+    <p class="attrib">
+      Listings courtesy of <strong>Stellar MLS</strong> as distributed by <strong>MLS GRID</strong>.
+      Information is deemed reliable but is not guaranteed accurate by Stellar MLS, MLS GRID, or
+      Putnam Realty Group, and should be independently verified. This information is provided
+      exclusively for consumers' personal, non-commercial use and may not be used for any purpose
+      other than to identify prospective properties consumers may be interested in purchasing.
+      Properties may be listed by brokerages other than Putnam Realty Group.
+      To report an inaccuracy, contact Michael Putnam at
+      <a href="tel:9416629941">941-662-9941</a> or Michael@PutnamRealtyGroup.com.
+      <span id="idx-updated"></span>
+    </p>
+  </section>
+
+  <!-- ============ SECTION 2: COUNTY PUBLIC RECORDS ============ -->
+  <section class="section src-county">
+    <div class="section-label">Source: Sarasota County public records</div>
+    <h2>What Sarasota National homes have actually sold for</h2>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
+
+    <table>
+      <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>Jul 23, 2026</td><td>10051 Crooked Creek Dr #202</td><td>Condo</td><td>1,998 sqft</td><td><strong>$355,000</strong></td></tr>
+        <tr><td>Jul 21, 2026</td><td>10533 Crooked Creek Dr</td><td>Single-family</td><td>1,804 sqft</td><td><strong>$485,000</strong></td></tr>
+        <tr><td>Jul 15, 2026</td><td>10832 Whisk Fern Dr</td><td>Single-family</td><td>3,079 sqft</td><td><strong>$1,255,000</strong></td></tr>
+        <tr><td>Jul 10, 2026</td><td>23980 Skyflower Ct</td><td>Villa</td><td>1,568 sqft</td><td><strong>$357,500</strong></td></tr>
+        <tr><td>Jul 7, 2026</td><td>23113 Banbury Way #202</td><td>Condo</td><td>1,998 sqft</td><td><strong>$285,000</strong></td></tr>
+        <tr><td>Jul 2, 2026</td><td>10744 Tarflower Dr</td><td>Single-family</td><td>2,440 sqft</td><td><strong>$1,165,000</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="note" style="margin-top:1rem;">Across <strong>83</strong> owner-to-owner resales in the past year, the Sarasota National median ran <strong>$465,000</strong> ($254 a square foot). By type: single-family <strong>$575,000</strong> ($296 a square foot, 59 sales), condos <strong>$360,000</strong> ($181 a square foot, 20 sales) and villas <strong>$358,750</strong> ($229 a square foot, 4 sales).</p>
+    <p class="note">Every recorded sale in Sarasota National over the past year was an owner resale. None were builder closings.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Sarasota National's typical single-family resale price of <strong>$575,000</strong>, yearly property tax would be about <strong>$5,872</strong> without a homestead exemption, or about <strong>$5,443</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Sarasota National is taxed as unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
+
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
+    <a href="https://floridahomevalueai.com/sarasota-national"><strong>Look up what your own Sarasota National home is worth &rarr;</strong></a></p>
+  </section>
+
+  <div class="cta">
+    <h2>Thinking about buying or selling in Sarasota National?</h2>
+    <p>Michael Putnam works Sarasota National and the surrounding Wellen Park market constantly.
+    You get a straight read from a local agent who answers the phone, not a call center.</p>
+    <a class="btn" href="tel:9416629941">Call or text 941-662-9941</a>
+  </div>
+
+  <footer>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
+    941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
+    <p class="muted">
+      <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
+      <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
+      <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
+      <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
+      <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national">Sarasota National home values</a> &middot;
+      <a href="https://floridahomevalueai.com/">Florida Home Value AI</a>
+    </p>
+    <p class="muted">Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act.
+    This is not a solicitation of property currently listed with another broker.</p>
+  </footer>
+
+</div>
+
+<script>
+/* Thumbnails past the third load only when their card reaches the screen. */
+(function () {
+  var lazy = document.querySelectorAll('img[data-src]');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < lazy.length; i++) lazy[i].src = lazy[i].dataset.src;
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var img = e.target;
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+      io.unobserve(img);
+    });
+  }, { rootMargin: '300px' });
+  for (var j = 0; j < lazy.length; j++) io.observe(lazy[j]);
+})();
+
+/* Thumbnail clicks swap the main image. One listener for the whole page rather
+   than one per card — a page can carry 24 listings and 240 thumbnails. */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.g) return;
+  var main = document.getElementById(t.dataset.g);
+  if (!main) return;
+  main.src = t.dataset.full;
+  var strip = t.parentNode;
+  for (var i = 0; i < strip.children.length; i++) {
+    strip.children[i].classList && strip.children[i].classList.remove('on');
+  }
+  t.classList.add('on');
+});
+</script>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Property photos">
+  <div class="lb-bar"><span class="lb-count" id="lb-count"></span>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button></div>
+  <img id="lb-img" alt="">
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next photo">&#8250;</button>
+</div>
+<script>
+/* Lightbox. Every photo for a listing, opened from the main image.
+   One instance for the whole page rather than one per card. */
+(function () {
+  var BASE = 'https://fhv-idx-sync.cleirshusband.workers.dev/photo/';
+  var lb = document.getElementById('lb'), img = document.getElementById('lb-img'),
+      cnt = document.getElementById('lb-count');
+  var keys = [], at = 0, addr = '';
+
+  function show() {
+    img.src = BASE + keys[at];
+    img.alt = addr + ' \\u2014 photo ' + (at + 1);
+    cnt.textContent = addr + '  \\u00b7  ' + (at + 1) + ' of ' + keys.length;
+  }
+  function open(shot) {
+    keys = (shot.dataset.all || '').split('|').filter(Boolean);
+    if (!keys.length) return;
+    addr = shot.dataset.addr || '';
+    at = 0; show();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function step(n) { at = (at + n + keys.length) % keys.length; show(); }
+
+  document.addEventListener('click', function (e) {
+    var shot = e.target.closest && e.target.closest('.shot');
+    if (shot) { open(shot); return; }
+    if (e.target.id === 'lb-close' || e.target === lb) close();
+    if (e.target.id === 'lb-next') step(1);
+    if (e.target.id === 'lb-prev') step(-1);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+  /* Swipe, because most of this traffic is a phone. */
+  var x0 = null;
+  lb.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
+`;
+
+const REN_HEAD = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renaissance Homes for Sale, Venice FL | Putnam Realty Group</title>
+<meta name="description" content="Current homes for sale in Renaissance at Wellen Park, the gated Mattamy community, Venice FL, from Putnam Realty Group. Live Stellar MLS listings alongside what Renaissance homes have actually sold for, and what a buyer would pay in property tax, from Sarasota County public records.">
+<link rel="canonical" href="https://floridahomevalueai.com/renaissance-homes-for-sale">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Renaissance Homes for Sale, Venice FL | Putnam Realty Group">
+<meta property="og:description" content="Current Renaissance listings from Stellar MLS, alongside recorded Sarasota County sale prices. Putnam Realty Group, Nokomis.">
+<meta property="og:url" content="https://floridahomevalueai.com/renaissance-homes-for-sale">
+<meta property="og:image" content="https://floridahomevalueai.com/renaissance-og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://floridahomevalueai.com/renaissance-og.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=DM+Mono:wght@400&display=optional" rel="stylesheet">
+
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+
+<!-- RealEstateAgent entity. Deliberately NOT a listing schema: marking up another
+     brokerage's listings as our own structured data would misrepresent them. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent",
+"name":"Putnam Realty Group",
+"url":"https://floridahomevalueai.com/renaissance-homes-for-sale",
+"telephone":"+1-941-662-9941",
+"email":"Michael@PutnamRealtyGroup.com",
+"areaServed":[{"@type":"Place","name":"Nokomis, Florida"},{"@type":"Place","name":"Venice, Florida"},{"@type":"Place","name":"Sarasota County, Florida"}],
+"employee":{"@type":"RealEstateAgent","name":"Michael Putnam","jobTitle":"Sales Associate","identifier":"SL3220671"},
+"parentOrganization":{"@type":"Organization","name":"Putnam Realty Group LLC"}}
+</script>
+
+<style>
+  :root{ --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --ink:#1a1814;
+         --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8; --surface:#fff; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);
+       min-height:100vh;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem;}
+  a{color:var(--gold);}
+
+  /* Article 19.06 requires brokerage branding to be the most prominent on any page
+     showing Stellar MLS data. Putnam Realty Group is therefore the masthead here,
+     not Florida Home Value AI. The valuation pages, which carry no MLS data, keep
+     their own identity. */
+  .masthead{background:var(--ink);color:#fff;padding:1.1rem 0;}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .brand{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;}
+  .brand small{display:block;font-family:'DM Mono',monospace;font-size:10px;
+       letter-spacing:.14em;text-transform:uppercase;color:#c9c2b8;font-weight:400;margin-top:3px;}
+  .masthead a{color:#fff;text-decoration:none;font-weight:700;font-size:15px;}
+
+  header{text-align:center;padding:3.5rem 0 2.5rem;}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,3.5rem);
+     font-weight:600;line-height:1.15;margin-bottom:1.4rem;}
+  .lede{font-size:16px;color:var(--ink-mid);max-width:560px;margin:0 auto;
+        font-weight:300;line-height:1.75;}
+
+  .section{padding:3rem 0;}
+  .section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;
+       color:var(--ink-faint);text-transform:uppercase;margin-bottom:.6rem;text-align:center;}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;
+     text-align:center;margin-bottom:1rem;color:var(--ink);}
+  .note{font-size:16px;color:var(--ink-mid);margin:0 auto 1.75rem;max-width:640px;
+        text-align:center;}
+
+  /* The two data sources are kept in visually distinct, separately headed blocks.
+     Ben Martin (Stellar, Data & Technology Compliance): "if the listing search
+     results contains data from any other source than Stellar MLS then the Stellar
+     MLS portions must have Stellar MLS branding on them. Portions that are from
+     public records should also be identifiable as such. Typically, we recommend
+     doing this by creating a separate section with a header or other identifier
+     for the public records portion." */
+  .src-mls .section-label{color:var(--gold);}
+  .src-county .section-label{color:#6b7f6b;}
+  .src-county{background:var(--warm);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1rem;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:1.05rem 1.15rem;}
+  
+  .shot{margin:-1.05rem -1.15rem .8rem;border-radius:12px 12px 0 0;overflow:hidden;
+    background:var(--warm);aspect-ratio:4/3;}
+  .shot{position:relative;cursor:zoom-in;}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+  .viewall{position:absolute;right:.6rem;bottom:.6rem;background:rgba(26,24,20,.82);
+    color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;
+    padding:5px 10px;border-radius:6px;pointer-events:none;}
+
+  /* Lightbox. Full screen on a phone, arrows and swipe, Escape to close. */
+  .lb{position:fixed;inset:0;background:rgba(12,11,9,.96);z-index:9999;display:none;
+    flex-direction:column;align-items:center;justify-content:center;}
+  .lb.open{display:flex;}
+  .lb img{max-width:94vw;max-height:78vh;object-fit:contain;border-radius:6px;}
+  .lb-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:.9rem 1.1rem;color:#e8e2d8;font-size:14px;}
+  .lb-close{background:none;border:0;color:#e8e2d8;font-size:30px;line-height:1;
+    cursor:pointer;padding:0 .4rem;font-family:inherit;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);
+    border:0;color:#fff;font-size:26px;width:52px;height:52px;border-radius:50%;
+    cursor:pointer;line-height:1;}
+  .lb-prev{left:1rem;} .lb-next{right:1rem;}
+  .lb-count{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;}
+  @media(max-width:560px){ .lb-nav{width:44px;height:44px;font-size:22px;}
+    .lb-prev{left:.4rem;} .lb-next{right:.4rem;} }
+  .strip{display:flex;gap:4px;margin:-.4rem 0 .7rem;align-items:center;}
+  .strip{flex-wrap:wrap;}
+  .strip img{width:52px;height:40px;object-fit:cover;border-radius:5px;display:block;
+    background:var(--warm);
+    cursor:pointer;opacity:.62;transition:opacity .12s;border:2px solid transparent;}
+  .strip img:hover,.strip img.on{opacity:1;border-color:var(--gold);}
+  .more{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);
+    padding-left:.3rem;}
+  .price{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;}
+  .addr{font-size:15.5px;margin-top:.1rem;}
+  .sub{font-size:13px;color:var(--ink-faint);margin-top:.15rem;}
+  .specs{font-size:14.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .tags{font-size:13px;color:var(--ink-faint);margin-top:.4rem;}
+  .fees{font-size:13.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .courtesy{font-size:12px;color:var(--ink-faint);margin-top:.6rem;padding-top:.55rem;
+        border-top:1px solid var(--border);line-height:1.5;}
+  
+  .pager{display:flex;align-items:center;justify-content:center;gap:1rem;
+    margin:2rem auto 0;max-width:640px;flex-wrap:wrap;}
+  .pg{display:inline-block;padding:.7rem 1.25rem;border-radius:8px;font-weight:700;
+    font-size:15px;text-decoration:none;background:var(--gold);color:#fff;}
+  .pg-off{background:var(--warm);color:var(--ink-faint);border:1px solid var(--border);}
+  .pg-now{font-size:14px;color:var(--ink-mid);}
+  .pill{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;
+        letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+        background:var(--warm);border:1px solid var(--border);color:var(--ink-mid);margin-left:.4rem;}
+
+  table{width:100%;max-width:820px;margin:0 auto;border-collapse:collapse;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        overflow:hidden;font-size:15px;}
+  th{text-align:left;padding:.55rem .7rem;font-weight:400;color:var(--ink-mid);font-size:13.5px;}
+  td{padding:.55rem .7rem;border-top:1px solid var(--border);}
+
+  .attrib{font-size:12.5px;color:var(--ink-faint);line-height:1.7;
+        margin:1.5rem auto 0;max-width:680px;text-align:center;}
+  .cta{background:var(--ink);color:#fff;border-radius:14px;padding:2rem 1.75rem;margin:2.5rem auto;max-width:900px;text-align:center;}
+  .cta h2{color:#fff;}
+  .cta p{color:#d8d2c8;font-size:16px;margin:0 auto 1.25rem;max-width:560px;}
+  .btn{display:inline-block;background:var(--gold);color:#fff;text-decoration:none;
+       padding:.8rem 1.6rem;border-radius:8px;font-weight:700;}
+  footer{border-top:1px solid var(--border);margin-top:3rem;padding:2rem 0 3rem;
+         font-size:13.5px;color:var(--ink-mid);line-height:1.7;text-align:center;}
+  footer a{color:var(--ink-mid);}
+  .muted{font-size:12.5px;color:var(--ink-faint);margin-top:.7rem;line-height:1.7;max-width:680px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">Putnam Realty Group
+      <small>Michael Putnam &middot; Sales Associate</small>
+    </div>
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Venice, Florida 34293</div>
+    <h1>Renaissance Homes for Sale</h1>
+    <p class="lede">Every home currently on the market in Renaissance at Wellen Park, the gated Mattamy community, shown alongside what Renaissance homes have actually sold for. Two separate sources, kept separate, so you can see the difference between what sellers are asking and what buyers have paid.</p>
+  </header>
+
+  <!-- ============ SECTION 1: STELLAR MLS ============ -->
+  <section class="section src-mls">
+    <div class="section-label">Source: Stellar MLS</div>
+    <h2>On the market now</h2>
+    <p class="note">Current listings in Renaissance. Some may be listed by brokerages other than
+    Putnam Realty Group; each listing names its own.</p>
+
+    `;
+
+const REN_TAIL = `
+
+    <!-- Article 19.23: source identification where listings appear.
+         Article 19.15: a contact for reporting inaccuracies. -->
+    <p class="attrib">
+      Listings courtesy of <strong>Stellar MLS</strong> as distributed by <strong>MLS GRID</strong>.
+      Information is deemed reliable but is not guaranteed accurate by Stellar MLS, MLS GRID, or
+      Putnam Realty Group, and should be independently verified. This information is provided
+      exclusively for consumers' personal, non-commercial use and may not be used for any purpose
+      other than to identify prospective properties consumers may be interested in purchasing.
+      Properties may be listed by brokerages other than Putnam Realty Group.
+      To report an inaccuracy, contact Michael Putnam at
+      <a href="tel:9416629941">941-662-9941</a> or Michael@PutnamRealtyGroup.com.
+      <span id="idx-updated"></span>
+    </p>
+  </section>
+
+  <!-- ============ SECTION 2: COUNTY PUBLIC RECORDS ============ -->
+  <section class="section src-county">
+    <div class="section-label">Source: Sarasota County public records</div>
+    <h2>What Renaissance homes have actually sold for</h2>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
+
+    <table>
+      <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>Jul 17, 2026</td><td>11789 Tapestry Ln</td><td>Villa</td><td>1,629 sqft</td><td><strong>$328,000</strong></td></tr>
+        <tr><td>Jul 9, 2026</td><td>11710 Alessandro Ln</td><td>Single-family</td><td>2,373 sqft</td><td><strong>$490,000</strong></td></tr>
+        <tr><td>Jul 8, 2026</td><td>11539 Tapestry Ln</td><td>Single-family</td><td>2,294 sqft</td><td><strong>$675,000</strong></td></tr>
+        <tr><td>Jun 30, 2026</td><td>20616 Galileo Pl</td><td>Villa</td><td>1,432 sqft</td><td><strong>$317,000</strong></td></tr>
+        <tr><td>Jun 26, 2026</td><td>20724 Galileo Pl</td><td>Villa</td><td>1,432 sqft</td><td><strong>$299,900</strong></td></tr>
+        <tr><td>Jun 25, 2026</td><td>11794 Sistine Ln</td><td>Single-family</td><td>2,086 sqft</td><td><strong>$578,500</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="note" style="margin-top:1rem;">Across <strong>51</strong> owner-to-owner resales in the past year, the Renaissance median ran <strong>$450,000</strong> ($234 a square foot). By type: single-family <strong>$550,000</strong> ($244 a square foot, 28 sales) and villas <strong>$328,000</strong> ($216 a square foot, 23 sales).</p>
+    <p class="note">Builder or owner resale? In the past year Renaissance's builder closed 10 villas at a median $223 a square foot, and owners resold 23 at $216 a square foot. That's close enough that, here, a resale and a new build of the same type sell at about the same rate per foot.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Renaissance's typical single-family resale price of <strong>$550,000</strong>, yearly property tax would be about <strong>$7,103</strong> without a homestead exemption, or about <strong>$6,518</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Renaissance sits inside the City of North Port for tax purposes, which carries a higher rate than unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
+
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
+    <a href="https://floridahomevalueai.com/renaissance"><strong>Look up what your own Renaissance home is worth &rarr;</strong></a></p>
+  </section>
+
+  <div class="cta">
+    <h2>Thinking about buying or selling in Renaissance?</h2>
+    <p>Michael Putnam works Renaissance and the surrounding Wellen Park market constantly.
+    You get a straight read from a local agent who answers the phone, not a call center.</p>
+    <a class="btn" href="tel:9416629941">Call or text 941-662-9941</a>
+  </div>
+
+  <footer>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
+    941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
+    <p class="muted">
+      <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
+      <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
+      <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
+      <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
+      <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance">Renaissance home values</a> &middot;
+      <a href="https://floridahomevalueai.com/">Florida Home Value AI</a>
+    </p>
+    <p class="muted">Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act.
+    This is not a solicitation of property currently listed with another broker.</p>
+  </footer>
+
+</div>
+
+<script>
+/* Thumbnails past the third load only when their card reaches the screen. */
+(function () {
+  var lazy = document.querySelectorAll('img[data-src]');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < lazy.length; i++) lazy[i].src = lazy[i].dataset.src;
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var img = e.target;
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+      io.unobserve(img);
+    });
+  }, { rootMargin: '300px' });
+  for (var j = 0; j < lazy.length; j++) io.observe(lazy[j]);
+})();
+
+/* Thumbnail clicks swap the main image. One listener for the whole page rather
+   than one per card — a page can carry 24 listings and 240 thumbnails. */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.g) return;
+  var main = document.getElementById(t.dataset.g);
+  if (!main) return;
+  main.src = t.dataset.full;
+  var strip = t.parentNode;
+  for (var i = 0; i < strip.children.length; i++) {
+    strip.children[i].classList && strip.children[i].classList.remove('on');
+  }
+  t.classList.add('on');
+});
+</script>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Property photos">
+  <div class="lb-bar"><span class="lb-count" id="lb-count"></span>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button></div>
+  <img id="lb-img" alt="">
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next photo">&#8250;</button>
+</div>
+<script>
+/* Lightbox. Every photo for a listing, opened from the main image.
+   One instance for the whole page rather than one per card. */
+(function () {
+  var BASE = 'https://fhv-idx-sync.cleirshusband.workers.dev/photo/';
+  var lb = document.getElementById('lb'), img = document.getElementById('lb-img'),
+      cnt = document.getElementById('lb-count');
+  var keys = [], at = 0, addr = '';
+
+  function show() {
+    img.src = BASE + keys[at];
+    img.alt = addr + ' \\u2014 photo ' + (at + 1);
+    cnt.textContent = addr + '  \\u00b7  ' + (at + 1) + ' of ' + keys.length;
+  }
+  function open(shot) {
+    keys = (shot.dataset.all || '').split('|').filter(Boolean);
+    if (!keys.length) return;
+    addr = shot.dataset.addr || '';
+    at = 0; show();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function step(n) { at = (at + n + keys.length) % keys.length; show(); }
+
+  document.addEventListener('click', function (e) {
+    var shot = e.target.closest && e.target.closest('.shot');
+    if (shot) { open(shot); return; }
+    if (e.target.id === 'lb-close' || e.target === lb) close();
+    if (e.target.id === 'lb-next') step(1);
+    if (e.target.id === 'lb-prev') step(-1);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+  /* Swipe, because most of this traffic is a phone. */
+  var x0 = null;
+  lb.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
+`;
+
+const SUNST_HEAD = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunstone Homes for Sale, Venice FL | Putnam Realty Group</title>
+<meta name="description" content="Current homes for sale in Sunstone at Wellen Park, the gated Mattamy community, Venice FL, from Putnam Realty Group. Live Stellar MLS listings alongside what Sunstone homes have actually sold for, and what a buyer would pay in property tax, from Sarasota County public records.">
+<link rel="canonical" href="https://floridahomevalueai.com/sunstone-homes-for-sale">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sunstone Homes for Sale, Venice FL | Putnam Realty Group">
+<meta property="og:description" content="Current Sunstone listings from Stellar MLS, alongside recorded Sarasota County sale prices. Putnam Realty Group, Nokomis.">
+<meta property="og:url" content="https://floridahomevalueai.com/sunstone-homes-for-sale">
+<meta property="og:image" content="https://floridahomevalueai.com/sunstone-og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://floridahomevalueai.com/sunstone-og.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=DM+Mono:wght@400&display=optional" rel="stylesheet">
+
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+
+<!-- RealEstateAgent entity. Deliberately NOT a listing schema: marking up another
+     brokerage's listings as our own structured data would misrepresent them. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent",
+"name":"Putnam Realty Group",
+"url":"https://floridahomevalueai.com/sunstone-homes-for-sale",
+"telephone":"+1-941-662-9941",
+"email":"Michael@PutnamRealtyGroup.com",
+"areaServed":[{"@type":"Place","name":"Nokomis, Florida"},{"@type":"Place","name":"Venice, Florida"},{"@type":"Place","name":"Sarasota County, Florida"}],
+"employee":{"@type":"RealEstateAgent","name":"Michael Putnam","jobTitle":"Sales Associate","identifier":"SL3220671"},
+"parentOrganization":{"@type":"Organization","name":"Putnam Realty Group LLC"}}
+</script>
+
+<style>
+  :root{ --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --ink:#1a1814;
+         --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8; --surface:#fff; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);
+       min-height:100vh;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem;}
+  a{color:var(--gold);}
+
+  /* Article 19.06 requires brokerage branding to be the most prominent on any page
+     showing Stellar MLS data. Putnam Realty Group is therefore the masthead here,
+     not Florida Home Value AI. The valuation pages, which carry no MLS data, keep
+     their own identity. */
+  .masthead{background:var(--ink);color:#fff;padding:1.1rem 0;}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .brand{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;}
+  .brand small{display:block;font-family:'DM Mono',monospace;font-size:10px;
+       letter-spacing:.14em;text-transform:uppercase;color:#c9c2b8;font-weight:400;margin-top:3px;}
+  .masthead a{color:#fff;text-decoration:none;font-weight:700;font-size:15px;}
+
+  header{text-align:center;padding:3.5rem 0 2.5rem;}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,3.5rem);
+     font-weight:600;line-height:1.15;margin-bottom:1.4rem;}
+  .lede{font-size:16px;color:var(--ink-mid);max-width:560px;margin:0 auto;
+        font-weight:300;line-height:1.75;}
+
+  .section{padding:3rem 0;}
+  .section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;
+       color:var(--ink-faint);text-transform:uppercase;margin-bottom:.6rem;text-align:center;}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;
+     text-align:center;margin-bottom:1rem;color:var(--ink);}
+  .note{font-size:16px;color:var(--ink-mid);margin:0 auto 1.75rem;max-width:640px;
+        text-align:center;}
+
+  /* The two data sources are kept in visually distinct, separately headed blocks.
+     Ben Martin (Stellar, Data & Technology Compliance): "if the listing search
+     results contains data from any other source than Stellar MLS then the Stellar
+     MLS portions must have Stellar MLS branding on them. Portions that are from
+     public records should also be identifiable as such. Typically, we recommend
+     doing this by creating a separate section with a header or other identifier
+     for the public records portion." */
+  .src-mls .section-label{color:var(--gold);}
+  .src-county .section-label{color:#6b7f6b;}
+  .src-county{background:var(--warm);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1rem;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:1.05rem 1.15rem;}
+  
+  .shot{margin:-1.05rem -1.15rem .8rem;border-radius:12px 12px 0 0;overflow:hidden;
+    background:var(--warm);aspect-ratio:4/3;}
+  .shot{position:relative;cursor:zoom-in;}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+  .viewall{position:absolute;right:.6rem;bottom:.6rem;background:rgba(26,24,20,.82);
+    color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;
+    padding:5px 10px;border-radius:6px;pointer-events:none;}
+
+  /* Lightbox. Full screen on a phone, arrows and swipe, Escape to close. */
+  .lb{position:fixed;inset:0;background:rgba(12,11,9,.96);z-index:9999;display:none;
+    flex-direction:column;align-items:center;justify-content:center;}
+  .lb.open{display:flex;}
+  .lb img{max-width:94vw;max-height:78vh;object-fit:contain;border-radius:6px;}
+  .lb-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:.9rem 1.1rem;color:#e8e2d8;font-size:14px;}
+  .lb-close{background:none;border:0;color:#e8e2d8;font-size:30px;line-height:1;
+    cursor:pointer;padding:0 .4rem;font-family:inherit;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);
+    border:0;color:#fff;font-size:26px;width:52px;height:52px;border-radius:50%;
+    cursor:pointer;line-height:1;}
+  .lb-prev{left:1rem;} .lb-next{right:1rem;}
+  .lb-count{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;}
+  @media(max-width:560px){ .lb-nav{width:44px;height:44px;font-size:22px;}
+    .lb-prev{left:.4rem;} .lb-next{right:.4rem;} }
+  .strip{display:flex;gap:4px;margin:-.4rem 0 .7rem;align-items:center;}
+  .strip{flex-wrap:wrap;}
+  .strip img{width:52px;height:40px;object-fit:cover;border-radius:5px;display:block;
+    background:var(--warm);
+    cursor:pointer;opacity:.62;transition:opacity .12s;border:2px solid transparent;}
+  .strip img:hover,.strip img.on{opacity:1;border-color:var(--gold);}
+  .more{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);
+    padding-left:.3rem;}
+  .price{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;}
+  .addr{font-size:15.5px;margin-top:.1rem;}
+  .sub{font-size:13px;color:var(--ink-faint);margin-top:.15rem;}
+  .specs{font-size:14.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .tags{font-size:13px;color:var(--ink-faint);margin-top:.4rem;}
+  .fees{font-size:13.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .courtesy{font-size:12px;color:var(--ink-faint);margin-top:.6rem;padding-top:.55rem;
+        border-top:1px solid var(--border);line-height:1.5;}
+  
+  .pager{display:flex;align-items:center;justify-content:center;gap:1rem;
+    margin:2rem auto 0;max-width:640px;flex-wrap:wrap;}
+  .pg{display:inline-block;padding:.7rem 1.25rem;border-radius:8px;font-weight:700;
+    font-size:15px;text-decoration:none;background:var(--gold);color:#fff;}
+  .pg-off{background:var(--warm);color:var(--ink-faint);border:1px solid var(--border);}
+  .pg-now{font-size:14px;color:var(--ink-mid);}
+  .pill{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;
+        letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+        background:var(--warm);border:1px solid var(--border);color:var(--ink-mid);margin-left:.4rem;}
+
+  table{width:100%;max-width:820px;margin:0 auto;border-collapse:collapse;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        overflow:hidden;font-size:15px;}
+  th{text-align:left;padding:.55rem .7rem;font-weight:400;color:var(--ink-mid);font-size:13.5px;}
+  td{padding:.55rem .7rem;border-top:1px solid var(--border);}
+
+  .attrib{font-size:12.5px;color:var(--ink-faint);line-height:1.7;
+        margin:1.5rem auto 0;max-width:680px;text-align:center;}
+  .cta{background:var(--ink);color:#fff;border-radius:14px;padding:2rem 1.75rem;margin:2.5rem auto;max-width:900px;text-align:center;}
+  .cta h2{color:#fff;}
+  .cta p{color:#d8d2c8;font-size:16px;margin:0 auto 1.25rem;max-width:560px;}
+  .btn{display:inline-block;background:var(--gold);color:#fff;text-decoration:none;
+       padding:.8rem 1.6rem;border-radius:8px;font-weight:700;}
+  footer{border-top:1px solid var(--border);margin-top:3rem;padding:2rem 0 3rem;
+         font-size:13.5px;color:var(--ink-mid);line-height:1.7;text-align:center;}
+  footer a{color:var(--ink-mid);}
+  .muted{font-size:12.5px;color:var(--ink-faint);margin-top:.7rem;line-height:1.7;max-width:680px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">Putnam Realty Group
+      <small>Michael Putnam &middot; Sales Associate</small>
+    </div>
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Venice, Florida 34293</div>
+    <h1>Sunstone Homes for Sale</h1>
+    <p class="lede">Every home currently on the market in Sunstone at Wellen Park, the gated Mattamy community, shown alongside what Sunstone homes have actually sold for. Two separate sources, kept separate, so you can see the difference between what sellers are asking and what buyers have paid.</p>
+  </header>
+
+  <!-- ============ SECTION 1: STELLAR MLS ============ -->
+  <section class="section src-mls">
+    <div class="section-label">Source: Stellar MLS</div>
+    <h2>On the market now</h2>
+    <p class="note">Current listings in Sunstone. Some may be listed by brokerages other than
+    Putnam Realty Group; each listing names its own.</p>
+
+    `;
+
+const SUNST_TAIL = `
+
+    <!-- Article 19.23: source identification where listings appear.
+         Article 19.15: a contact for reporting inaccuracies. -->
+    <p class="attrib">
+      Listings courtesy of <strong>Stellar MLS</strong> as distributed by <strong>MLS GRID</strong>.
+      Information is deemed reliable but is not guaranteed accurate by Stellar MLS, MLS GRID, or
+      Putnam Realty Group, and should be independently verified. This information is provided
+      exclusively for consumers' personal, non-commercial use and may not be used for any purpose
+      other than to identify prospective properties consumers may be interested in purchasing.
+      Properties may be listed by brokerages other than Putnam Realty Group.
+      To report an inaccuracy, contact Michael Putnam at
+      <a href="tel:9416629941">941-662-9941</a> or Michael@PutnamRealtyGroup.com.
+      <span id="idx-updated"></span>
+    </p>
+  </section>
+
+  <!-- ============ SECTION 2: COUNTY PUBLIC RECORDS ============ -->
+  <section class="section src-county">
+    <div class="section-label">Source: Sarasota County public records</div>
+    <h2>What Sunstone homes have actually sold for</h2>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
+
+    <table>
+      <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>Apr 1, 2026</td><td>12333 Asana Ct</td><td>Villa</td><td>1,744 sqft</td><td><strong>$385,000</strong></td></tr>
+        <tr><td>Mar 26, 2026</td><td>17953 Grand Prosperity Dr</td><td>Single-family</td><td>1,996 sqft</td><td><strong>$460,000</strong></td></tr>
+        <tr><td>Mar 12, 2026</td><td>12365 Asana Ct</td><td>Villa</td><td>1,744 sqft</td><td><strong>$360,000</strong></td></tr>
+        <tr><td>Feb 20, 2026</td><td>17962 Solstice Ave</td><td>Single-family</td><td>2,370 sqft</td><td><strong>$590,000</strong></td></tr>
+        <tr><td>Feb 19, 2026</td><td>12381 Asana Ct</td><td>Villa</td><td>1,502 sqft</td><td><strong>$330,000</strong></td></tr>
+        <tr><td>Feb 9, 2026</td><td>17945 Grand Prosperity Dr</td><td>Single-family</td><td>2,884 sqft</td><td><strong>$610,000</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="note" style="margin-top:1rem;">Across <strong>10</strong> owner-to-owner resales in the past year, the Sunstone median ran <strong>$415,000</strong> ($220 a square foot). By type: single-family <strong>$525,000</strong> ($225 a square foot, 6 sales) and villas <strong>$372,500</strong> ($220 a square foot, 4 sales).</p>
+    <p class="note">Builder or owner resale? In the past year Sunstone's builder closed 46 single-family homes at a median $239 a square foot, while owners resold six at a median $225 a square foot, about 6% less. On a 2,207 square foot home, that's roughly $32,000.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Sunstone's typical single-family resale price of <strong>$525,000</strong>, yearly property tax would be about <strong>$6,780</strong> without a homestead exemption, or about <strong>$6,195</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Sunstone sits inside the City of North Port for tax purposes, which carries a higher rate than unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
+
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
+    <a href="https://floridahomevalueai.com/sunstone"><strong>Look up what your own Sunstone home is worth &rarr;</strong></a></p>
+  </section>
+
+  <div class="cta">
+    <h2>Thinking about buying or selling in Sunstone?</h2>
+    <p>Michael Putnam works Sunstone and the surrounding Wellen Park market constantly.
+    You get a straight read from a local agent who answers the phone, not a call center.</p>
+    <a class="btn" href="tel:9416629941">Call or text 941-662-9941</a>
+  </div>
+
+  <footer>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
+    941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
+    <p class="muted">
+      <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
+      <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
+      <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
+      <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
+      <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone">Sunstone home values</a> &middot;
+      <a href="https://floridahomevalueai.com/">Florida Home Value AI</a>
+    </p>
+    <p class="muted">Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act.
+    This is not a solicitation of property currently listed with another broker.</p>
+  </footer>
+
+</div>
+
+<script>
+/* Thumbnails past the third load only when their card reaches the screen. */
+(function () {
+  var lazy = document.querySelectorAll('img[data-src]');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < lazy.length; i++) lazy[i].src = lazy[i].dataset.src;
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var img = e.target;
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+      io.unobserve(img);
+    });
+  }, { rootMargin: '300px' });
+  for (var j = 0; j < lazy.length; j++) io.observe(lazy[j]);
+})();
+
+/* Thumbnail clicks swap the main image. One listener for the whole page rather
+   than one per card — a page can carry 24 listings and 240 thumbnails. */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.g) return;
+  var main = document.getElementById(t.dataset.g);
+  if (!main) return;
+  main.src = t.dataset.full;
+  var strip = t.parentNode;
+  for (var i = 0; i < strip.children.length; i++) {
+    strip.children[i].classList && strip.children[i].classList.remove('on');
+  }
+  t.classList.add('on');
+});
+</script>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Property photos">
+  <div class="lb-bar"><span class="lb-count" id="lb-count"></span>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button></div>
+  <img id="lb-img" alt="">
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next photo">&#8250;</button>
+</div>
+<script>
+/* Lightbox. Every photo for a listing, opened from the main image.
+   One instance for the whole page rather than one per card. */
+(function () {
+  var BASE = 'https://fhv-idx-sync.cleirshusband.workers.dev/photo/';
+  var lb = document.getElementById('lb'), img = document.getElementById('lb-img'),
+      cnt = document.getElementById('lb-count');
+  var keys = [], at = 0, addr = '';
+
+  function show() {
+    img.src = BASE + keys[at];
+    img.alt = addr + ' \\u2014 photo ' + (at + 1);
+    cnt.textContent = addr + '  \\u00b7  ' + (at + 1) + ' of ' + keys.length;
+  }
+  function open(shot) {
+    keys = (shot.dataset.all || '').split('|').filter(Boolean);
+    if (!keys.length) return;
+    addr = shot.dataset.addr || '';
+    at = 0; show();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function step(n) { at = (at + n + keys.length) % keys.length; show(); }
+
+  document.addEventListener('click', function (e) {
+    var shot = e.target.closest && e.target.closest('.shot');
+    if (shot) { open(shot); return; }
+    if (e.target.id === 'lb-close' || e.target === lb) close();
+    if (e.target.id === 'lb-next') step(1);
+    if (e.target.id === 'lb-prev') step(-1);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+  /* Swipe, because most of this traffic is a phone. */
+  var x0 = null;
+  lb.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
+`;
+
+const BRIGHT_HEAD = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brightmore Homes for Sale, Venice FL | Putnam Realty Group</title>
+<meta name="description" content="Current homes for sale in Brightmore, Wellen Park&#39;s 55+ community, Venice FL, from Putnam Realty Group. Live Stellar MLS listings alongside what Brightmore homes have actually sold for, and what a buyer would pay in property tax, from Sarasota County public records.">
+<link rel="canonical" href="https://floridahomevalueai.com/brightmore-homes-for-sale">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Brightmore Homes for Sale, Venice FL | Putnam Realty Group">
+<meta property="og:description" content="Current Brightmore listings from Stellar MLS, alongside recorded Sarasota County sale prices. Putnam Realty Group, Nokomis.">
+<meta property="og:url" content="https://floridahomevalueai.com/brightmore-homes-for-sale">
+<meta property="og:image" content="https://floridahomevalueai.com/brightmore-og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://floridahomevalueai.com/brightmore-og.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=DM+Mono:wght@400&display=optional" rel="stylesheet">
+
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+
+<!-- RealEstateAgent entity. Deliberately NOT a listing schema: marking up another
+     brokerage's listings as our own structured data would misrepresent them. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent",
+"name":"Putnam Realty Group",
+"url":"https://floridahomevalueai.com/brightmore-homes-for-sale",
+"telephone":"+1-941-662-9941",
+"email":"Michael@PutnamRealtyGroup.com",
+"areaServed":[{"@type":"Place","name":"Nokomis, Florida"},{"@type":"Place","name":"Venice, Florida"},{"@type":"Place","name":"Sarasota County, Florida"}],
+"employee":{"@type":"RealEstateAgent","name":"Michael Putnam","jobTitle":"Sales Associate","identifier":"SL3220671"},
+"parentOrganization":{"@type":"Organization","name":"Putnam Realty Group LLC"}}
+</script>
+
+<style>
+  :root{ --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --ink:#1a1814;
+         --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8; --surface:#fff; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);
+       min-height:100vh;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem;}
+  a{color:var(--gold);}
+
+  /* Article 19.06 requires brokerage branding to be the most prominent on any page
+     showing Stellar MLS data. Putnam Realty Group is therefore the masthead here,
+     not Florida Home Value AI. The valuation pages, which carry no MLS data, keep
+     their own identity. */
+  .masthead{background:var(--ink);color:#fff;padding:1.1rem 0;}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .brand{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;}
+  .brand small{display:block;font-family:'DM Mono',monospace;font-size:10px;
+       letter-spacing:.14em;text-transform:uppercase;color:#c9c2b8;font-weight:400;margin-top:3px;}
+  .masthead a{color:#fff;text-decoration:none;font-weight:700;font-size:15px;}
+
+  header{text-align:center;padding:3.5rem 0 2.5rem;}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,3.5rem);
+     font-weight:600;line-height:1.15;margin-bottom:1.4rem;}
+  .lede{font-size:16px;color:var(--ink-mid);max-width:560px;margin:0 auto;
+        font-weight:300;line-height:1.75;}
+
+  .section{padding:3rem 0;}
+  .section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;
+       color:var(--ink-faint);text-transform:uppercase;margin-bottom:.6rem;text-align:center;}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;
+     text-align:center;margin-bottom:1rem;color:var(--ink);}
+  .note{font-size:16px;color:var(--ink-mid);margin:0 auto 1.75rem;max-width:640px;
+        text-align:center;}
+
+  /* The two data sources are kept in visually distinct, separately headed blocks.
+     Ben Martin (Stellar, Data & Technology Compliance): "if the listing search
+     results contains data from any other source than Stellar MLS then the Stellar
+     MLS portions must have Stellar MLS branding on them. Portions that are from
+     public records should also be identifiable as such. Typically, we recommend
+     doing this by creating a separate section with a header or other identifier
+     for the public records portion." */
+  .src-mls .section-label{color:var(--gold);}
+  .src-county .section-label{color:#6b7f6b;}
+  .src-county{background:var(--warm);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1rem;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:1.05rem 1.15rem;}
+  
+  .shot{margin:-1.05rem -1.15rem .8rem;border-radius:12px 12px 0 0;overflow:hidden;
+    background:var(--warm);aspect-ratio:4/3;}
+  .shot{position:relative;cursor:zoom-in;}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+  .viewall{position:absolute;right:.6rem;bottom:.6rem;background:rgba(26,24,20,.82);
+    color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;
+    padding:5px 10px;border-radius:6px;pointer-events:none;}
+
+  /* Lightbox. Full screen on a phone, arrows and swipe, Escape to close. */
+  .lb{position:fixed;inset:0;background:rgba(12,11,9,.96);z-index:9999;display:none;
+    flex-direction:column;align-items:center;justify-content:center;}
+  .lb.open{display:flex;}
+  .lb img{max-width:94vw;max-height:78vh;object-fit:contain;border-radius:6px;}
+  .lb-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:.9rem 1.1rem;color:#e8e2d8;font-size:14px;}
+  .lb-close{background:none;border:0;color:#e8e2d8;font-size:30px;line-height:1;
+    cursor:pointer;padding:0 .4rem;font-family:inherit;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);
+    border:0;color:#fff;font-size:26px;width:52px;height:52px;border-radius:50%;
+    cursor:pointer;line-height:1;}
+  .lb-prev{left:1rem;} .lb-next{right:1rem;}
+  .lb-count{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;}
+  @media(max-width:560px){ .lb-nav{width:44px;height:44px;font-size:22px;}
+    .lb-prev{left:.4rem;} .lb-next{right:.4rem;} }
+  .strip{display:flex;gap:4px;margin:-.4rem 0 .7rem;align-items:center;}
+  .strip{flex-wrap:wrap;}
+  .strip img{width:52px;height:40px;object-fit:cover;border-radius:5px;display:block;
+    background:var(--warm);
+    cursor:pointer;opacity:.62;transition:opacity .12s;border:2px solid transparent;}
+  .strip img:hover,.strip img.on{opacity:1;border-color:var(--gold);}
+  .more{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);
+    padding-left:.3rem;}
+  .price{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;}
+  .addr{font-size:15.5px;margin-top:.1rem;}
+  .sub{font-size:13px;color:var(--ink-faint);margin-top:.15rem;}
+  .specs{font-size:14.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .tags{font-size:13px;color:var(--ink-faint);margin-top:.4rem;}
+  .fees{font-size:13.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .courtesy{font-size:12px;color:var(--ink-faint);margin-top:.6rem;padding-top:.55rem;
+        border-top:1px solid var(--border);line-height:1.5;}
+  
+  .pager{display:flex;align-items:center;justify-content:center;gap:1rem;
+    margin:2rem auto 0;max-width:640px;flex-wrap:wrap;}
+  .pg{display:inline-block;padding:.7rem 1.25rem;border-radius:8px;font-weight:700;
+    font-size:15px;text-decoration:none;background:var(--gold);color:#fff;}
+  .pg-off{background:var(--warm);color:var(--ink-faint);border:1px solid var(--border);}
+  .pg-now{font-size:14px;color:var(--ink-mid);}
+  .pill{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;
+        letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+        background:var(--warm);border:1px solid var(--border);color:var(--ink-mid);margin-left:.4rem;}
+
+  table{width:100%;max-width:820px;margin:0 auto;border-collapse:collapse;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        overflow:hidden;font-size:15px;}
+  th{text-align:left;padding:.55rem .7rem;font-weight:400;color:var(--ink-mid);font-size:13.5px;}
+  td{padding:.55rem .7rem;border-top:1px solid var(--border);}
+
+  .attrib{font-size:12.5px;color:var(--ink-faint);line-height:1.7;
+        margin:1.5rem auto 0;max-width:680px;text-align:center;}
+  .cta{background:var(--ink);color:#fff;border-radius:14px;padding:2rem 1.75rem;margin:2.5rem auto;max-width:900px;text-align:center;}
+  .cta h2{color:#fff;}
+  .cta p{color:#d8d2c8;font-size:16px;margin:0 auto 1.25rem;max-width:560px;}
+  .btn{display:inline-block;background:var(--gold);color:#fff;text-decoration:none;
+       padding:.8rem 1.6rem;border-radius:8px;font-weight:700;}
+  footer{border-top:1px solid var(--border);margin-top:3rem;padding:2rem 0 3rem;
+         font-size:13.5px;color:var(--ink-mid);line-height:1.7;text-align:center;}
+  footer a{color:var(--ink-mid);}
+  .muted{font-size:12.5px;color:var(--ink-faint);margin-top:.7rem;line-height:1.7;max-width:680px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">Putnam Realty Group
+      <small>Michael Putnam &middot; Sales Associate</small>
+    </div>
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Venice, Florida 34293</div>
+    <h1>Brightmore Homes for Sale</h1>
+    <p class="lede">Every home currently on the market in Brightmore, Wellen Park's 55+ community, shown alongside what Brightmore homes have actually sold for. Two separate sources, kept separate, so you can see the difference between what sellers are asking and what buyers have paid.</p>
+  </header>
+
+  <!-- ============ SECTION 1: STELLAR MLS ============ -->
+  <section class="section src-mls">
+    <div class="section-label">Source: Stellar MLS</div>
+    <h2>On the market now</h2>
+    <p class="note">Current listings in Brightmore. Some may be listed by brokerages other than
+    Putnam Realty Group; each listing names its own.</p>
+
+    `;
+
+const BRIGHT_TAIL = `
+
+    <!-- Article 19.23: source identification where listings appear.
+         Article 19.15: a contact for reporting inaccuracies. -->
+    <p class="attrib">
+      Listings courtesy of <strong>Stellar MLS</strong> as distributed by <strong>MLS GRID</strong>.
+      Information is deemed reliable but is not guaranteed accurate by Stellar MLS, MLS GRID, or
+      Putnam Realty Group, and should be independently verified. This information is provided
+      exclusively for consumers' personal, non-commercial use and may not be used for any purpose
+      other than to identify prospective properties consumers may be interested in purchasing.
+      Properties may be listed by brokerages other than Putnam Realty Group.
+      To report an inaccuracy, contact Michael Putnam at
+      <a href="tel:9416629941">941-662-9941</a> or Michael@PutnamRealtyGroup.com.
+      <span id="idx-updated"></span>
+    </p>
+  </section>
+
+  <!-- ============ SECTION 2: COUNTY PUBLIC RECORDS ============ -->
+  <section class="section src-county">
+    <div class="section-label">Source: Sarasota County public records</div>
+    <h2>What Brightmore homes have actually sold for</h2>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
+
+    <table>
+      <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>Jul 15, 2026</td><td>11288 Boundless Ter</td><td>Single-family</td><td>1,685 sqft</td><td><strong>$437,500</strong></td></tr>
+        <tr><td>Jun 24, 2026</td><td>11463 Myakka Blue Dr</td><td>Single-family</td><td>2,390 sqft</td><td><strong>$795,000</strong></td></tr>
+        <tr><td>Apr 14, 2026</td><td>11222 Livewell Ct</td><td>Single-family</td><td>1,919 sqft</td><td><strong>$450,000</strong></td></tr>
+        <tr><td>Apr 8, 2026</td><td>11247 Boundless Ter</td><td>Villa</td><td>1,750 sqft</td><td><strong>$450,000</strong></td></tr>
+        <tr><td>Sep 23, 2025</td><td>11239 Boundless Ter</td><td>Villa</td><td>1,413 sqft</td><td><strong>$331,000</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="note" style="margin-top:1rem;">Across <strong>5</strong> owner-to-owner resales in the past year, the Brightmore median ran <strong>$450,000</strong> ($257 a square foot). By type: single-family <strong>$450,000</strong> ($260 a square foot, 3 sales) and villas <strong>$390,500</strong> ($246 a square foot, 2 sales).</p>
+    <p class="note">Builder or owner resale? In the past year Brightmore's builder closed 25 single-family homes at a median $290 a square foot, while owners resold three at a median $260 a square foot, about 11% less. On a 1,988 square foot home, that's roughly $61,000. Three owner resales is a small sample, so take that as a direction rather than a rule.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Brightmore's typical single-family resale price of <strong>$450,000</strong>, yearly property tax would be about <strong>$5,811</strong> without a homestead exemption, or about <strong>$5,226</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Most of Brightmore, 178 of its 191 parcels, sits inside the City of North Port for tax purposes; the other 13 are in unincorporated Sarasota County at a lower rate, so check which one a given home is in. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
+
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
+    <a href="https://floridahomevalueai.com/brightmore"><strong>Look up what your own Brightmore home is worth &rarr;</strong></a></p>
+  </section>
+
+  <div class="cta">
+    <h2>Thinking about buying or selling in Brightmore?</h2>
+    <p>Michael Putnam works Brightmore and the surrounding Wellen Park market constantly.
+    You get a straight read from a local agent who answers the phone, not a call center.</p>
+    <a class="btn" href="tel:9416629941">Call or text 941-662-9941</a>
+  </div>
+
+  <footer>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
+    941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
+    <p class="muted">
+      <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
+      <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
+      <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
+      <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
+      <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore">Brightmore home values</a> &middot;
+      <a href="https://floridahomevalueai.com/">Florida Home Value AI</a>
+    </p>
+    <p class="muted">Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act.
+    This is not a solicitation of property currently listed with another broker.</p>
+  </footer>
+
+</div>
+
+<script>
+/* Thumbnails past the third load only when their card reaches the screen. */
+(function () {
+  var lazy = document.querySelectorAll('img[data-src]');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < lazy.length; i++) lazy[i].src = lazy[i].dataset.src;
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var img = e.target;
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+      io.unobserve(img);
+    });
+  }, { rootMargin: '300px' });
+  for (var j = 0; j < lazy.length; j++) io.observe(lazy[j]);
+})();
+
+/* Thumbnail clicks swap the main image. One listener for the whole page rather
+   than one per card — a page can carry 24 listings and 240 thumbnails. */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.g) return;
+  var main = document.getElementById(t.dataset.g);
+  if (!main) return;
+  main.src = t.dataset.full;
+  var strip = t.parentNode;
+  for (var i = 0; i < strip.children.length; i++) {
+    strip.children[i].classList && strip.children[i].classList.remove('on');
+  }
+  t.classList.add('on');
+});
+</script>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Property photos">
+  <div class="lb-bar"><span class="lb-count" id="lb-count"></span>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button></div>
+  <img id="lb-img" alt="">
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next photo">&#8250;</button>
+</div>
+<script>
+/* Lightbox. Every photo for a listing, opened from the main image.
+   One instance for the whole page rather than one per card. */
+(function () {
+  var BASE = 'https://fhv-idx-sync.cleirshusband.workers.dev/photo/';
+  var lb = document.getElementById('lb'), img = document.getElementById('lb-img'),
+      cnt = document.getElementById('lb-count');
+  var keys = [], at = 0, addr = '';
+
+  function show() {
+    img.src = BASE + keys[at];
+    img.alt = addr + ' \\u2014 photo ' + (at + 1);
+    cnt.textContent = addr + '  \\u00b7  ' + (at + 1) + ' of ' + keys.length;
+  }
+  function open(shot) {
+    keys = (shot.dataset.all || '').split('|').filter(Boolean);
+    if (!keys.length) return;
+    addr = shot.dataset.addr || '';
+    at = 0; show();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function step(n) { at = (at + n + keys.length) % keys.length; show(); }
+
+  document.addEventListener('click', function (e) {
+    var shot = e.target.closest && e.target.closest('.shot');
+    if (shot) { open(shot); return; }
+    if (e.target.id === 'lb-close' || e.target === lb) close();
+    if (e.target.id === 'lb-next') step(1);
+    if (e.target.id === 'lb-prev') step(-1);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+  /* Swipe, because most of this traffic is a phone. */
+  var x0 = null;
+  lb.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
+`;
+
+const SUNRISE_HEAD = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunrise Preserve Homes for Sale, Sarasota FL | Putnam Realty Group</title>
+<meta name="description" content="Current homes for sale in Sunrise Preserve, the maintenance-free Mattamy community in Palmer Ranch, Sarasota FL, from Putnam Realty Group. Live Stellar MLS listings alongside what Sunrise Preserve homes have actually sold for, and what a buyer would pay in property tax, from Sarasota County public records.">
+<link rel="canonical" href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sunrise Preserve Homes for Sale, Sarasota FL | Putnam Realty Group">
+<meta property="og:description" content="Current Sunrise Preserve listings from Stellar MLS, alongside recorded Sarasota County sale prices. Putnam Realty Group, Nokomis.">
+<meta property="og:url" content="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">
+<meta property="og:image" content="https://floridahomevalueai.com/sunrise-preserve-og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://floridahomevalueai.com/sunrise-preserve-og.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=DM+Mono:wght@400&display=optional" rel="stylesheet">
+
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XW1DFSRC2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XW1DFSRC2');
+</script>
+
+<!-- RealEstateAgent entity. Deliberately NOT a listing schema: marking up another
+     brokerage's listings as our own structured data would misrepresent them. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent",
+"name":"Putnam Realty Group",
+"url":"https://floridahomevalueai.com/sunrise-preserve-homes-for-sale",
+"telephone":"+1-941-662-9941",
+"email":"Michael@PutnamRealtyGroup.com",
+"areaServed":[{"@type":"Place","name":"Nokomis, Florida"},{"@type":"Place","name":"Venice, Florida"},{"@type":"Place","name":"Sarasota County, Florida"}],
+"employee":{"@type":"RealEstateAgent","name":"Michael Putnam","jobTitle":"Sales Associate","identifier":"SL3220671"},
+"parentOrganization":{"@type":"Organization","name":"Putnam Realty Group LLC"}}
+</script>
+
+<style>
+  :root{ --cream:#faf7f2; --warm:#f4f0e8; --gold:#b8722a; --ink:#1a1814;
+         --ink-mid:#4a4640; --ink-faint:#9a948e; --border:#e8e2d8; --surface:#fff; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);
+       min-height:100vh;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem;}
+  a{color:var(--gold);}
+
+  /* Article 19.06 requires brokerage branding to be the most prominent on any page
+     showing Stellar MLS data. Putnam Realty Group is therefore the masthead here,
+     not Florida Home Value AI. The valuation pages, which carry no MLS data, keep
+     their own identity. */
+  .masthead{background:var(--ink);color:#fff;padding:1.1rem 0;}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .brand{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.01em;}
+  .brand small{display:block;font-family:'DM Mono',monospace;font-size:10px;
+       letter-spacing:.14em;text-transform:uppercase;color:#c9c2b8;font-weight:400;margin-top:3px;}
+  .masthead a{color:#fff;text-decoration:none;font-weight:700;font-size:15px;}
+
+  header{text-align:center;padding:3.5rem 0 2.5rem;}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,3.5rem);
+     font-weight:600;line-height:1.15;margin-bottom:1.4rem;}
+  .lede{font-size:16px;color:var(--ink-mid);max-width:560px;margin:0 auto;
+        font-weight:300;line-height:1.75;}
+
+  .section{padding:3rem 0;}
+  .section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;
+       color:var(--ink-faint);text-transform:uppercase;margin-bottom:.6rem;text-align:center;}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;
+     text-align:center;margin-bottom:1rem;color:var(--ink);}
+  .note{font-size:16px;color:var(--ink-mid);margin:0 auto 1.75rem;max-width:640px;
+        text-align:center;}
+
+  /* The two data sources are kept in visually distinct, separately headed blocks.
+     Ben Martin (Stellar, Data & Technology Compliance): "if the listing search
+     results contains data from any other source than Stellar MLS then the Stellar
+     MLS portions must have Stellar MLS branding on them. Portions that are from
+     public records should also be identifiable as such. Typically, we recommend
+     doing this by creating a separate section with a header or other identifier
+     for the public records portion." */
+  .src-mls .section-label{color:var(--gold);}
+  .src-county .section-label{color:#6b7f6b;}
+  .src-county{background:var(--warm);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1rem;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:1.05rem 1.15rem;}
+  
+  .shot{margin:-1.05rem -1.15rem .8rem;border-radius:12px 12px 0 0;overflow:hidden;
+    background:var(--warm);aspect-ratio:4/3;}
+  .shot{position:relative;cursor:zoom-in;}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+  .viewall{position:absolute;right:.6rem;bottom:.6rem;background:rgba(26,24,20,.82);
+    color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;
+    padding:5px 10px;border-radius:6px;pointer-events:none;}
+
+  /* Lightbox. Full screen on a phone, arrows and swipe, Escape to close. */
+  .lb{position:fixed;inset:0;background:rgba(12,11,9,.96);z-index:9999;display:none;
+    flex-direction:column;align-items:center;justify-content:center;}
+  .lb.open{display:flex;}
+  .lb img{max-width:94vw;max-height:78vh;object-fit:contain;border-radius:6px;}
+  .lb-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:.9rem 1.1rem;color:#e8e2d8;font-size:14px;}
+  .lb-close{background:none;border:0;color:#e8e2d8;font-size:30px;line-height:1;
+    cursor:pointer;padding:0 .4rem;font-family:inherit;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);
+    border:0;color:#fff;font-size:26px;width:52px;height:52px;border-radius:50%;
+    cursor:pointer;line-height:1;}
+  .lb-prev{left:1rem;} .lb-next{right:1rem;}
+  .lb-count{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;}
+  @media(max-width:560px){ .lb-nav{width:44px;height:44px;font-size:22px;}
+    .lb-prev{left:.4rem;} .lb-next{right:.4rem;} }
+  .strip{display:flex;gap:4px;margin:-.4rem 0 .7rem;align-items:center;}
+  .strip{flex-wrap:wrap;}
+  .strip img{width:52px;height:40px;object-fit:cover;border-radius:5px;display:block;
+    background:var(--warm);
+    cursor:pointer;opacity:.62;transition:opacity .12s;border:2px solid transparent;}
+  .strip img:hover,.strip img.on{opacity:1;border-color:var(--gold);}
+  .more{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);
+    padding-left:.3rem;}
+  .price{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;}
+  .addr{font-size:15.5px;margin-top:.1rem;}
+  .sub{font-size:13px;color:var(--ink-faint);margin-top:.15rem;}
+  .specs{font-size:14.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .tags{font-size:13px;color:var(--ink-faint);margin-top:.4rem;}
+  .fees{font-size:13.5px;color:var(--ink-mid);margin-top:.45rem;}
+  .courtesy{font-size:12px;color:var(--ink-faint);margin-top:.6rem;padding-top:.55rem;
+        border-top:1px solid var(--border);line-height:1.5;}
+  
+  .pager{display:flex;align-items:center;justify-content:center;gap:1rem;
+    margin:2rem auto 0;max-width:640px;flex-wrap:wrap;}
+  .pg{display:inline-block;padding:.7rem 1.25rem;border-radius:8px;font-weight:700;
+    font-size:15px;text-decoration:none;background:var(--gold);color:#fff;}
+  .pg-off{background:var(--warm);color:var(--ink-faint);border:1px solid var(--border);}
+  .pg-now{font-size:14px;color:var(--ink-mid);}
+  .pill{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;
+        letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+        background:var(--warm);border:1px solid var(--border);color:var(--ink-mid);margin-left:.4rem;}
+
+  table{width:100%;max-width:820px;margin:0 auto;border-collapse:collapse;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        overflow:hidden;font-size:15px;}
+  th{text-align:left;padding:.55rem .7rem;font-weight:400;color:var(--ink-mid);font-size:13.5px;}
+  td{padding:.55rem .7rem;border-top:1px solid var(--border);}
+
+  .attrib{font-size:12.5px;color:var(--ink-faint);line-height:1.7;
+        margin:1.5rem auto 0;max-width:680px;text-align:center;}
+  .cta{background:var(--ink);color:#fff;border-radius:14px;padding:2rem 1.75rem;margin:2.5rem auto;max-width:900px;text-align:center;}
+  .cta h2{color:#fff;}
+  .cta p{color:#d8d2c8;font-size:16px;margin:0 auto 1.25rem;max-width:560px;}
+  .btn{display:inline-block;background:var(--gold);color:#fff;text-decoration:none;
+       padding:.8rem 1.6rem;border-radius:8px;font-weight:700;}
+  footer{border-top:1px solid var(--border);margin-top:3rem;padding:2rem 0 3rem;
+         font-size:13.5px;color:var(--ink-mid);line-height:1.7;text-align:center;}
+  footer a{color:var(--ink-mid);}
+  .muted{font-size:12.5px;color:var(--ink-faint);margin-top:.7rem;line-height:1.7;max-width:680px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand">Putnam Realty Group
+      <small>Michael Putnam &middot; Sales Associate</small>
+    </div>
+    <a href="tel:9416629941">941-662-9941</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Sarasota, Florida 34238</div>
+    <h1>Sunrise Preserve Homes for Sale</h1>
+    <p class="lede">Every home currently on the market in Sunrise Preserve, the maintenance-free Mattamy community in Palmer Ranch, shown alongside what Sunrise Preserve homes have actually sold for. Two separate sources, kept separate, so you can see the difference between what sellers are asking and what buyers have paid.</p>
+  </header>
+
+  <!-- ============ SECTION 1: STELLAR MLS ============ -->
+  <section class="section src-mls">
+    <div class="section-label">Source: Stellar MLS</div>
+    <h2>On the market now</h2>
+    <p class="note">Current listings in Sunrise Preserve. Some may be listed by brokerages other than
+    Putnam Realty Group; each listing names its own.</p>
+
+    `;
+
+const SUNRISE_TAIL = `
+
+    <!-- Article 19.23: source identification where listings appear.
+         Article 19.15: a contact for reporting inaccuracies. -->
+    <p class="attrib">
+      Listings courtesy of <strong>Stellar MLS</strong> as distributed by <strong>MLS GRID</strong>.
+      Information is deemed reliable but is not guaranteed accurate by Stellar MLS, MLS GRID, or
+      Putnam Realty Group, and should be independently verified. This information is provided
+      exclusively for consumers' personal, non-commercial use and may not be used for any purpose
+      other than to identify prospective properties consumers may be interested in purchasing.
+      Properties may be listed by brokerages other than Putnam Realty Group.
+      To report an inaccuracy, contact Michael Putnam at
+      <a href="tel:9416629941">941-662-9941</a> or Michael@PutnamRealtyGroup.com.
+      <span id="idx-updated"></span>
+    </p>
+  </section>
+
+  <!-- ============ SECTION 2: COUNTY PUBLIC RECORDS ============ -->
+  <section class="section src-county">
+    <div class="section-label">Source: Sarasota County public records</div>
+    <h2>What Sunrise Preserve homes have actually sold for</h2>
+    <p class="note">These are recorded closing prices from Sarasota County public records: what buyers paid,
+    not what sellers asked. <strong>This section contains no MLS data.</strong> Builder closings are excluded,
+    because a builder's price isn't a comparable sale for a home that's already been lived in.</p>
+
+    <table>
+      <thead><tr><th>Sold</th><th>Address</th><th>Type</th><th>Size</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>Jun 30, 2026</td><td>8733 Rain Song Rd</td><td>Villa</td><td>1,540 sqft</td><td><strong>$470,000</strong></td></tr>
+        <tr><td>Jun 12, 2026</td><td>5632 Long Shore Loop</td><td>Single-family</td><td>2,298 sqft</td><td><strong>$725,000</strong></td></tr>
+        <tr><td>May 8, 2026</td><td>5604 Morning Sun Dr</td><td>Single-family</td><td>2,489 sqft</td><td><strong>$814,500</strong></td></tr>
+        <tr><td>May 8, 2026</td><td>5841 Long Shore Loop</td><td>Single-family</td><td>1,843 sqft</td><td><strong>$629,900</strong></td></tr>
+        <tr><td>May 8, 2026</td><td>8792 Rain Song Rd</td><td>Villa</td><td>1,675 sqft</td><td><strong>$419,000</strong></td></tr>
+        <tr><td>Apr 30, 2026</td><td>5436 Hope Sound Cir</td><td>Single-family</td><td>1,843 sqft</td><td><strong>$525,000</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="note" style="margin-top:1rem;">Across <strong>17</strong> owner-to-owner resales in the past year, the Sunrise Preserve median ran <strong>$650,000</strong> ($327 a square foot). By type: single-family <strong>$814,250</strong> ($342 a square foot, 12 sales) and villas <strong>$440,000</strong> ($262 a square foot, 5 sales).</p>
+    <p class="note">Every recorded sale in Sunrise Preserve over the past year was an owner resale. None were builder closings.</p>
+    <p class="note">What a buyer would pay in property tax. A purchase resets the taxable value to about 89% of the price, so the seller's current bill doesn't carry over. At Sunrise Preserve's typical single-family resale price of <strong>$814,250</strong>, yearly property tax would be about <strong>$8,315</strong> without a homestead exemption, or about <strong>$7,886</strong> for a buyer who makes it their primary home, before any CDD and other non-ad valorem charges. Sunrise Preserve is taxed as unincorporated Sarasota County. <a href="https://floridahomevalueai.com/property-tax-calculator">Work out any price in the tax calculator &rarr;</a></p>
+
+    <p class="muted">Sarasota County public records, qualified owner-to-owner sales recorded August 18, 2025 through August 18, 2026. Figures are for general market awareness and are not appraisals.
+    <a href="https://floridahomevalueai.com/sunrise-preserve"><strong>Look up what your own Sunrise Preserve home is worth &rarr;</strong></a></p>
+  </section>
+
+  <div class="cta">
+    <h2>Thinking about buying or selling in Sunrise Preserve?</h2>
+    <p>Michael Putnam works Sunrise Preserve and the surrounding Palmer Ranch market constantly.
+    You get a straight read from a local agent who answers the phone, not a call center.</p>
+    <a class="btn" href="tel:9416629941">Call or text 941-662-9941</a>
+  </div>
+
+  <footer>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
+    941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
+    <p class="muted">
+      <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
+      <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
+      <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
+      <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
+      <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
+      <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve">Sunrise Preserve home values</a> &middot;
+      <a href="https://floridahomevalueai.com/">Florida Home Value AI</a>
+    </p>
+    <p class="muted">Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act.
+    This is not a solicitation of property currently listed with another broker.</p>
+  </footer>
+
+</div>
+
+<script>
+/* Thumbnails past the third load only when their card reaches the screen. */
+(function () {
+  var lazy = document.querySelectorAll('img[data-src]');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < lazy.length; i++) lazy[i].src = lazy[i].dataset.src;
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var img = e.target;
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+      io.unobserve(img);
+    });
+  }, { rootMargin: '300px' });
+  for (var j = 0; j < lazy.length; j++) io.observe(lazy[j]);
+})();
+
+/* Thumbnail clicks swap the main image. One listener for the whole page rather
+   than one per card — a page can carry 24 listings and 240 thumbnails. */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.g) return;
+  var main = document.getElementById(t.dataset.g);
+  if (!main) return;
+  main.src = t.dataset.full;
+  var strip = t.parentNode;
+  for (var i = 0; i < strip.children.length; i++) {
+    strip.children[i].classList && strip.children[i].classList.remove('on');
+  }
+  t.classList.add('on');
+});
+</script>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Property photos">
+  <div class="lb-bar"><span class="lb-count" id="lb-count"></span>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button></div>
+  <img id="lb-img" alt="">
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next photo">&#8250;</button>
+</div>
+<script>
+/* Lightbox. Every photo for a listing, opened from the main image.
+   One instance for the whole page rather than one per card. */
+(function () {
+  var BASE = 'https://fhv-idx-sync.cleirshusband.workers.dev/photo/';
+  var lb = document.getElementById('lb'), img = document.getElementById('lb-img'),
+      cnt = document.getElementById('lb-count');
+  var keys = [], at = 0, addr = '';
+
+  function show() {
+    img.src = BASE + keys[at];
+    img.alt = addr + ' \\u2014 photo ' + (at + 1);
+    cnt.textContent = addr + '  \\u00b7  ' + (at + 1) + ' of ' + keys.length;
+  }
+  function open(shot) {
+    keys = (shot.dataset.all || '').split('|').filter(Boolean);
+    if (!keys.length) return;
+    addr = shot.dataset.addr || '';
+    at = 0; show();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function step(n) { at = (at + n + keys.length) % keys.length; show(); }
+
+  document.addEventListener('click', function (e) {
+    var shot = e.target.closest && e.target.closest('.shot');
+    if (shot) { open(shot); return; }
+    if (e.target.id === 'lb-close' || e.target === lb) close();
+    if (e.target.id === 'lb-next') step(1);
+    if (e.target.id === 'lb-prev') step(-1);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+  /* Swipe, because most of this traffic is a phone. */
+  var x0 = null;
+  lb.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
+`;
+
 const PAGES = {
   '/palmero-homes-for-sale': { head: PALMERO_HEAD, tail: PALMERO_TAIL },
   '/talon-preserve-homes-for-sale': { head: TALON_HEAD, tail: TALON_TAIL },
   '/gran-paradiso-homes-for-sale': { head: GP_HEAD, tail: GP_TAIL },
-  '/islandwalk-homes-for-sale': { head: IW_HEAD, tail: IW_TAIL }
+  '/islandwalk-homes-for-sale': { head: IW_HEAD, tail: IW_TAIL },
+  '/grand-palm-homes-for-sale': { head: GPALM_HEAD, tail: GPALM_TAIL },
+  '/sarasota-national-homes-for-sale': { head: SNAT_HEAD, tail: SNAT_TAIL },
+  '/renaissance-homes-for-sale': { head: REN_HEAD, tail: REN_TAIL },
+  '/sunstone-homes-for-sale': { head: SUNST_HEAD, tail: SUNST_TAIL },
+  '/brightmore-homes-for-sale': { head: BRIGHT_HEAD, tail: BRIGHT_TAIL },
+  '/sunrise-preserve-homes-for-sale': { head: SUNRISE_HEAD, tail: SUNRISE_TAIL }
 };
 
 
@@ -2321,7 +4590,7 @@ const SEARCH_HEAD = `<!DOCTYPE html>
 <div class="masthead">
   <div class="wrap">
     <div class="brand">Putnam Realty Group
-      <small>Michael Putnam &middot; Sales Associate SL3220671 &middot; Broker: Brian Putnam Jr. BK3276432</small>
+      <small>Michael Putnam &middot; Sales Associate</small>
     </div>
     <a href="tel:9416629941">941-662-9941</a>
   </div>
@@ -2357,14 +4626,19 @@ const SEARCH_TAIL = `
   </div>
 
   <footer>
-    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate SL3220671 &middot;
-    Broker: Brian Putnam Jr. BK3276432<br>
+    <strong>Putnam Realty Group</strong> &middot; Michael Putnam, Sales Associate<br>
     941-662-9941 &middot; Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275
     <p class="muted">
       <a href="https://floridahomevalueai.com/palmero-homes-for-sale">Palmero</a> &middot;
       <a href="https://floridahomevalueai.com/talon-preserve-homes-for-sale">Talon Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/gran-paradiso-homes-for-sale">Gran Paradiso</a> &middot;
       <a href="https://floridahomevalueai.com/islandwalk-homes-for-sale">IslandWalk</a> &middot;
+      <a href="https://floridahomevalueai.com/grand-palm-homes-for-sale">Grand Palm</a> &middot;
+      <a href="https://floridahomevalueai.com/sarasota-national-homes-for-sale">Sarasota National</a> &middot;
+      <a href="https://floridahomevalueai.com/renaissance-homes-for-sale">Renaissance</a> &middot;
+      <a href="https://floridahomevalueai.com/sunstone-homes-for-sale">Sunstone</a> &middot;
+      <a href="https://floridahomevalueai.com/brightmore-homes-for-sale">Brightmore</a> &middot;
+      <a href="https://floridahomevalueai.com/sunrise-preserve-homes-for-sale">Sunrise Preserve</a> &middot;
       <a href="https://floridahomevalueai.com/home-search">Search all listings</a><br>
       <a href="https://floridahomevalueai.com/terms">Terms of Use</a> &middot;
       <a href="https://floridahomevalueai.com/privacy">Privacy Policy</a> &middot;
