@@ -69,7 +69,7 @@
       for(var i=0;i<q.length;i++) q[i]();
     };
     script('/fhv-p-'+tag+'.js?v=20260916a', fin);
-    script('/fhv-c-'+tag+'.js?v=20260921c', fin);
+    script('/fhv-c-'+tag+'.js?v=20260921d', fin);
   }
 
   function ensure(st, cb){
@@ -178,13 +178,15 @@
   function noComps(subj){
     return '<div style="margin-top:1.6rem;">'
       +'<div style="font-family:\'Playfair Display\',serif;font-size:1.45rem;font-weight:700;margin-bottom:.2rem;">'
-      +'Nothing comparable has sold here recently</div>'
+      +'No owner resale to compare yet</div>'
       +'<p style="font-size:16px;color:var(--ink-mid,#4a4640);margin:0;">'
-      +'No home in '+esc(subj.com)+' of your type and size has changed hands in the past twelve months. '
-      +'That happens in smaller communities and with larger homes. '
-      +'<a href="/home-search" style="color:#b8722a;">See what is on the market now</a>, or call me and I will '
+      +'No home in '+esc(subj.com)+' of your type and size has been resold by its owner in the past twelve months. '
+      +'In newer communities most sales are still the builder\'s, and a builder\'s price isn\'t a fair comparison '
+      +'for a home that\'s already been lived in. In smaller communities it can simply be quiet. '
+      +'<a href="/home-search" style="color:#b8722a;">See what\'s on the market now</a>, or call me and I\'ll '
       +'work out what the nearest sales say about your address.</p></div>';
   }
+
 
   /* ---- the result block -------------------------------------------------- */
   function brandHeader(addr){
