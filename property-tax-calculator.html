@@ -470,7 +470,13 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
        would contradict the warning at the top of the result. */
     var just = row[10], gap = Math.max(0, just - row[3]);
     if(gap > 15000 && !row[16]){
-      var resetTax = Math.max(0, just - 250000) * d.nonschool/1000 + Math.max(0, just - 25000) * d.school/1000;
+      /* Veteran, disability, senior and widow exemptions belong to the PERSON,
+         not the house, so they move with the owner. Apply them to the
+         market-value home too, otherwise the whole gap gets blamed on Save Our
+         Homes when most of it comes from an exemption they would keep. */
+      var xtra = Math.max(0, row[4] - STD);
+      var resetTax = Math.max(0, just - 250000 - xtra) * d.nonschool/1000
+                   + Math.max(0, just - 25000 - xtra) * d.school/1000;
       var keepTax  = y28.nonschool + y28.school;
       h += '<div style="background:var(--warm);border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:1rem 0;border-radius:var(--radius);">'
          + '<div style="font-weight:800;margin-bottom:0.35rem;">If you were thinking of moving</div>'
@@ -478,7 +484,8 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);font
          + ' below market. The county puts the market value of this home at ' + money(just)
          + ' and taxes you on ' + money(row[3]) + '.</p>'
          + '<p style="margin:0 0 0.6rem;"><strong>That benefit resets when the home sells.</strong> An identical home bought at market value today would be taxed on the full '
-         + money(just) + ', which at 2028 rates is roughly ' + money(resetTax) + ' a year against your ' + money(keepTax) + '.</p>'
+         + money(just) + ', which at 2028 rates is roughly ' + money(resetTax) + ' a year against your ' + money(keepTax)
+         + (xtra > 0 ? ', assuming your other exemptions come with you, as they normally do' : '') + '.</p>'
          + '<p style="margin:0;">Florida portability lets you carry up to $500,000 of that benefit to a new Florida homestead, which in your case would cover '
          + (gap <= 500000 ? 'all of it' : 'most of it') + '. It is not automatic and it has its own deadline, so ask the Property Appraiser before you list anything.</p>'
          + (gap >= 100000
