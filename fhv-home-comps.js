@@ -229,7 +229,9 @@
     var drip=(kind==='drip');
     var d=document.createElement('div');
     d.id='fhv-em'; d.style.cssText='width:100%;margin-top:.8rem;';
-    d.innerHTML='<input id="fhv-em-in" type="'+(drip?'email':'tel')+'" placeholder="'
+    d.innerHTML=(drip ? '' : '<input id="fhv-em-name" type="text" autocomplete="given-name" placeholder="your first name (optional)" '
+      +'style="font-size:17px;padding:.7rem;border:1px solid #e8e2d8;border-radius:8px;width:260px;max-width:100%;margin-bottom:.5rem;"><br>')
+      +'<input id="fhv-em-in" type="'+(drip?'email':'tel')+'" placeholder="'
       +(drip?'your email':'your phone number')+'" style="font-size:17px;'
       +'padding:.7rem;border:1px solid #e8e2d8;border-radius:8px;width:260px;max-width:100%;"> '
       +'<button type="button" id="fhv-em-go" style="font-size:16px;font-weight:700;padding:.7rem 1.2rem;'
@@ -239,11 +241,13 @@
              +'message has an unsubscribe link.'
              : 'Your number stays with me. I only use it to call you about your home.')+'</div>';
     box.appendChild(d);
-    document.getElementById('fhv-em-in').focus();
+    document.getElementById(drip ? 'fhv-em-in' : 'fhv-em-name').focus();
     document.getElementById('fhv-em-go').onclick=function(){
       var v=(document.getElementById('fhv-em-in').value||'').trim();
       if(drip){ if(v.indexOf('@')<1) return; lead(addr, community||'', v, '', 'drip'); }
-      else    { if(v.replace(/[^0-9]/g,'').length<10) return; lead(addr, community||'', '', v, 'call'); }
+      else    { if(v.replace(/[^0-9]/g,'').length<10) return;
+                var nm=((document.getElementById('fhv-em-name')||{}).value||'').trim().slice(0,60);
+                lead(addr, community||'', '', v, 'call', nm); }
       d.innerHTML = drip
         ? '<div style="font-size:16px;">Got it. I\'ll set that up for you, usually the same day. You\'ll get an '
           +'email whenever a home like yours goes up for sale, cuts its price, goes under contract or sells.</div>'
@@ -262,7 +266,7 @@
     }).join(' | ');
     return t;
   }
-  function lead(addr, community, email, phone, kind){
+  function lead(addr, community, email, phone, kind, name){
     /* The page fires on every load with ?addr= in it, so the back button, a
        refresh or reopening a saved link each sent another email about the same
        visit (Michael got four in a row, 21 Sep 2026). An anonymous lookup now
@@ -296,6 +300,7 @@
                : 'HOME PAGE - address lookup with comps',
           email: email || '',
           phone: phone || '',
+          name: name || '',
           agent_name:'Michael Putnam', agent_email:'michael@putnamrealtygroup.com'
         })
       });
