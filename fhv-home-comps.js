@@ -210,33 +210,45 @@
     return '<div class="fhv-actions" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.5rem;">' + tax
       +'<button type="button" id="fhv-print" style="font-size:16px;font-weight:700;padding:.7rem 1.3rem;'
       +'border-radius:8px;border:1px solid #e8e2d8;background:#fff;cursor:pointer;">Print this</button>'
-      +'<button type="button" id="fhv-email" style="font-size:16px;font-weight:700;padding:.7rem 1.3rem;'
-      +'border-radius:8px;border:0;background:#b8722a;color:#fff;cursor:pointer;">Email it to me</button>'
+      +'<button type="button" id="fhv-drip" style="font-size:16px;font-weight:700;padding:.7rem 1.3rem;'
+      +'border-radius:8px;border:0;background:#b8722a;color:#fff;cursor:pointer;">Email me when a home like mine sells</button>'
+      +'<button type="button" id="fhv-call" style="font-size:16px;font-weight:700;padding:.7rem 1.3rem;'
+      +'border-radius:8px;border:1px solid #b8722a;background:#fff;color:#1a1814;cursor:pointer;">Have Michael call me</button>'
       +'<a href="tel:9416629941" style="font-size:16px;font-weight:700;padding:.7rem 1.3rem;border-radius:8px;'
       +'border:1px solid #e8e2d8;background:#fff;color:#1a1814;text-decoration:none;">Call 941-662-9941</a></div>';
   }
 
-  function askEmail(addr, community){
-    var box=document.getElementById('fhv-email').parentNode;
-    if(document.getElementById('fhv-em')) return;
+  /* Two requests, named the way Michael works: a DRIP request (ongoing emails
+     about homes like theirs, which he sets up in OneHome) and a CALL request.
+     The labels in `wants` are what the fhv-alerts worker watches for, so it can
+     send him "ACTION NEEDED" within minutes. Do not rename them without
+     changing the worker too. */
+  function askContact(kind, addr, community){
+    var box=document.getElementById('fhv-drip').parentNode;
+    var old=document.getElementById('fhv-em'); if(old) old.parentNode.removeChild(old);
+    var drip=(kind==='drip');
     var d=document.createElement('div');
     d.id='fhv-em'; d.style.cssText='width:100%;margin-top:.8rem;';
-    d.innerHTML='<input id="fhv-em-in" type="email" placeholder="your email" style="font-size:17px;'
+    d.innerHTML='<input id="fhv-em-in" type="'+(drip?'email':'tel')+'" placeholder="'
+      +(drip?'your email':'your phone number')+'" style="font-size:17px;'
       +'padding:.7rem;border:1px solid #e8e2d8;border-radius:8px;width:260px;max-width:100%;"> '
       +'<button type="button" id="fhv-em-go" style="font-size:16px;font-weight:700;padding:.7rem 1.2rem;'
-      +'border-radius:8px;border:0;background:#b8722a;color:#fff;cursor:pointer;">Send it</button>'
+      +'border-radius:8px;border:0;background:#b8722a;color:#fff;cursor:pointer;">'+(drip?'Send me updates':'Call me')+'</button>'
       +'<div style="font-size:14px;color:#6b6560;margin-top:.5rem;">'
-      +'Your email address stays with me. I never sell it, share it or give it to anyone, and every '
-      +'message has an unsubscribe link.</div>';
+      +(drip ? 'Your email address stays with me. I never sell it, share it or give it to anyone, and every '
+             +'message has an unsubscribe link.'
+             : 'Your number stays with me. I only use it to call you about your home.')+'</div>';
     box.appendChild(d);
+    document.getElementById('fhv-em-in').focus();
     document.getElementById('fhv-em-go').onclick=function(){
       var v=(document.getElementById('fhv-em-in').value||'').trim();
-      if(v.indexOf('@')<1) return;
-      lead(addr, community||'', v);
-      /* Michael sends this himself from his own inbox. Do not claim an
-         automatic email until the lead vault knows about this lead type. */
-      d.innerHTML='<div style="font-size:16px;">Got it. I\'ll send this to you myself, '
-        +'usually the same day. If you\'d like it sooner, call or text 941-662-9941.</div>';
+      if(drip){ if(v.indexOf('@')<1) return; lead(addr, community||'', v, '', 'drip'); }
+      else    { if(v.replace(/[^0-9]/g,'').length<10) return; lead(addr, community||'', '', v, 'call'); }
+      d.innerHTML = drip
+        ? '<div style="font-size:16px;">Got it. I\'ll set that up for you, usually the same day. You\'ll get an '
+          +'email whenever a home like yours goes up for sale, cuts its price, goes under contract or sells.</div>'
+        : '<div style="font-size:16px;">Got it. I\'ll call you, usually the same day. If it\'s easier, call or '
+          +'text me any time at 941-662-9941.</div>';
     };
   }
 
@@ -250,13 +262,13 @@
     }).join(' | ');
     return t;
   }
-  function lead(addr, community, email){
+  function lead(addr, community, email, phone, kind){
     /* The page fires on every load with ?addr= in it, so the back button, a
        refresh or reopening a saved link each sent another email about the same
        visit (Michael got four in a row, 21 Sep 2026). An anonymous lookup now
        sends once per address per browser every twelve hours. A visitor
        handing over their email always goes through. */
-    if(!email){
+    if(!email && !phone){
       try{
         var k='fhv-lead:'+tidy(addr), last=+(localStorage.getItem(k)||0);
         if(Date.now()-last < 12*3600*1000) return;
@@ -279,8 +291,11 @@
              comps go there as well as in homeowner_note. */
           insight: (rprValue() ? ('RPR '+rprValue()+(rprRange()?', range '+rprRange():'')+'. ') : '')
                    + compsNote(),
-          wants: email ? 'HOME PAGE - emailed the result to themselves' : 'HOME PAGE - address lookup with comps',
+          wants: kind==='drip' ? 'DRIP REQUEST - email me when a home like mine sells'
+               : kind==='call' ? 'CALL REQUEST - have Michael call me'
+               : 'HOME PAGE - address lookup with comps',
           email: email || '',
+          phone: phone || '',
           agent_name:'Michael Putnam', agent_email:'michael@putnamrealtygroup.com'
         })
       });
@@ -442,7 +457,8 @@
           + 'the nearest sales say about your home, call or text me and I\'ll pull them myself.</p>'
           + actions(addr) + '</div>';
         document.getElementById('fhv-print').onclick=function(){ window.fhvPrint(); };
-        document.getElementById('fhv-email').onclick=function(){ askEmail(addr, ''); };
+        document.getElementById('fhv-drip').onclick=function(){ askContact('drip', addr, ''); };
+        document.getElementById('fhv-call').onclick=function(){ askContact('call', addr, ''); };
         LAST={comps:[],window:'',subj:null,subjCom:''};
         setTimeout(function(){ lead(addr,''); },1800);
         return;
@@ -459,7 +475,8 @@
         + 'usually what separates two homes that look identical on paper.</p>'
         + actions(addr) + '</div>';
       document.getElementById('fhv-print').onclick=function(){ window.fhvPrint(); };
-      document.getElementById('fhv-email').onclick=function(){ askEmail(addr, subj.com); };
+      document.getElementById('fhv-drip').onclick=function(){ askContact('drip', addr, subj.com); };
+      document.getElementById('fhv-call').onclick=function(){ askContact('call', addr, subj.com); };
       setTimeout(function(){ lead(addr, subj.com); }, 1800);
     });
   })();
