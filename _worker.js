@@ -708,7 +708,35 @@ async function hpData(env, origin) {
   });
   resales.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
 
-  HP_DATA = { c: raw.community, parcels: parcels, bySlug: bySlug, sales: salesByParcel, resales: resales, rpr: raw.rpr || {} };
+  /* ---- never trust the data file to be in step with this code -------------
+     The worker and hp-granparadiso.json are deployed as two separate files, and
+     on 24 September the worker went up with the data file left behind. The new
+     code asked for c.ratio_now, the old file did not have it, and every address
+     page returned "temporarily unavailable" until the file caught up.
+     A page must never go down because a number is missing. Anything the code
+     relies on gets a sane default here, once, and the features that need real
+     values check for them rather than assuming. */
+  const c = raw.community || {};
+  if (!c.types)        c.types = ['Single-family', 'Villa', 'Townhome', 'Condo'];
+  if (!c.districts)    c.districts = { '0100': { name: 'Sarasota County (unincorporated)', nonschool: 5.3787, school: 6.095 } };
+  if (!c.std_exemption) c.std_exemption = 51411;
+  if (!c.new_2027)     c.new_2027 = 150000;
+  if (!c.new_2028)     c.new_2028 = 250000;
+  if (!c.trend)        c.trend = {};
+  if (!c.name)         c.name = 'this community';
+  if (!c.city)         c.city = '';
+  if (!c.region)       c.region = '';
+  if (!c.roll)         c.roll = 'the county certified roll';
+  if (!c.parcels)      c.parcels = parcels.length;
+  /* ratio_now drives the market context and the time adjustment. Without it the
+     page simply leaves those parts out rather than failing. */
+  if (typeof c.ratio_now !== 'number') c.ratio_now = null;
+  if (typeof c.ratio_peak !== 'number') c.ratio_peak = null;
+  if (!c.ratio_index)  c.ratio_index = null;
+  if (!c.just_ratio)   c.just_ratio = c.ratio_now;
+  if (!c.just_ratio_n) c.just_ratio_n = 0;
+
+  HP_DATA = { c: c, parcels: parcels, bySlug: bySlug, sales: salesByParcel, resales: resales, rpr: raw.rpr || {} };
   return HP_DATA;
 }
 
@@ -1119,11 +1147,14 @@ function hpPage(D, p, host) {
              a home whose own multiple was 1.67, which reads as the page
              contradicting itself within two sentences. It now states this
              home's own multiple first and only calls it normal when it is. */
-          const normal = Math.abs(mult - c.ratio_now) < 0.15;
+          const haveRatio = typeof c.ratio_now === 'number' && c.ratio_now > 0;
+          const normal = haveRatio && Math.abs(mult - c.ratio_now) < 0.15;
           h += '<p class="note"><strong>Why this is not the county\'s number.</strong> '
             + 'The county puts the market value of this home at ' + hpMoney(p.just) + '. '
             + 'The figure above works out at ' + mult.toFixed(2) + ' times that. '
-            + (normal
+            + (!haveRatio
+                ? 'Homes here routinely sell for more than the county figure.'
+              : normal
                 ? 'That is the ordinary relationship here: across ' + c.just_ratio_n + ' '
                   + hpEsc(c.name) + ' homes sold in the last two years, the typical one went for '
                   + c.ratio_now.toFixed(2) + ' times what the county said that same home was worth.'
@@ -1912,12 +1943,12 @@ function hpLookupPage(D, host, q, matches, tried) {
   const c = D.c;
   let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-    + '<title>What is my home worth? | Florida Home Value AI</title>'
-    + '<meta name="description" content="Type your address and see what you have gained since you bought, what homes like yours have actually sold for, and what the November ballot does to your tax bill. Sarasota County public records. Free, no signup.">'
+    + '<title>What homes on your street actually sold for | Florida Home Value AI</title>'
+    + '<meta name="description" content="Type your address and see the recorded price of every comparable home near you, what the November ballot does to your tax bill, and what you would walk away with if you sold. Sarasota County public records.">'
     + '<link rel="canonical" href="https://' + host + '/my-home">'
     + '<meta property="og:type" content="website">'
-    + '<meta property="og:title" content="See what your own home has gained since you bought it">'
-    + '<meta property="og:description" content="Type your address. Recorded sale prices from your own neighborhood, your Save Our Homes benefit, and your tax bill before and after the November ballot. Free, no signup. Michael Putnam, Putnam Realty Group.">'
+    + '<meta property="og:title" content="What homes on your street actually sold for">'
+    + '<meta property="og:description" content="Type your address. The recorded price of every comparable home near you, from Sarasota County records. Not an asking price, not an estimate from a national website. Michael Putnam, Putnam Realty Group.">'
     + '<meta property="og:image" content="https://' + host + '/og-image-fhv.jpg">'
     + '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
     + '<meta name="twitter:card" content="summary_large_image">'
@@ -1929,12 +1960,13 @@ function hpLookupPage(D, host, q, matches, tried) {
   h += '<div class="mast">'
     +   '<div class="brandline"><img src="/putnam-mark.png" alt="" class="mark">'
     +     'Florida Home Value AI &middot; Putnam Realty Group</div>'
-    +   '<h1>What has your home gained since you bought it?</h1>'
-    +   '<p class="lede">Type your address. You get what you paid against what homes like yours have '
-    +   'actually sold for, what Save Our Homes has saved you, and what the November ballot does to your '
-    +   'tax bill. Every figure comes from Sarasota County public records.</p>'
-    +   '<p class="lede"><strong>Free, no signup, and nothing is hidden behind an email box.</strong> '
-    +   'The page it builds is permanent and it is yours to keep.</p>'
+    +   '<h1>What homes on your street actually sold for</h1>'
+    +   '<p class="lede">Not asking prices. Not an estimate from a national website. The price that was actually '
+    +   'recorded on the deed when the house down the street changed hands.</p>'
+    +   '<p class="lede">Type your address and the page builds itself around your home, from Sarasota County '
+    +   'public records.</p>'
+    +   '<p class="lede">The page it builds is yours to keep. The link is permanent and it still works in two '
+    +   'years. There is nothing to fill in.</p>'
     + '</div>';
 
   h += '<form class="card lookup" method="GET" action="/my-home" autocomplete="off">'
@@ -1945,11 +1977,12 @@ function hpLookupPage(D, host, q, matches, tried) {
     +   '<button type="submit">Show me</button>'
     + '</div>'
     + '<div id="hpsuggest" class="suggest"></div>'
-    + '<p class="small" id="hphint">Start with the house number, for example 20730. '
-    + 'Right now this covers the ' + c.parcels.toLocaleString('en-US') + ' homes in '
-    + hpEsc(c.name) + ', ' + hpEsc(c.city) + '. Other communities are being added. '
-    + 'If yours is not here yet, text the address to <a href="sms:19416629941">941-662-9941</a> and I will '
-    + 'do it by hand and send you the link.</p>'
++ '<div class="coverage"><strong>Built so far: ' + hpEsc(c.name) + ', ' + hpEsc(c.city) + '.</strong> '
++ 'That is ' + c.parcels.toLocaleString('en-US') + ' homes. IslandWalk, Palmero, Talon Preserve, Grand Palm, '
++ 'Sarasota National and Sunrise Preserve are being added next. '
++ 'If your home is not in yet, text the address to <a href="sms:19416629941">941-662-9941</a>. '
++ 'I will build your page by hand and send you the link, and it tells me which community to do first.</div>'
+    + '<p class="small" id="hphint">Start with the house number, for example 20730.</p>'
     + '</form>';
 
   if (tried && matches.length > 1) {
@@ -1974,14 +2007,16 @@ function hpLookupPage(D, host, q, matches, tried) {
       + '</div>';
   }
 
-  h += '<div class="card quiet"><h2>What you get, before you give anything</h2>'
+  h += '<div class="card quiet"><h2>What the page shows you</h2>'
     + '<ul class="what">'
-    + '<li><strong>What you have gained since you bought.</strong> What you paid, against what comparable homes are selling for now.</li>'
-    + '<li><strong>The sales behind that number.</strong> Full addresses, sizes, dates and recorded prices, so you can check every one against the county.</li>'
-    + '<li><strong>What Save Our Homes has saved you</strong>, in dollars a year, and what happens to it when you sell.</li>'
+    + '<li><strong>Every comparable sale near you.</strong> Full addresses, sizes, dates and the price on the deed, '
+    + 'so you can look up every one of them yourself.</li>'
+    + '<li><strong>Where your own home sits among them,</strong> and how far it has moved since you bought it, '
+    + 'up or down.</li>'
+    + '<li><strong>What Save Our Homes has saved you</strong>, in dollars a year, and what happens to it the day you sell.</li>'
     + '<li><strong>Your tax bill, line by line, before and after the November ballot.</strong></li>'
-    + '<li><strong>A net proceeds calculator</strong> with your own numbers in it.</li>'
-    + '<li><strong>Everything the county has recorded on your address.</strong></li>'
+    + '<li><strong>What you would walk away with</strong> after the costs of selling.</li>'
+    + '<li><strong>Every sale the county has recorded on your address</strong>, back to the day it was built.</li>'
     + '</ul>'
     + '<p class="small">No MLS data appears on these pages. Every figure is a public record or arithmetic on one. '
     + 'The pages are not indexed by search engines, so yours is not going to turn up in somebody else\'s search results.</p>'
@@ -2013,6 +2048,8 @@ const HP_LOOKUP_CSS = `
 .suggest a:first-child{border-top:1px solid var(--line);border-radius:8px 8px 0 0}
 .suggest a:last-child{border-radius:0 0 8px 8px}
 .suggest a:hover,.suggest a:focus{background:var(--warm)}
+.suggest .nomatch{padding:13px 15px;border:1px solid var(--line);border-radius:8px;background:#fdf3f1;font-size:16px;line-height:1.6}
+.coverage{margin:12px 0 4px;padding:13px 15px;background:var(--warm);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;font-size:16px;line-height:1.6}
 .suggest .s2{display:block;font-size:15px;color:var(--dim)}
 ul.hits{list-style:none;padding:0;margin:0}
 ul.hits li{padding:11px 0;border-bottom:1px solid var(--line);font-size:17px}
@@ -2027,8 +2064,16 @@ const HP_LOOKUP_JS = `
   var box=document.getElementById('hpq'), out=document.getElementById('hpsuggest');
   if(!box||!out) return;
   var t=null, last='';
-  function draw(list){
-    if(!list.length){ out.innerHTML=''; return; }
+  function draw(list, q){
+    /* Silence is indistinguishable from broken. When nothing matches, say so
+       and say why, rather than leaving an empty box under the cursor. */
+    if(!list.length){
+      out.innerHTML = '<div class="nomatch">No address here starts with <strong>'
+        + q.replace(/[&<>"]/g,'') + '</strong>. '
+        + 'Either the community is not built yet, or the county spells it differently. '
+        + 'Text it to <a href="sms:19416629941">941-662-9941</a> and I will build it by hand.</div>';
+      return;
+    }
     out.innerHTML=list.map(function(r){
       return '<a href="/h/'+r.slug+'">'+r.addr+'<span class="s2">'+r.sub+'</span></a>';
     }).join('');
@@ -2040,7 +2085,7 @@ const HP_LOOKUP_JS = `
     if(q.length<2){ out.innerHTML=''; return; }
     fetch('/my-home/suggest?q='+encodeURIComponent(q))
       .then(function(r){ return r.json(); })
-      .then(function(d){ if(box.value.trim()===q) draw(d.matches||[]); })
+      .then(function(d){ if(box.value.trim()===q) draw(d.matches||[], q); })
       .catch(function(){});
   }
   box.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(go,120); });
@@ -2216,9 +2261,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');   // tolerate a trailing slash
 
-    /* /my-home is the address box, /h/<slug> is one owner's page. Handled
-       first so the alias repair below cannot rewrite them. Address pages are
-       not indexed, the address box is, and there is no MLS data on either. */
+    /* /my-home is the address box, /h/<slug> is one owner's page. */
     const hpPath = path.toLowerCase();
     if (hpPath === '/my-home' || hpPath === '/my-home/suggest'
         || hpPath === '/h' || hpPath.indexOf('/h/') === 0) {
@@ -2347,9 +2390,7 @@ export default {
        sitemap.xml, robots.txt, llms.txt. This line is not optional. */
     const assetRes = await env.ASSETS.fetch(request);
 
-    /* One link, sixty pages. Every page carries <nav aria-label="Site links">,
-       so the address box is added there as the page streams out rather than by
-       editing sixty files, which is how a link ends up on fifty-seven of them. */
+    /* One link, sixty pages, added as each page streams out. */
     const ct = assetRes.headers.get('content-type') || '';
     if (ct.indexOf('text/html') === -1) return assetRes;
     return new HTMLRewriter()
