@@ -651,16 +651,79 @@ async function renderSearch(env, url, saved) {
    the one owner they were built for, not for search.
    ========================================================================== */
 
-let HP_DATA = null;
+let HP_DATA = null;   /* first community, kept only as hpRange's fallback */
+let HP_REG  = null;   /* every community this worker serves */
 
+/* Each community is one file in the repo root. Adding a community is one line
+   here plus the file. A file that is missing or broken is skipped rather than
+   taking the other communities down with it. */
+const HP_FILES = ['/hp-granparadiso.json', '/hp-islandwalk.json'];
+
+/* Load every community once per isolate, and index every address across all of
+   them. Slugs carry the city, and no two communities have shared one yet, but
+   the first file to claim a slug keeps it so a collision can never make an
+   address ambiguous. */
 async function hpData(env, origin) {
-  if (HP_DATA) return HP_DATA;
+  if (HP_REG) return HP_REG;
   /* Built from the request's own origin rather than a made up hostname, because
      env.ASSETS matches on the whole URL and a foreign host can miss. */
   const base = origin || 'https://floridahomevalueai.com';
-  const res = await env.ASSETS.fetch(new Request(base + '/hp-granparadiso.json'));
-  if (!res.ok) throw new Error('hp data missing: ' + res.status);
-  const raw = await res.json();
+  const comms = [];
+  for (let i = 0; i < HP_FILES.length; i++) {
+    try {
+      const res = await env.ASSETS.fetch(new Request(base + HP_FILES[i]));
+      if (!res.ok) continue;
+      comms.push(hpLoadOne(await res.json()));
+    } catch (err) { /* one bad file must not cost the others */ }
+  }
+  if (!comms.length) throw new Error('hp data missing');
+
+  const allSlugs = {}, allParcels = [];
+  comms.forEach(function (D) {
+    D.parcels.forEach(function (p) {
+      allParcels.push(p);
+      if (!allSlugs[p.slug]) allSlugs[p.slug] = p;
+    });
+  });
+  HP_DATA = comms[0];
+  HP_REG = {
+    comms: comms,
+    parcels: allParcels,
+    bySlug: allSlugs,
+    homes: allParcels.length,
+    names: comms.map(function (D) { return D.c.name; })
+  };
+  return HP_REG;
+}
+
+function hpLoadOne(raw) {
+  /* ---- never trust the data file to be in step with this code -------------
+     The worker and hp-granparadiso.json are deployed as two separate files, and
+     on 24 September the worker went up with the data file left behind. The new
+     code asked for c.ratio_now, the old file did not have it, and every address
+     page returned "temporarily unavailable" until the file caught up.
+     A page must never go down because a number is missing. Anything the code
+     relies on gets a sane default here, once, and the features that need real
+     values check for them rather than assuming. */
+  const c = raw.community || {};
+  if (!c.types)        c.types = ['Single-family', 'Villa', 'Townhome', 'Condo'];
+  if (!c.districts)    c.districts = { '0100': { name: 'Sarasota County (unincorporated)', nonschool: 5.3787, school: 6.095 } };
+  if (!c.std_exemption) c.std_exemption = 51411;
+  if (!c.new_2027)     c.new_2027 = 150000;
+  if (!c.new_2028)     c.new_2028 = 250000;
+  if (!c.trend)        c.trend = {};
+  if (!c.name)         c.name = 'this community';
+  if (!c.city)         c.city = '';
+  if (!c.region)       c.region = '';
+  if (!c.builder)      c.builder = 'the builder';
+  if (!c.roll)         c.roll = 'the county certified roll';
+  /* ratio_now drives the market context and the time adjustment. Without it the
+     page simply leaves those parts out rather than failing. */
+  if (typeof c.ratio_now !== 'number') c.ratio_now = null;
+  if (typeof c.ratio_peak !== 'number') c.ratio_peak = null;
+  if (!c.ratio_index)  c.ratio_index = null;
+  if (!c.just_ratio)   c.just_ratio = c.ratio_now;
+  if (!c.just_ratio_n) c.just_ratio_n = 0;
 
   /* Expand the compact arrays once, into objects the rest of the file can read
      without remembering column positions. */
@@ -668,9 +731,11 @@ async function hpData(env, origin) {
   const parcels = raw.parcels.map(function (a) {
     const o = {};
     for (let i = 0; i < F.length; i++) o[F[i]] = a[i];
-    o.typeName = raw.community.types[o.type];
+    o.typeName = c.types[o.type] || c.types[0];
     return o;
   });
+  if (!c.parcels) c.parcels = parcels.length;
+
   const bySlug = {};
   parcels.forEach(function (p, i) { p.i = i; bySlug[p.slug] = p; });
 
@@ -708,36 +773,13 @@ async function hpData(env, origin) {
   });
   resales.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
 
-  /* ---- never trust the data file to be in step with this code -------------
-     The worker and hp-granparadiso.json are deployed as two separate files, and
-     on 24 September the worker went up with the data file left behind. The new
-     code asked for c.ratio_now, the old file did not have it, and every address
-     page returned "temporarily unavailable" until the file caught up.
-     A page must never go down because a number is missing. Anything the code
-     relies on gets a sane default here, once, and the features that need real
-     values check for them rather than assuming. */
-  const c = raw.community || {};
-  if (!c.types)        c.types = ['Single-family', 'Villa', 'Townhome', 'Condo'];
-  if (!c.districts)    c.districts = { '0100': { name: 'Sarasota County (unincorporated)', nonschool: 5.3787, school: 6.095 } };
-  if (!c.std_exemption) c.std_exemption = 51411;
-  if (!c.new_2027)     c.new_2027 = 150000;
-  if (!c.new_2028)     c.new_2028 = 250000;
-  if (!c.trend)        c.trend = {};
-  if (!c.name)         c.name = 'this community';
-  if (!c.city)         c.city = '';
-  if (!c.region)       c.region = '';
-  if (!c.roll)         c.roll = 'the county certified roll';
-  if (!c.parcels)      c.parcels = parcels.length;
-  /* ratio_now drives the market context and the time adjustment. Without it the
-     page simply leaves those parts out rather than failing. */
-  if (typeof c.ratio_now !== 'number') c.ratio_now = null;
-  if (typeof c.ratio_peak !== 'number') c.ratio_peak = null;
-  if (!c.ratio_index)  c.ratio_index = null;
-  if (!c.just_ratio)   c.just_ratio = c.ratio_now;
-  if (!c.just_ratio_n) c.just_ratio_n = 0;
-
-  HP_DATA = { c: c, parcels: parcels, bySlug: bySlug, sales: salesByParcel, resales: resales, rpr: raw.rpr || {} };
-  return HP_DATA;
+  const D = { c: c, parcels: parcels, bySlug: bySlug, sales: salesByParcel,
+              resales: resales, rpr: raw.rpr || {} };
+  /* Every parcel knows its own community, so once an address is resolved the
+     rest of the page works on that community's comps, ratios and millage
+     without any of it being threaded through by hand. */
+  parcels.forEach(function (p) { p.cd = D; });
+  return D;
 }
 
 /* ---------------------------------------------------------------- helpers */
@@ -1004,7 +1046,7 @@ function hpPage(D, p, host) {
     +     'Florida Home Value AI &middot; Putnam Realty Group</div>'
     +   '<div class="prepared">Prepared for one address &middot; Sarasota County public records</div>'
     +   '<h1>' + hpEsc(addr) + '</h1>'
-    +   '<div class="sub">' + hpEsc(c.name) + ' &middot; ' + hpEsc(c.region) + '</div>'
+    +   '<div class="sub">' + hpEsc(c.name) + (c.region ? ' &middot; ' + hpEsc(c.region) : '') + '</div>'
     +   '<div class="facts">'
     +     hpEsc(p.typeName) + ' &middot; ' + p.sqft.toLocaleString('en-US') + ' sq ft'
     +     (p.bd ? ' &middot; ' + p.bd + ' bed' : '')
@@ -1747,7 +1789,7 @@ function hpDone(D, p, kind, scope) {
 /* --------------------------------------------------------------- the route */
 async function hpRoute(env, request, slug) {
   const u = new URL(request.url);
-  const D = await hpData(env, u.origin);
+  const REG = await hpData(env, u.origin);
   const host = u.host;
 
   /* The lookup page. /my-home is the URL that goes on Facebook and on print.
@@ -1761,25 +1803,25 @@ async function hpRoute(env, request, slug) {
        common case, one obvious match, goes straight to their page instead of
        making them pick from a list of one. */
     if (q) {
-      const exact = D.bySlug[hpNorm(q).replace(/ /g, '-')];
+      const exact = REG.bySlug[hpNorm(q).replace(/ /g, '-')];
       if (exact) return Response.redirect('https://' + host + '/h/' + exact.slug, 302);
-      const m = hpSearch(D, q, 12);
+      const m = hpSearch(REG, q, 12);
       if (m.length === 1) return Response.redirect('https://' + host + '/h/' + m[0].slug, 302);
-      return new Response(hpLookupPage(D, host, q, m, true), {
+      return new Response(hpLookupPage(REG, host, q, m, true), {
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
       });
     }
-    return new Response(hpLookupPage(D, host, '', [], false), {
+    return new Response(hpLookupPage(REG, host, '', [], false), {
       headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }
     });
   }
 
   /* Type-ahead. Returns rows, nothing else, and is never indexed. */
   if (raw.toLowerCase() === 'my-home/suggest') {
-    const m = hpSearch(D, u.searchParams.get('q') || '', 8);
+    const m = hpSearch(REG, u.searchParams.get('q') || '', 8);
     return new Response(JSON.stringify({ matches: m.map(function (p2) {
       return { slug: p2.slug, addr: hpEsc(hpStreetLine(p2)),
-               sub: hpEsc(hpTitle(p2.city || D.c.city) + ', FL ' + p2.zip + '  ' + p2.typeName
+               sub: hpEsc(hpTitle(p2.city || p2.cd.c.city) + ', FL ' + p2.zip + '  ' + p2.typeName
                           + ', ' + p2.sqft.toLocaleString('en-US') + ' sq ft') };
     }) }), {
       headers: { 'Content-Type': 'application/json; charset=utf-8',
@@ -1787,14 +1829,17 @@ async function hpRoute(env, request, slug) {
     });
   }
 
-  const p = D.bySlug[raw.toLowerCase()];
+  const p = REG.bySlug[raw.toLowerCase()];
 
   if (!p) {
-    return new Response(hpNotFound(D, host), {
+    return new Response(hpNotFound(REG, host), {
       status: 404,
       headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow' }
     });
   }
+
+  /* From here on D is this address's own community. */
+  const D = p.cd;
 
   if (request.method === 'POST') {
     const form = await request.formData();
@@ -1874,15 +1919,15 @@ async function hpRoute(env, request, slug) {
   });
 }
 
-function hpNotFound(D, host) {
+function hpNotFound(REG, host) {
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     + '<meta name="robots" content="noindex, nofollow"><title>Address not found</title>'
     + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">'
     + '<style>' + HP_CSS + '</style></head><body><div class="wrap">'
     + '<div class="card"><h2>I do not have a page for that address yet</h2>'
-    + '<p>These pages currently cover ' + D.c.parcels.toLocaleString('en-US') + ' homes in ' + hpEsc(D.c.name)
-    + ', ' + hpEsc(D.c.city) + '. If your address is in there and this link did not work, it is my mistake rather than yours.</p>'
+    + '<p>These pages currently cover ' + REG.homes.toLocaleString('en-US') + ' homes in ' + hpNames(REG)
+    + '. If your address is in there and this link did not work, it is my mistake rather than yours.</p>'
     + '<p>Text the address to <a href="sms:19416629941">941-662-9941</a> and I will send you the right link. '
     + 'For anywhere else in Sarasota, Charlotte or Manatee County, the '
     + '<a href="/property-tax-calculator">tax calculator</a> works on any address today.</p></div>'
@@ -1918,11 +1963,11 @@ function hpNorm(s) {
 /* Rank matches so that typing a house number finds the house, and typing a
    street finds the street. Anything starting with what was typed beats
    anything merely containing it. */
-function hpSearch(D, q, limit) {
+function hpSearch(REG, q, limit) {
   const n = hpNorm(q);
   if (n.length < 2) return [];
   const hits = [];
-  for (const p of D.parcels) {
+  for (const p of REG.parcels) {
     const hay = hpNorm(p.num + ' ' + p.street + ' ' + p.unit);
     let score = -1;
     if (hay === n) score = 0;
@@ -1939,8 +1984,16 @@ function hpSearch(D, q, limit) {
   return hits.slice(0, limit || 8).map(function (h) { return h.p; });
 }
 
-function hpLookupPage(D, host, q, matches, tried) {
-  const c = D.c;
+/* A plain English list: "Gran Paradiso and IslandWalk", or with three or more,
+   "A, B and C". */
+function hpNames(REG) {
+  const n = REG.names.slice();
+  if (n.length === 1) return hpEsc(n[0]);
+  return hpEsc(n.slice(0, -1).join(', ')) + ' and ' + hpEsc(n[n.length - 1]);
+}
+
+function hpLookupPage(REG, host, q, matches, tried) {
+  const c = REG.comms[0].c;
   let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     + '<title>What homes on your street actually sold for | Florida Home Value AI</title>'
@@ -1977,8 +2030,8 @@ function hpLookupPage(D, host, q, matches, tried) {
     +   '<button type="submit">Show me</button>'
     + '</div>'
     + '<div id="hpsuggest" class="suggest"></div>'
-+ '<div class="coverage"><strong>Built so far: ' + hpEsc(c.name) + ', ' + hpEsc(c.city) + '.</strong> '
-+ 'That is ' + c.parcels.toLocaleString('en-US') + ' homes. IslandWalk, Palmero, Talon Preserve, Grand Palm, '
++ '<div class="coverage"><strong>Built so far: ' + hpNames(REG) + '.</strong> '
++ 'That is ' + REG.homes.toLocaleString('en-US') + ' homes. Palmero, Talon Preserve, Grand Palm, '
 + 'Sarasota National and Sunrise Preserve are being added next. '
 + 'If your home is not in yet, text the address to <a href="sms:19416629941">941-662-9941</a>. '
 + 'I will build your page by hand and send you the link, and it tells me which community to do first.</div>'
@@ -1989,16 +2042,17 @@ function hpLookupPage(D, host, q, matches, tried) {
     h += '<div class="card"><h2>' + matches.length + ' addresses match that</h2>'
       + '<p>Pick yours.</p><ul class="hits">';
     matches.forEach(function (p) {
-      h += '<li><a href="/h/' + hpEsc(p.slug) + '">' + hpEsc(hpAddress(p, c)) + '</a>'
-        + '<span class="dim"> ' + hpEsc(p.typeName) + ', ' + p.sqft.toLocaleString('en-US')
-        + ' sq ft, built ' + p.yr + '</span></li>';
+      h += '<li><a href="/h/' + hpEsc(p.slug) + '">' + hpEsc(hpAddress(p, p.cd.c)) + '</a>'
+        + '<span class="dim"> ' + hpEsc(p.cd.c.name) + ' &middot; ' + hpEsc(p.typeName) + ', '
+        + p.sqft.toLocaleString('en-US') + ' sq ft, built ' + p.yr + '</span></li>';
     });
     h += '</ul></div>';
   } else if (tried && !matches.length) {
     h += '<div class="card"><h2>Nothing here matches that</h2>'
       + '<p>Two likely reasons, and neither is your fault.</p>'
       + '<p><strong>Your community is not built yet.</strong> This currently covers '
-      + hpEsc(c.name) + ' only. IslandWalk, Palmero and Talon Preserve are next.</p>'
+      + hpNames(REG) + '. Palmero, Talon Preserve, Grand Palm, Sarasota National and '
+      + 'Sunrise Preserve are next.</p>'
       + '<p><strong>Or the spelling is not what the county has.</strong> Try just the house number on its own, '
       + 'or just the street name, and pick from the list.</p>'
       + '<p>Either way, text the address to <a href="sms:19416629941">941-662-9941</a> and I will build it by '
@@ -2029,7 +2083,8 @@ function hpLookupPage(D, host, q, matches, tried) {
     + 'legal advice. Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
     + 'This is not a solicitation of property currently listed with another broker.</p>'
     + '<p><a href="/">Home</a> &middot; <a href="/property-tax-calculator">Property tax calculator</a> &middot; '
-    + '<a href="https://granparadiso.floridahomevalueai.com/">' + hpEsc(c.name) + ' home values</a> &middot; '
+    + '<a href="https://granparadiso.floridahomevalueai.com/">Gran Paradiso home values</a> &middot; '
+    + '<a href="https://islandwalk.floridahomevalueai.com/">IslandWalk home values</a> &middot; '
     + '<a href="/meet">About Michael Putnam</a></p>'
     + '</div>';
 
