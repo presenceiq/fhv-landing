@@ -1414,75 +1414,85 @@ function hpNotFound(D, host) {
 
 /* -------------------------------------------------------------- the styles */
 const HP_CSS = `
-:root{--ink:#1a1714;--dim:#6b6259;--gold:#b07d2b;--warm:#faf7f2;--line:#e6ded2;--green:#2e6b46;--red:#9b3b2f;--radius:10px}
+/* Type is set larger than a web default on purpose. The people reading
+   these pages own homes in Gran Paradiso and are mostly over sixty, and
+   a lot of what matters here sits in the explanatory text rather than the
+   headline. 18px body, and nothing on the page below 15px.
+   --dim is the gray for secondary text. At #6b6259 it cleared the AA
+   contrast bar at 5.59:1 but not AAA. #57504a reaches 7.41:1.
+   --gold is the brand color and stays as it is for rules, borders and
+   headings, where it is large enough not to matter. --goldink is the
+   darker version used anywhere gold becomes readable text or a link:
+   the brand gold is 3.38:1 on this background, which fails AA outright. */
+:root{--ink:#1a1714;--dim:#57504a;--gold:#b07d2b;--goldink:#8a601d;--warm:#faf7f2;--line:#e6ded2;--green:#2e6b46;--red:#9b3b2f;--radius:10px}
 *{box-sizing:border-box}
-body{margin:0;background:var(--warm);color:var(--ink);font:400 17px/1.65 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--warm);color:var(--ink);font:400 18px/1.7 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px 56px}
 h1{font:800 32px/1.15 "Playfair Display",Georgia,serif;margin:.3rem 0 .4rem}
 h2{font:700 22px/1.25 "Playfair Display",Georgia,serif;margin:0 0 .6rem}
 p{margin:0 0 .9rem}
-a{color:var(--gold)}
+a{color:var(--goldink)}
 .mast{padding:28px 0 18px;border-bottom:1px solid var(--line)}
-.brandline{font:600 12px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
-.prepared{font-size:13px;color:var(--dim);margin-top:2px}
-.sub{font-size:16px;color:var(--dim)}
-.facts{margin-top:8px;font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
+.brandline{font:600 13px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--goldink)}
+.prepared{font-size:15px;color:var(--dim);margin-top:2px}
+.sub{font-size:17px;color:var(--dim)}
+.facts{margin-top:8px;font-size:17px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
 .hero{margin:20px 0;padding:22px;border-radius:var(--radius);background:#fff;border:1px solid var(--line);border-left:4px solid var(--green)}
 .hero.down{border-left-color:var(--red)}
-.herolabel{font:600 12px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.herolabel{font:600 13px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
 .herobig{font:800 44px/1.05 "Playfair Display",Georgia,serif;margin:.15rem 0 .7rem;color:var(--green)}
 .hero.down .herobig{color:var(--red)}
 .card{margin:18px 0;padding:22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
 .card.quiet{background:transparent;border-style:dashed}
 .card.gold{border-left:4px solid var(--gold);background:#fffaf1}
-.tag{font:600 11px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.tag{font:600 12px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--goldink);margin-bottom:6px}
 .lead{font:800 26px/1.2 "Playfair Display",Georgia,serif;margin:0 0 .6rem}
-.small{font-size:14px;color:var(--dim)}
-.dim{color:var(--dim);font-size:13px;font-weight:400}
-.note{background:var(--warm);border-left:3px solid var(--gold);padding:12px 14px;border-radius:6px;font-size:15px;margin-top:14px}
-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:15px}
-th{text-align:left;font:600 11px/1.5 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);padding:6px 8px}
+.small{font-size:16px;line-height:1.65;color:var(--dim)}
+.dim{color:var(--dim);font-size:15px;font-weight:400}
+.note{background:var(--warm);border-left:3px solid var(--gold);padding:12px 14px;border-radius:6px;font-size:17px;margin-top:14px}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:16px}
+th{text-align:left;font:600 12px/1.5 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);padding:6px 8px}
 td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .r{text-align:right}
-.chip{font-size:11px;background:var(--warm);border:1px solid var(--line);border-radius:20px;padding:1px 7px;color:var(--dim)}
+.chip{font-size:12px;background:var(--warm);border:1px solid var(--line);border-radius:20px;padding:1px 7px;color:var(--dim)}
 .rangebar{display:flex;gap:8px;margin:16px 0 6px}
 .rangebar>div{flex:1;text-align:center;padding:12px 6px;background:var(--warm);border:1px solid var(--line);border-radius:8px}
-.rangebar span{display:block;font:600 11px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.rangebar span{display:block;font:600 12px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
 .rangebar strong{font:800 19px/1.3 "Playfair Display",Georgia,serif}
 .rangebar .mid{background:#fffaf1;border-color:var(--gold)}
-.rangebar .mid strong{color:var(--gold);font-size:22px}
+.rangebar .mid strong{color:var(--goldink);font-size:22px}
 .rpr{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:16px;text-align:center;margin:12px 0}
 .rprv{font:800 32px/1.1 "Playfair Display",Georgia,serif}
-.rprr{font-size:14px;color:var(--dim)}
+.rprr{font-size:15px;color:var(--dim)}
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.calc label{display:block;font-size:13px;color:var(--dim)}
+.calc label{display:block;font-size:15px;color:var(--dim)}
 .calc input{display:block;width:100%;margin-top:3px;padding:10px;font:600 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
-.npout{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:15px}
-.npout .tot{font:800 26px/1.2 "Playfair Display",Georgia,serif;color:var(--gold);margin-top:6px}
+.npout{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:17px}
+.npout .tot{font:800 28px/1.2 "Playfair Display",Georgia,serif;color:var(--goldink);margin-top:6px}
 .npout .line{display:flex;justify-content:space-between;padding:3px 0}
 .row{display:flex;gap:8px;margin:12px 0}
 .row input[type=email]{flex:1;min-width:0;padding:13px;font:400 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px}
 .row button{padding:13px 22px;font:600 16px Inter,sans-serif;background:var(--gold);color:#fff;border:0;border-radius:8px;cursor:pointer;white-space:nowrap}
 .scopes{margin:10px 0 4px}
-.scopes label{display:block;padding:11px 13px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px;font-size:15px;cursor:pointer;background:var(--warm);line-height:1.5}
-.carries{background:var(--warm);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px;font-size:14px;color:var(--dim);margin:12px 0}
-.carries strong{color:var(--ink);font-size:16px}
+.scopes label{display:block;padding:11px 13px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px;font-size:17px;cursor:pointer;background:var(--warm);line-height:1.55}
+.carries{background:var(--warm);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px;font-size:16px;color:var(--dim);margin:12px 0}
+.carries strong{color:var(--ink);font-size:18px}
 .wrongwhat{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:14px 0}
-.wrongwhat label{font-size:15px;cursor:pointer}
-.fieldlab{display:block;font-size:13px;color:var(--dim);margin-top:10px}
+.wrongwhat label{font-size:17px;cursor:pointer}
+.fieldlab{display:block;font-size:15px;color:var(--dim);margin-top:10px}
 .fieldlab textarea{display:block;width:100%;margin-top:4px;padding:11px;font:400 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);resize:vertical}
 .npout .empty span:last-child{color:var(--dim);font-style:italic}
-.npout .warn{margin-top:10px;padding:10px 12px;background:#fff4e6;border-left:3px solid var(--gold);border-radius:6px;font-size:14px;color:var(--ink)}
+.npout .warn{margin-top:10px;padding:10px 12px;background:#fff4e6;border-left:3px solid var(--gold);border-radius:6px;font-size:16px;color:var(--ink)}
 .cta{margin-top:14px}
 .btn{display:inline-block;padding:12px 20px;background:var(--gold);color:#fff;text-decoration:none;border-radius:8px;font-weight:600;margin:0 6px 8px 0}
 .btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
-.foot{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:14px;color:var(--dim)}
+.foot{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:16px;color:var(--dim)}
 .foot strong{color:var(--ink)}
 @media(max-width:560px){
-  h1{font-size:26px}.herobig{font-size:34px}.calc{grid-template-columns:1fr}
+  h1{font-size:27px}.herobig{font-size:34px}.calc{grid-template-columns:1fr}
   .rangebar{flex-direction:column}.row{flex-direction:column}
   .wrongwhat{grid-template-columns:1fr}
-  table{font-size:14px}td,th{padding:7px 4px}
+  table{font-size:15px}td,th{padding:8px 5px}
 }
 `;
 
