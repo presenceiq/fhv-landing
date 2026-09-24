@@ -1165,12 +1165,24 @@ function hpPage(D, p, host) {
   /* ---- 9. the alerts signup, three scopes ---- */
   h += '<form class="card signup" method="POST" action="/h/' + hpEsc(p.slug) + '">'
     + '<input type="hidden" name="form" value="alerts">'
+    /* ---- the alerts signup ----------------------------------------------
+       WHAT THIS PROMISES, AND WHY IT IS NARROWER THAN IT WAS.
+       An earlier version offered new listings, price cuts and pending sales as
+       well. Three problems with that. Nothing sends them. They come from the
+       MLS feed rather than the county, and the Stellar agreement limits that
+       data to public listing display, which an outbound email is not. And a
+       closed price is the only one of the four that is a fact rather than a
+       hope. So this promises recorded sales only. That part is county record,
+       it needs nobody's permission, and it is the part no other agent sends.
+       If Brian and Ben clear MLS-driven alerts, widen it then and not before. */
     + '<div class="tag">Alerts</div>'
-    + '<h2>Know what sells on ' + hpEsc(hpTitle(p.street)) + ' before your neighbors do</h2>'
-    + '<p>This page rebuilds itself every time the county records a new sale, so it is never out of date. '
-    + 'Leave your email and I will also tell you the moment something moves near you: a home goes on the market, '
-    + 'a price gets cut, something goes under contract, something closes and for how much. '
-    + 'Most of that never reaches an owner until it is finished and the number is already set.</p>'
+    + '<h2>Know what ' + hpEsc(hpTitle(p.street)) + ' actually sells for, as it happens</h2>'
+    + '<p>This page rebuilds itself every time the county records a new sale, so what you are reading is never '
+    + 'out of date. Leave your email and I will tell you when one of those sales lands: which house, when it closed, '
+    + 'and what the buyer actually paid.</p>'
+    + '<p>That last part is the whole point. Asking prices are public and mostly noise. '
+    + 'The recorded price is what your own home gets measured against, and most owners never see it '
+    + 'until they are already trying to sell.</p>'
     + '<p class="small">Pick how wide you want it.</p>'
     + '<div class="scopes">'
     +   '<label><input type="radio" name="scope" value="street" checked> <strong>' + hpEsc(hpTitle(p.street)) + ' only.</strong> Your own street, nothing else.</label>'
@@ -1181,6 +1193,9 @@ function hpPage(D, p, host) {
     +     'Everything, including types and sizes unlike yours.</label>'
     + '</div>'
     + '<div class="row"><input type="email" name="email" required placeholder="your email"><button type="submit">Notify me</button></div>'
+    + '<p class="small"><strong>I send these myself.</strong> There is no robot behind this, which means an email '
+    + 'reaches you within a day or two of a sale being recorded rather than within a second, and it means somebody '
+    + 'has looked at it before it goes. If that is too slow for you, say so and I will call you instead.</p>'
     + '<p class="small">Your address and email stay with me. I never sell them, share them or give them to anyone. '
     + 'Every message has an unsubscribe link, or reply with the word stop and you are off the same day.</p>'
     + '</form>';
@@ -1278,9 +1293,10 @@ function hpDone(D, p, kind, scope) {
         ? hpEsc(p.typeName) + ' homes within 10% of your ' + p.sqft.toLocaleString('en-US') + ' square feet, anywhere in ' + D.c.name
         : hpTitle(p.street) + ' only';
     title = 'Done. You are on the list.';
-    body = '<p>You will hear from me about <strong>' + hpEsc(what) + '</strong>: '
-         + 'anything that lists, cuts its price, goes under contract or closes, and for how much.</p>'
-         + '<p>Nothing else goes to that address. Every email has an unsubscribe link at the bottom, '
+    body = '<p>You will hear from me whenever a home sells in <strong>' + hpEsc(what) + '</strong>: '
+         + 'which house, when it closed, and what the buyer actually paid.</p>'
+         + '<p>I send these myself rather than automatically, so expect a day or two after a sale is recorded '
+         + 'rather than the same minute. Nothing else goes to that address. Every email has an unsubscribe link, '
          + 'or reply with the word stop and you are off the same day.</p>';
   }
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
@@ -1331,7 +1347,12 @@ async function hpRoute(env, request, slug) {
         body: JSON.stringify({
           name: '', phone: '', email: email, address: addr,
           territory_id: D.c.name + ' - CORRECTION on a personal home page',
-          subdivision: D.c.name,
+          /* The vault builds its subject line from this field, and it decides
+             "lead" purely by whether contact details are present. A correction
+             is not a lead. Until the vault itself can tell them apart, putting
+             the word here is what makes it obvious in the inbox without
+             opening anything. */
+          subdivision: 'CORRECTION, ' + D.c.name,
           wants: 'CORRECTION REPORTED\nAddress: ' + addr
                + '\nPage URL: https://' + host + '/h/' + p.slug
                + '\nWhat they say is wrong: ' + (wrong.length ? wrong.join(', ') : 'not specified')
@@ -1349,7 +1370,7 @@ async function hpRoute(env, request, slug) {
       const wants = scope === 'community'
           ? 'Alerts for all ' + D.c.parcels + ' homes in ' + D.c.name
         : scope === 'plan'
-          ? 'Alerts for ' + p.typeName + ' homes within 10% of ' + p.sqft + ' sq ft anywhere in ' + D.c.name
+          ? 'Alerts for ' + p.typeName + ' homes within 10% of ' + p.sqft.toLocaleString('en-US') + ' sq ft anywhere in ' + D.c.name
           : 'Alerts for ' + hpTitle(p.street) + ' only';
       await fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
