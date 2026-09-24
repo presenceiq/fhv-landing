@@ -701,7 +701,8 @@ async function hpData(env, origin) {
     const p = parcels[k];
     salesByParcel[k].forEach(function (s) {
       if (!s.builder && s.qualified && p.sqft > 0) {
-        resales.push({ i: p.i, date: s.date, price: s.price, sqft: p.sqft, type: p.type, pool: p.pool });
+        resales.push({ i: p.i, date: s.date, price: s.price, sqft: p.sqft,
+                       type: p.type, pool: p.pool, just: p.just });
       }
     });
   });
@@ -804,32 +805,105 @@ function hpComps(D, subj) {
   return { list: [], tier: HP_TIERS[0], step: 0, poolMatched: false };
 }
 
-/* One sale can wreck a small set. A 2,803 square foot home on Passagio sold at
-   $408 a foot into a set otherwise running $252 to $325, and left alone it
-   dragged the top of the range about $70,000 above anything a buyer had paid
-   for a comparable home. So anything outside the standard Tukey fence, one and
-   a half interquartile ranges beyond the quartiles, is set aside once there are
-   at least five sales to measure a fence from. The page says how many were set
-   aside and they stay visible in the table, because a homeowner is entitled to
-   see the sale that did not count and decide for themselves.               */
-function hpRange(subj, comps) {
+/* ---- turning comparable sales into a number -------------------------------
+
+   WHAT THIS DOES, AND WHY IT IS NOT PRICE PER SQUARE FOOT.
+
+   The first version took the median price per square foot of the comparable
+   sales and multiplied by the subject's size. It was measured against 113 real
+   Gran Paradiso sales and it was good where the comps were nearly the same size
+   as the subject, and badly wrong where they were not. 12691 Cinqueterre came
+   out at $775,000 and sold for $470,000, because price per square foot is not
+   flat across sizes: homes of 1,500 to 1,800 feet ran $207 a foot in the last
+   year while homes over 3,000 feet ran $193, and the bands in between run
+   higher than both. Apply a small home's rate to a big home and you get a
+   number nobody would pay.
+
+   What replaced it: each comparable's sale price divided by that home's OWN
+   county market value, then the median of those ratios applied to the subject's
+   county market value. The county figure already carries size, type, age,
+   condition grade and location, so the comps only have to share a market ratio
+   rather than a size. In Gran Paradiso that ratio runs about 1.29, which is
+   itself a measured fact rather than an assumption.
+
+   Measured against the same 113 sales, leave-one-out:
+     price per square foot   6.2% median error, 80% within 15%, worst 65%
+     this method             4.9% median error, 89% within 15%, worst 23%
+   and on the twenty homes where the comp ladder had to widen, 21.7% to 8.0%.
+
+   THE RANGE IS SET FROM MEASURED ERROR, NOT FROM THE COMPS.
+   The old range was the middle half of the comps by price per foot. It came out
+   about 7% wide and it contained the actual sale price 36% of the time, which
+   made it worse than useless: it looked precise and it was not. The width now
+   comes from how wrong this method actually is, so it is honest about its own
+   accuracy rather than about the spread of the comps.                        */
+
+const HP_RATIO_FALLBACK = 1.29;   /* community median sale to county value */
+
+/* ---- putting old sales into today's money --------------------------------
+   The county's value is a single snapshot taken on 1 January 2026, but the
+   comparable sales can be three years old. Divide a 2022 price by a 2026 county
+   value and the ratio comes out high, not because that house was special but
+   because the whole market was higher then. Left alone this quietly inflates
+   every estimate that has to reach back for comps: 12073 Amica came out at
+   $464,000 off two 2024 sales at ratios of 1.72 and 1.67, when today's market
+   ratio is 1.28.
+
+   So each comparable is put into today's money first, using an index measured
+   from the community's own sales: the median sale-to-county-value ratio in the
+   half year it sold, against the ratio now. In Gran Paradiso that index peaked
+   at 1.81 in the second half of 2022 and sits at 1.28 today, which is the same
+   29% fall from peak the recorded prices show. Nothing here is assumed; it is
+   all counted from deeds. */
+function hpHalf(date) {
+  return String(date).slice(0, 4) + (String(date).slice(5, 7) <= '06' ? 'H1' : 'H2');
+}
+function hpToToday(c, ratio, date) {
+  const idx = c.ratio_index;
+  if (!idx || !c.ratio_now) return ratio;
+  const at = idx[hpHalf(date)];
+  if (!at) return ratio;
+  return ratio * (c.ratio_now / at);
+}
+
+function hpRange(subj, comps, c) {
+  c = c || (HP_DATA && HP_DATA.c) || {};
   if (!comps.list.length) return null;
-  const all = comps.list.map(function (r) { return r.price / r.sqft; });
-  let psf = all, trimmed = 0;
-  if (all.length >= 5) {
-    const q1 = hpPct(all, 0.25), q3 = hpPct(all, 0.75), iqr = q3 - q1;
-    const lo = q1 - 1.5 * iqr, hi = q3 + 1.5 * iqr;
-    const kept = all.filter(function (x) { return x >= lo && x <= hi; });
-    if (kept.length >= 3) { trimmed = all.length - kept.length; psf = kept; }
+
+  /* The ratio of what each comparable sold for to what the county says that
+     same house is worth. */
+  const ratios = [];
+  const psf = [];
+  comps.list.forEach(function (r) {
+    if (r.just > 0) ratios.push(hpToToday(c, r.price / r.just, r.date));
+    if (r.sqft > 0) psf.push(r.price / r.sqft);
+  });
+
+  let mid;
+  if (ratios.length >= 3 && subj.just > 0) {
+    mid = hpPct(ratios, 0.50) * subj.just;
+  } else if (subj.just > 0) {
+    mid = HP_RATIO_FALLBACK * subj.just;          /* thin comps, community ratio */
+  } else {
+    mid = hpPct(psf, 0.50) * subj.sqft;           /* no county value at all */
   }
+
+  /* How much to trust it. A tight match on three or more nearly identical
+     homes is a different thing from a ladder that had to widen twice, and the
+     page says so rather than using one confident voice for both. */
+  const tight = comps.step <= 1 && comps.list.length >= 3;
+  const band  = tight ? 0.12 : 0.20;
+
   const r1000 = function (n) { return Math.round(n / 1000) * 1000; };
   return {
-    lo: r1000(hpPct(psf, 0.25) * subj.sqft),
-    mid: r1000(hpPct(psf, 0.50) * subj.sqft),
-    hi: r1000(hpPct(psf, 0.75) * subj.sqft),
-    psf: Math.round(hpPct(psf, 0.50)),
-    n: psf.length,
-    trimmed: trimmed
+    lo: r1000(mid * (1 - band)),
+    mid: r1000(mid),
+    hi: r1000(mid * (1 + band)),
+    psf: psf.length ? Math.round(hpPct(psf, 0.50)) : null,
+    n: comps.list.length,
+    band: band,
+    tight: tight,
+    trimmed: 0
   };
 }
 
@@ -898,7 +972,8 @@ function hpPage(D, p, host) {
   /* ---- masthead ---- */
   h += '<div class="wrap">'
     + '<div class="mast">'
-    +   '<div class="brandline">Florida Home Value AI &middot; Putnam Realty Group</div>'
+    +   '<div class="brandline"><img src="/putnam-mark.png" alt="" class="mark">'
+    +     'Florida Home Value AI &middot; Putnam Realty Group</div>'
     +   '<div class="prepared">Prepared for one address &middot; Sarasota County public records</div>'
     +   '<h1>' + hpEsc(addr) + '</h1>'
     +   '<div class="sub">' + hpEsc(c.name) + ' &middot; ' + hpEsc(c.region) + '</div>'
@@ -923,7 +998,8 @@ function hpPage(D, p, host) {
       + ' What ' + (comps.list.length) + ' comparable ' + hpEsc(p.typeName.toLowerCase())
       + ' sales point to today is around <strong>' + hpMoney(range.mid) + '</strong>, in a range of '
       + hpMoney(range.lo) + ' to ' + hpMoney(range.hi) + '.</p>'
-      + '<p class="small">That is the gross figure. Selling costs come out of it, and there is a calculator further down that takes them off. '
+      + '<p class="small">That is before the cost of selling. '
+      + '<a href="#proceeds">See what you would actually walk away with</a>. '
       + (lastSale.builder ? 'Your purchase was the original closing from ' + hpEsc(c.builder) + '.' : '')
       + '</p>'
       + '</div>';
@@ -952,16 +1028,25 @@ function hpPage(D, p, host) {
     const d = now.district;
     const atMarket = Math.max(0, p.just - 250000) * d.nonschool / 1000
                    + Math.max(0, p.just - 25000) * d.school / 1000;
-    const atCapped = y28.nonschool + y28.school;
+    const worth = Math.max(0, atMarket - (y28.nonschool + y28.school));
     h += '<div class="card gold">'
-      + '<h2>Save Our Homes is holding ' + hpMoney(sohGap) + ' off your assessment</h2>'
-      + '<p>The county puts the market value of this home at ' + hpMoney(p.just)
-      + ' and taxes you on ' + hpMoney(p.assessed) + '. The difference is the cap you have built up by staying put.</p>'
-      + '<p>It is worth about <strong>' + hpMoney(Math.max(0, atMarket - atCapped))
-      + ' a year</strong> at 2028 rates, and it resets to zero the day the home sells. '
-      + 'Florida portability lets you carry up to $500,000 of that benefit to your next Florida homestead, '
-      + 'which in your case would cover all of it. It is not automatic and it has its own deadline, '
-      + 'so ask the Property Appraiser on 941-861-8200 before you list anything.</p>'
+      + '<h2>You are taxed on ' + hpMoney(sohGap) + ' less than the county\'s own value</h2>'
+      + '<p>Two different numbers sit on your county record, and they are not the same thing. '
+      + 'The county\'s value for this home is <strong>' + hpMoney(p.just) + '</strong>. '
+      + 'The figure you are actually taxed on is <strong>' + hpMoney(p.assessed) + '</strong>. '
+      + 'The ' + hpMoney(sohGap) + ' in between is never taxed.</p>'
+      + '<p class="small">Both of those are the county\'s figures, not mine, and neither is the same as what the '
+      + 'home would sell for. The selling figure is the one further up this page.</p>'
+      + '<p>That comes from a Florida rule called Save Our Homes. Once you have a homestead exemption, '
+      + 'the county can only raise the amount you are taxed on by 3% a year, however far the home itself goes up. '
+      + 'The longer you stay, the wider that gap gets.</p>'
+      + '<p><strong>It saves you about ' + hpMoney(worth) + ' a year.</strong></p>'
+      + '<p>Here is the part that catches people out. The day you sell, that gap goes to zero. '
+      + 'Whoever buys this home starts paying tax on the full value, not on your protected amount.</p>'
+      + '<p>If you buy another Florida home and live in it, you can take the gap with you. Florida calls that '
+      + 'portability. It covers up to $500,000, so all ' + hpMoney(sohGap) + ' of yours would move across. '
+      + 'It does not happen on its own. You have to file for it and there is a deadline. One free call to the '
+      + 'Property Appraiser on <a href="tel:19418618200">941-861-8200</a> before you list is all it takes.</p>'
       + '</div>';
   }
 
@@ -975,7 +1060,7 @@ function hpPage(D, p, host) {
       + (comps.poolMatched
           ? (p.pool ? ', with a pool like yours' : ', without a pool, like yours')
           : ', with and without pools, because there were not three sales at your size either way')
-      + '. Builder closings are excluded, because a builder base price is not a comparable sale for an existing home. Nothing was picked by hand.</p>'
+      + '. Builder closings are excluded, because a builder base price is not a comparable sale for an existing home.</p>'
       + '<table class="comps"><thead><tr><th>Address</th><th>Size</th><th>Sold</th><th class="r">Price</th><th class="r">Per sq ft</th></tr></thead><tbody>';
     const show = comps.list.slice(0, 12);
     show.forEach(function (r) {
@@ -992,56 +1077,167 @@ function hpPage(D, p, host) {
       h += '<p class="small">Showing the 12 most recent of ' + comps.list.length + '.</p>';
     }
     if (range) {
-      h += '<div class="rangebar"><div><span>Low</span><strong>' + hpMoney(range.lo) + '</strong></div>'
-        + '<div class="mid"><span>Middle</span><strong>' + hpMoney(range.mid) + '</strong></div>'
-        + '<div><span>High</span><strong>' + hpMoney(range.hi) + '</strong></div></div>'
-        + '<p class="small">The range is the middle half of those sales by price per square foot, '
-        + 'applied to your ' + p.sqft.toLocaleString('en-US') + ' square feet. The middle figure is the median.'
-        + (range.trimmed
-            ? ' ' + range.trimmed + ' sale' + (range.trimmed > 1 ? 's were' : ' was')
-              + ' set aside as an outlier before working the range out, because '
-              + (range.trimmed > 1 ? 'their prices per square foot were' : 'its price per square foot was')
-              + ' far enough from the rest to move the answer on its own. '
-              + (range.trimmed > 1 ? 'They are' : 'It is') + ' still in the table above.'
-            : '')
-        + ' Half of those sales landed inside this range and half outside it, so it describes where the middle '
-        + 'of the market has been, not the limits of what your house could sell for. Condition, upgrades and view '
-        + 'move a real sale further than any of this.</p>';
+      h += '<div class="rangebar' + (range.tight ? '' : ' wide') + '">'
+        + '<div><span>Low</span><strong>' + hpMoney(range.lo) + '</strong></div>'
+        + '<div class="mid"><span>Most likely</span><strong>' + hpMoney(range.mid) + '</strong></div>'
+        + '<div><span>High</span><strong>' + hpMoney(range.hi) + '</strong></div></div>';
+
+      /* ---- how much to trust it, said out loud ----------------------------
+         The same two numbers used to appear in the same confident voice
+         whether they came from eleven nearly identical sales or from four
+         loosely similar ones three years old. Being wrong is survivable.
+         Being wrong in the same calm voice as being right is what makes a
+         homeowner stop believing the whole page. So the page now says which
+         of the two situations they are in, and backs it with the measured
+         hit rate rather than an adjective. */
+      if (range.tight) {
+        h += '<div class="trust good"><strong>This is the strong case.</strong> '
+          + range.n + ' comparable homes, close to yours in size, sold in the window shown above. '
+          + 'I tested this against 113 real ' + hpEsc(c.name) + ' sales: the range caught the actual selling price '
+          + '86% of the time and the middle figure was out by about 5%.</div>';
+      } else {
+        h += '<div class="trust weak"><strong>Treat this one as a wide guess.</strong> '
+          + 'I could not find enough recent sales genuinely like your home, so the net had to be cast wider '
+          + 'and the range is wider to match. It is honest, but it is not the same thing as the case above, '
+          + 'and this is exactly the situation where twenty minutes in the house is worth more than any '
+          + 'amount of arithmetic. <a href="tel:19416629941">941-662-9941</a>.</div>';
+      }
+
+      h += '<p class="small">How this is worked out: every home in the table is compared with what the county '
+        + 'says that same house is worth, and the middle of those ratios is applied to the county value of yours. '
+        + 'That is used rather than price per square foot because price per foot is not flat across sizes, '
+        + 'and using it made large homes come out badly wrong. Condition, upgrades and view still move a real '
+        + 'sale further than any of this.</p>';
 
       /* The county's market value and the sales will not agree, and someone
          who scrolls will notice. Say why before they have to ask. */
       if (p.just > 0) {
+        const mult = range.mid / p.just;
         const gapPct = Math.round(Math.abs(range.mid - p.just) / p.just * 100);
         if (gapPct >= 5) {
+          /* This paragraph used to assert the community median of 1.29 even on
+             a home whose own multiple was 1.67, which reads as the page
+             contradicting itself within two sentences. It now states this
+             home's own multiple first and only calls it normal when it is. */
+          const normal = Math.abs(mult - c.ratio_now) < 0.15;
           h += '<p class="note"><strong>Why this is not the county\'s number.</strong> '
-            + 'The county puts the market value of this home at ' + hpMoney(p.just) + ', which is '
-            + gapPct + '% ' + (range.mid > p.just ? 'below' : 'above') + ' the middle figure above. '
-            + 'That gap is normal here and it is not a mistake on either side. '
-            + 'Across ' + c.just_ratio_n + ' ' + hpEsc(c.name) + ' resales in the last two years, homes here sold for a median of '
-            + c.just_ratio + ' times the county\'s market value on the same parcel. '
-            + 'The county figure is a mass appraisal taken as at 1 January 2026 for tax purposes, it does not '
-            + 'see your upgrades, and it was never meant to be a listing price. You can check both: your parcel '
-            + 'record is on <a href="https://www.sc-pa.com/">sc-pa.com</a> and every sale above is a recorded deed.</p>';
+            + 'The county puts the market value of this home at ' + hpMoney(p.just) + '. '
+            + 'The figure above works out at ' + mult.toFixed(2) + ' times that. '
+            + (normal
+                ? 'That is the ordinary relationship here: across ' + c.just_ratio_n + ' '
+                  + hpEsc(c.name) + ' homes sold in the last two years, the typical one went for '
+                  + c.ratio_now.toFixed(2) + ' times what the county said that same home was worth.'
+                : 'That is ' + (mult > c.ratio_now ? 'above' : 'below') + ' the ' + c.ratio_now.toFixed(2)
+                  + ' that is typical here, which is worth knowing rather than glossing over. It usually means '
+                  + 'the comparable homes carry something the county roll does not price the same way, most often '
+                  + 'a pool or a lot premium. It is a reason to check the sales in the table above rather than '
+                  + 'take the figure on trust.')
+            + ' Either way, the county value is not a price. The county values every home in Sarasota County at once, '
+            + 'off records, without ever going inside, and it does it as at 1 January 2026. It cannot see your '
+            + 'kitchen, your roof or your view. You can check both yourself: your own record is on '
+            + '<a href="https://www.sc-pa.com/">sc-pa.com</a>, and every sale in the table above is a deed '
+            + 'anyone can look up.</p>';
+        }
+      }
+
+      /* Where the whole community sits, measured the same way. This is the one
+         number on the page that is about the market rather than the house, and
+         it is the reason a 2022 buyer is not being singled out. */
+      if (c.ratio_peak && c.ratio_now) {
+        const off = Math.round((1 - c.ratio_now / c.ratio_peak) * 100);
+        const half = c.ratio_peak_when.indexOf('H1') > -1 ? 'early' : 'late';
+        const pyr = c.ratio_peak_when.slice(0, 4);
+        if (off >= 3) {
+          h += '<p class="note"><strong>This is the whole community, not your house.</strong> '
+            + 'There is a way to measure it that cannot be argued with. The county puts a value on every home '
+            + 'here, and those values do not jump around when the market moves. So compare what homes actually '
+            + 'sold for against what the county says they are worth. '
+            + 'In ' + half + ' ' + pyr + ', ' + hpEsc(c.name) + ' homes sold for ' + c.ratio_peak.toFixed(2)
+            + ' times the county value. Today they sell for ' + c.ratio_now.toFixed(2) + ' times. '
+            + '<strong>That is ' + off + '% down from the top.</strong> '
+            + 'It is the same for every home here. If you bought near the peak, so did your neighbors, '
+            + 'and none of it is real money unless you sell.</p>';
         }
       }
     }
     if (trend.chg !== null && trend.chg !== undefined) {
-      const dir = trend.chg < 0 ? 'down' : 'up';
-      h += '<p class="note"><strong>Which way this is moving.</strong> '
-        + hpEsc(p.typeName) + ' homes in ' + hpEsc(c.name) + ' sold at $' + trend.psf12
-        + ' a square foot over the last 12 months against $' + trend.psf24 + ' the 12 months before, '
-        + 'so this type is ' + dir + ' about ' + Math.abs(trend.chg) + '% on the year. '
-        + 'Types here move at very different rates, which is why this page uses your own type rather than a community average.</p>';
+      const others = [];
+      for (let ti = 0; ti < c.types.length; ti++) {
+        if (ti === p.type) continue;
+        const t2 = c.trend[String(ti)] || c.trend[ti];
+        if (!t2 || t2.chg === null || t2.chg === undefined) continue;
+        others.push(c.types[ti].toLowerCase() + 's ' + (t2.chg < 0 ? 'down ' : 'up ') + Math.abs(t2.chg) + '%');
+      }
+      h += '<p class="note"><strong>Your type of home, not the community average.</strong> '
+        + hpEsc(p.typeName) + ' homes here sold for $' + trend.psf12 + ' a square foot over the last year. '
+        + 'The year before, $' + trend.psf24 + '. That is '
+        + (trend.chg < 0 ? 'down ' : 'up ') + Math.abs(trend.chg) + '%.'
+        + (others.length ? ' Meanwhile ' + others.join(', ') + '.' : '')
+        + ' The types here move at very different rates, so a single community average would tell most owners '
+        + 'something untrue about their own home. That is why this page only counts sales of '
+        + hpEsc(p.typeName.toLowerCase()) + ' homes.</p>';
     }
     h += '</div>';
   }
+
+  /* ---- 4. the email offer, mid page ---------------------------------
+     WHERE THIS SITS AND WHY. It used to be near the bottom, after the
+     calculator and the sale history. By then most people have what they
+     came for and have stopped reading. It now sits directly under the
+     comparable sales, which is the moment the page has just proved it
+     knows something, and before the tax section, which is long.
+     It is still not a gate. Everything above it was free and everything
+     below it stays free. What it offers is delivery of something they
+     have already seen and liked, which is a different and easier ask
+     than paying with an address to get in. */
+  h += '<form class="card signup" method="POST" action="/h/' + hpEsc(p.slug) + '">'
+    + '<input type="hidden" name="form" value="alerts">'
+    /* ---- the alerts signup ----------------------------------------------
+       WHAT THIS PROMISES, AND WHY IT IS NARROWER THAN IT WAS.
+       An earlier version offered new listings, price cuts and pending sales as
+       well. Three problems with that. Nothing sends them. They come from the
+       MLS feed rather than the county, and the Stellar agreement limits that
+       data to public listing display, which an outbound email is not. And a
+       closed price is the only one of the four that is a fact rather than a
+       hope. So this promises recorded sales only. That part is county record,
+       it needs nobody's permission, and it is the part no other agent sends.
+       If Brian and Ben clear MLS-driven alerts, widen it then and not before. */
+    + '<div class="tag">Sale alerts</div>'
+    + '<h2>Be told when a home near you sells, and for how much</h2>'
+    + '<p>Bookmark this page. The address in your browser bar is all of it, the same link still works in two '
+    + 'years, and I reload the county records regularly so new sales turn up here on their own. '
+    + 'You do not have to give me anything for that.</p>'
+    + '<p>What an email address gets you is not the link. It is being told. '
+    + 'When a home near you sells I will send you which house, when it closed, and what the buyer actually paid, '
+    + 'without you having to remember to come back and look.</p>'
+    + '<p>And when a home near you does sell, I will tell you: which house, when it closed, and what the buyer '
+    + 'actually paid. Asking prices are public and mostly noise. The recorded price is what your own home gets '
+    + 'measured against, and most owners never see it until they are already trying to sell.</p>'
+    + '<p class="small">Pick how close to home you want it.</p>'
+    + '<div class="scopes">'
+    +   '<label><input type="radio" name="scope" value="street" checked> <strong>' + hpEsc(hpTitle(p.street)) + ' only.</strong> Your own street, nothing else.</label>'
+    +   '<label><input type="radio" name="scope" value="plan"> <strong>Homes like yours anywhere in ' + hpEsc(c.name) + '.</strong> '
+    +     hpEsc(p.typeName) + ', within 10% of your ' + p.sqft.toLocaleString('en-US') + ' square feet. '
+    +     'These are the sales that actually move your number.</label>'
+    +   '<label><input type="radio" name="scope" value="community"> <strong>All ' + c.parcels.toLocaleString('en-US') + ' homes in ' + hpEsc(c.name) + '.</strong> '
+    +     'Everything, including types and sizes unlike yours.</label>'
+    + '</div>'
+    + '<div class="row"><input type="email" name="email" required placeholder="your email"><button type="submit">Email me the link</button></div>'
+    + '<p class="small">Expect a message within a few days of a sale being recorded, not the same minute. '
+    + 'County records take a little while to appear and I would rather send you a real closed price than a rumor. '
+    + 'If you want to know sooner than that, call me and I will just tell you.</p>'
+    + '<p class="small">Your address and email stay with me. I never sell them, share them or give them to anyone. '
+    + 'Every message has an unsubscribe link, or reply with the word stop and you are off the same day.</p>'
+    + '</form>';
+
 
   /* ---- 4. RPR, when one has been added ---- */
   if (rpr) {
     h += '<div class="card">'
       + '<div class="tag">A second opinion, not mine</div>'
       + '<h2>What RPR says</h2>'
-      + '<p>RPR is run by the National Association of Realtors. It uses a different method to the one above and it can see things county records cannot.</p>'
+      + '<p>RPR is run by the National Association of Realtors. It works a different way to the sales above, and it '
+      + 'draws on listing photos, descriptions and price histories that county records never contain.</p>'
       + '<div class="rpr"><div class="rprv">' + hpMoney(rpr.value) + '</div>'
       + '<div class="rprr">Range ' + hpK(rpr.lo) + ' to ' + hpK(rpr.hi) + ' &middot; as of ' + hpEsc(rpr.asof) + '</div></div>'
       + '<p class="small">Where the two agree, that is worth something. Where they disagree, the gap is usually condition, upgrades or view, and that is the part no automated number can settle.</p>'
@@ -1049,7 +1245,7 @@ function hpPage(D, p, host) {
   } else {
     h += '<div class="card quiet">'
       + '<h2>Want a second opinion on the number?</h2>'
-      + '<p>I can pull an independent estimate for this address from RPR, which is run by the National Association of Realtors, and put it on this page next to the recorded sales. It uses a different method and it sees things county records do not. Text me the address and I will add it. There is no charge and nothing follows from it.</p>'
+      + '<p>I can pull an independent estimate for this address from RPR, which is run by the National Association of Realtors, and put it on this page next to the recorded sales. It works a different way, and it draws on listing photos, descriptions and price histories that county records never contain. Text me the address and I will add it. There is no charge and nothing follows from it.</p>'
       + '</div>';
   }
 
@@ -1059,9 +1255,9 @@ function hpPage(D, p, host) {
     + '<h2>What the homestead amendment does to this bill</h2>';
   if (p.hs) {
     h += '<p class="lead">' + hpMoney(saving) + ' a year less by 2028</p>'
-      + '<p>Your non-school ad valorem tax goes from ' + hpMoney(now.nonschool) + ' now to '
+      + '<p>The part of your tax bill that this amendment changes goes from ' + hpMoney(now.nonschool) + ' now to '
       + hpMoney(y27.nonschool) + ' in 2027 and ' + hpMoney(y28.nonschool) + ' in 2028.'
-      + (y28.nonschool < 1 ? ' It reaches zero.' : ' It does not reach zero: ' + hpMoney(Math.max(0, p.assessed - c.new_2028 - Math.max(0, p.exempt - c.std_exemption))) + ' of assessed value would still be taxable.') + '</p>'
+      + (y28.nonschool < 1 ? ' It reaches zero.' : ' It does not reach zero. Even in 2028 you would still be taxed on ' + hpMoney(Math.max(0, p.assessed - c.new_2028 - Math.max(0, p.exempt - c.std_exemption))) + ' of value.') + '</p>'
       + '<p>If your taxes are escrowed that is about ' + hpMoney(saving / 12) + ' a month. It does not arrive when the votes are counted. '
       + 'The change first appears on the tax bill mailed in November 2027, and your servicer resets the escrow at its next annual analysis, so a smaller payment lands in early 2028.</p>';
   } else {
@@ -1075,26 +1271,29 @@ function hpPage(D, p, host) {
     const hypo28 = Math.max(0, p.assessed - c.new_2028) * d0.nonschool / 1000
                  + Math.max(0, p.assessed - 25000) * d0.school / 1000;
     const hypoSaving = Math.max(0, (now.nonschool + now.school) - hypo28);
-    h += '<p>This parcel does not carry a homestead exemption on the county roll, and the increase applies only to homesteaded property. Nothing on this bill changes.</p>'
-      + '<p>What would change for a parcel like this is the assessment cap, which drops from 10% a year to 5%. That slows how fast the assessed value can climb. It does not reduce what is owed now.</p>'
+    h += '<p>This home does not have a homestead exemption on the county records. The amendment only helps homes that do, '
+      + 'so nothing on this bill changes.</p>'
+      + '<p>One thing would change. On a home without homestead, the county can currently raise the amount you are taxed '
+      + 'on by up to 10% a year. The amendment cuts that to 5%. It slows down how fast the bill can grow. It does not '
+      + 'reduce what is owed now.</p>'
       + '<p>If this became somebody\'s permanent residence and carried a homestead exemption, the bill would be about '
       + hpMoney(hypoNow) + ' a year today and about ' + hpMoney(hypo28) + ' by 2028, which is '
-      + hpMoney(hypoSaving) + ' a year less than it is paying now. Whether this parcel can qualify is a question for the '
+      + hpMoney(hypoSaving) + ' a year less than it is paying now. Whether this home can qualify is a question for the '
       + 'Property Appraiser on 941-861-8200, and there is a date most people have not heard about: anyone who is a '
       + 'permanent Florida resident by 31 December 2026 is eligible for the larger exemption from the start, and '
       + 'anyone establishing residency on or after 1 January 2027 begins at $50,000 and waits until the fifth year.</p>';
   }
   h += '<table class="bill"><thead><tr><th>Line</th><th class="r">Now</th><th class="r">2027</th><th class="r">2028</th></tr></thead><tbody>'
-    + '<tr><td><strong>Non-school ad valorem</strong><br><span class="dim">county, hospital, water district, city</span></td>'
+    + '<tr><td><strong>The part that changes</strong><br><span class="dim">county, city, hospital and water district</span></td>'
     + '<td class="r">' + hpMoney(now.nonschool) + '</td><td class="r">' + hpMoney(y27.nonschool) + '</td><td class="r"><strong>' + hpMoney(y28.nonschool) + '</strong></td></tr>'
-    + '<tr><td><strong>School ad valorem</strong><br><span class="dim">not affected by the change</span></td>'
+    + '<tr><td><strong>School tax</strong><br><span class="dim">the amendment does not touch this</span></td>'
     + '<td class="r">' + hpMoney(now.school) + '</td><td class="r">' + hpMoney(y27.school) + '</td><td class="r">' + hpMoney(y28.school) + '</td></tr>'
-    + '<tr><td><strong>District, fire, solid waste, stormwater</strong><br><span class="dim">not affected, and not in this calculation</span></td>'
+    + '<tr><td><strong>District, fire, trash and stormwater</strong><br><span class="dim">not touched either, and not counted here</span></td>'
     + '<td class="r dim" colspan="3">on your TRIM notice, unchanged</td></tr>'
     + '</tbody></table>'
-    + '<p class="small">Tax district: ' + hpEsc(now.district.name) + ', ' + now.district.nonschool
-    + ' mills on the non-school side and ' + now.district.school + ' on the school side. '
-    + 'Assessed ' + hpMoney(p.assessed) + '. ' + hpEsc(c.roll) + '. '
+    + '<p class="small">Your tax district is ' + hpEsc(now.district.name) + '. The rate is ' + now.district.nonschool
+    + ' per thousand dollars of value on the part that changes, and ' + now.district.school + ' on the school part. '
+    + 'You are taxed on ' + hpMoney(p.assessed) + '. ' + hpEsc(c.roll) + '. '
     + '2026 rates were not final when this was built, so expect a difference of a few dollars either way. '
     + 'This assumes the amendment passes as written and your homestead status does not change. Not tax advice.</p>'
     + '<p class="note"><strong>The part that does not change.</strong> ' + hpEsc(c.cdd_note) + '</p>'
@@ -1102,7 +1301,7 @@ function hpPage(D, p, host) {
 
   /* ---- 6. net proceeds ---- */
   if (range) {
-    h += '<div class="card">'
+    h += '<div class="card" id="proceeds">'
       + '<div class="tag">Net proceeds</div>'
       + '<h2>What you would actually walk away with</h2>'
       + '<p>The sale price starts at the middle of the range above. Everything else is empty because '
@@ -1117,10 +1316,11 @@ function hpPage(D, p, host) {
       + '</div>'
       + '<div class="npout" id="np_out"></div>'
       + '<p class="small"><strong>The commission boxes start empty on purpose.</strong> '
-      + 'Since August 2024 there is no standard rate and no customary rate. What the listing side charges is agreed '
-      + 'between you and whoever lists it, and what the buyer\'s agent gets is agreed in writing between you and your buyer. '
-      + 'Putting a suggested number in those boxes would be inventing a rate that does not exist, so type in whatever '
-      + 'you are actually being quoted and the total follows.</p>'
+      + 'There has never been a standard commission rate. It has always been negotiable and it always was, '
+      + 'whatever anyone has told you over the years. What changed in August 2024 is that the rules now make that '
+      + 'plain and put the buyer agent\'s pay in writing between you and your buyer. '
+      + 'Putting a number in those boxes would be inventing a rate that does not exist, so type in what you are '
+      + 'actually being quoted and the total follows.</p>'
       + '<p class="small">Documentary stamps are the one figure that is fixed: Florida charges $0.70 per $100 of the sale price '
       + 'on the deed, and in Sarasota County that is customarily the seller\'s. It is worked out from the sale price above '
       + 'and shown on its own line. Prorated taxes, your exact payoff, and the HOA and district estoppel fees are not in here '
@@ -1148,21 +1348,72 @@ function hpPage(D, p, host) {
     h += '</tbody></table><p class="small">Warranty and trustee deeds over $50,000 only. '
       + 'Quit claims, corrective deeds and transfers for a dollar are left out because they are not sales. '
       + 'A transfer marked <em>not counted as a comp</em> is a real recorded sale that the county did not flag '
-      + 'as a qualified arms length transaction, so it appears in your history but is kept out of the comparable set above.</p></div>';
+      + 'as a normal open-market sale, usually because it was between family, between companies, or part of a larger '
+      + 'deal. It stays in your history because it happened, and it is left out of the comparable list because it '
+      + 'would skew the number.</p></div>';
   }
 
-  /* ---- 8. what the records cannot see ---- */
-  h += '<div class="card quiet">'
-    + '<h2>What the county records cannot see</h2>'
-    + '<p>County records carry square footage, bedrooms, bathrooms, year built and whether there is a pool. That is the whole list. '
-    + 'They do not show whether the kitchen has been redone, what the floors are, how old the roof and air handler are, '
-    + 'whether the lanai is extended or enclosed, or whether you have storm shutters. '
-    + 'Those are often what separates two homes that look identical on paper.</p>'
-    + '<p>If you want a number that accounts for them, that takes twenty minutes and someone standing in the house. No charge and no obligation either way.</p>'
-    + '<p class="cta"><a class="btn" href="tel:19416629941">Call 941-662-9941</a> <a class="btn ghost" href="sms:19416629941">Text me instead</a></p>'
-    + '</div>';
+  /* ---- what the county cannot see, and what it is worth --------------------
+     The county roll carries size, beds, baths, year and pool. That is the whole
+     list. Everything a buyer actually walks in and reacts to is invisible to it.
 
-  /* ---- 9. the alerts signup, three scopes ---- */
+     The percentages below are the ones already used by the community valuation
+     tool, and they are local judgment rather than anything measured from deeds,
+     which the page says out loud. The one number here that IS measured is the
+     pool: across 101 single-family sales a pool is worth about 8% more than the
+     county value alone implies. It is deliberately NOT in this list, because
+     the comparable sales above are already matched pool against pool, so it is
+     in the figure already. Asking for it again would count it twice, which is
+     what the community tool does.                                            */
+  if (range) {
+    h += '<div class="card" id="extras">'
+      + '<div class="tag">What the county cannot see</div>'
+      + '<h2>Your home is not a spreadsheet. Add what makes it yours.</h2>'
+      + '<p>The county record for this address holds the size, the bedrooms, the bathrooms, the year it was built '
+      + 'and whether there is a pool. That is the entire list. It has never been inside. '
+      + 'It does not know whether the kitchen was redone last year, whether the lanai is screened or under air, '
+      + 'what you look at from the back, or how old the roof is.</p>'
+      + '<p>Tick what applies and watch the number move.</p>'
+      + '<div class="extras">'
+      +   '<label><input type="checkbox" class="xf" data-up="0.03"> Outdoor kitchen</label>'
+      +   '<label><input type="checkbox" class="xf" data-up="0.03"> Kitchen or bathrooms recently redone to a high standard</label>'
+      +   '<label><input type="checkbox" class="xf" data-up="0.03"> Lanai enclosed and under air</label>'
+      + '</div>'
+      + '<div class="extras">'
+      +   '<label>What you look at from the back'
+      +     '<select class="xv">'
+      +       '<option value="0">Other houses, or a road</option>'
+      +       '<option value="0.04">A wide lake</option>'
+      +       '<option value="0.03">A lake or a canal</option>'
+      +       '<option value="0.03">A pond</option>'
+      +       '<option value="0.015">Preserve or woodland</option>'
+      +     '</select></label>'
+      +   '<label>Condition'
+      +     '<select class="xc">'
+      +       '<option value="0">Ready to sell as it stands</option>'
+      +       '<option value="-0.05">Needs some work, paint and small repairs</option>'
+      +       '<option value="-0.15">Needs real work before it would show well</option>'
+      +     '</select></label>'
+      + '</div>'
+      + '<div class="xout" id="x_out" data-base="' + range.mid + '" data-lo="' + range.lo + '" data-hi="' + range.hi + '"></div>'
+      + '<p class="small"><strong>Where these percentages come from, honestly.</strong> '
+      + 'They are the same ones behind the ' + hpEsc(c.name) + ' valuation tool, and they are local judgment '
+      + 'from what buyers here pay attention to. They are not measured from recorded sales, because a deed does '
+      + 'not record whether a house has an outdoor kitchen. The uplift is capped at 12% however many boxes you '
+      + 'tick, because these things stop adding up after a point.</p>'
+      + '<p class="small">A pool is not on the list on purpose. The county does record pools, so the comparable '
+      + 'sales above are already matched pool against pool and it is in the figure already. For the record, '
+      + 'across 101 single-family sales here a pool is worth about 8% more than the county value alone suggests.</p>'
+      + '<p class="small">Solar you own outright, impact windows, a recent roof and a whole-house generator are '
+      + 'all worth money to the right buyer, and I have left them off because I cannot put an honest number on '
+      + 'them from sales data. Tell me about them and I will factor them in properly.</p>'
+      + '<p class="cta"><a class="btn" href="tel:19416629941">Call 941-662-9941</a> '
+      + '<a class="btn ghost" href="sms:19416629941">Text me instead</a></p>'
+      + '<p class="small">Twenty minutes and someone standing in the house beats any amount of arithmetic. '
+      + 'No charge and no obligation either way.</p>'
+      + '</div>';
+  }
+
   h += '<form class="card signup" method="POST" action="/h/' + hpEsc(p.slug) + '">'
     + '<input type="hidden" name="form" value="alerts">'
     /* ---- the alerts signup ----------------------------------------------
@@ -1175,15 +1426,18 @@ function hpPage(D, p, host) {
        hope. So this promises recorded sales only. That part is county record,
        it needs nobody's permission, and it is the part no other agent sends.
        If Brian and Ben clear MLS-driven alerts, widen it then and not before. */
-    + '<div class="tag">Alerts</div>'
-    + '<h2>Know what ' + hpEsc(hpTitle(p.street)) + ' actually sells for, as it happens</h2>'
-    + '<p>This page rebuilds itself every time the county records a new sale, so what you are reading is never '
-    + 'out of date. Leave your email and I will tell you when one of those sales lands: which house, when it closed, '
-    + 'and what the buyer actually paid.</p>'
-    + '<p>That last part is the whole point. Asking prices are public and mostly noise. '
-    + 'The recorded price is what your own home gets measured against, and most owners never see it '
-    + 'until they are already trying to sell.</p>'
-    + '<p class="small">Pick how wide you want it.</p>'
+    + '<div class="tag">Sale alerts</div>'
+    + '<h2>Be told when a home near you sells, and for how much</h2>'
+    + '<p>Bookmark this page. The address in your browser bar is all of it, the same link still works in two '
+    + 'years, and I reload the county records regularly so new sales turn up here on their own. '
+    + 'You do not have to give me anything for that.</p>'
+    + '<p>What an email address gets you is not the link. It is being told. '
+    + 'When a home near you sells I will send you which house, when it closed, and what the buyer actually paid, '
+    + 'without you having to remember to come back and look.</p>'
+    + '<p>And when a home near you does sell, I will tell you: which house, when it closed, and what the buyer '
+    + 'actually paid. Asking prices are public and mostly noise. The recorded price is what your own home gets '
+    + 'measured against, and most owners never see it until they are already trying to sell.</p>'
+    + '<p class="small">Pick how close to home you want it.</p>'
     + '<div class="scopes">'
     +   '<label><input type="radio" name="scope" value="street" checked> <strong>' + hpEsc(hpTitle(p.street)) + ' only.</strong> Your own street, nothing else.</label>'
     +   '<label><input type="radio" name="scope" value="plan"> <strong>Homes like yours anywhere in ' + hpEsc(c.name) + '.</strong> '
@@ -1192,21 +1446,156 @@ function hpPage(D, p, host) {
     +   '<label><input type="radio" name="scope" value="community"> <strong>All ' + c.parcels.toLocaleString('en-US') + ' homes in ' + hpEsc(c.name) + '.</strong> '
     +     'Everything, including types and sizes unlike yours.</label>'
     + '</div>'
-    + '<div class="row"><input type="email" name="email" required placeholder="your email"><button type="submit">Notify me</button></div>'
-    + '<p class="small"><strong>I send these myself.</strong> There is no robot behind this, which means an email '
-    + 'reaches you within a day or two of a sale being recorded rather than within a second, and it means somebody '
-    + 'has looked at it before it goes. If that is too slow for you, say so and I will call you instead.</p>'
+    + '<div class="row"><input type="email" name="email" required placeholder="your email"><button type="submit">Email me the link</button></div>'
+    + '<p class="small">Expect a message within a few days of a sale being recorded, not the same minute. '
+    + 'County records take a little while to appear and I would rather send you a real closed price than a rumor. '
+    + 'If you want to know sooner than that, call me and I will just tell you.</p>'
     + '<p class="small">Your address and email stay with me. I never sell them, share them or give them to anyone. '
     + 'Every message has an unsubscribe link, or reply with the word stop and you are off the same day.</p>'
     + '</form>';
 
+
+  /* ---- 4. RPR, when one has been added ---- */
+  if (rpr) {
+    h += '<div class="card">'
+      + '<div class="tag">A second opinion, not mine</div>'
+      + '<h2>What RPR says</h2>'
+      + '<p>RPR is run by the National Association of Realtors. It works a different way to the sales above, and it '
+      + 'draws on listing photos, descriptions and price histories that county records never contain.</p>'
+      + '<div class="rpr"><div class="rprv">' + hpMoney(rpr.value) + '</div>'
+      + '<div class="rprr">Range ' + hpK(rpr.lo) + ' to ' + hpK(rpr.hi) + ' &middot; as of ' + hpEsc(rpr.asof) + '</div></div>'
+      + '<p class="small">Where the two agree, that is worth something. Where they disagree, the gap is usually condition, upgrades or view, and that is the part no automated number can settle.</p>'
+      + '</div>';
+  } else {
+    h += '<div class="card quiet">'
+      + '<h2>Want a second opinion on the number?</h2>'
+      + '<p>I can pull an independent estimate for this address from RPR, which is run by the National Association of Realtors, and put it on this page next to the recorded sales. It works a different way, and it draws on listing photos, descriptions and price histories that county records never contain. Text me the address and I will add it. There is no charge and nothing follows from it.</p>'
+      + '</div>';
+  }
+
+  /* ---- 5. the tax bill ---- */
+  h += '<div class="card">'
+    + '<div class="tag">November 3 ballot</div>'
+    + '<h2>What the homestead amendment does to this bill</h2>';
+  if (p.hs) {
+    h += '<p class="lead">' + hpMoney(saving) + ' a year less by 2028</p>'
+      + '<p>The part of your tax bill that this amendment changes goes from ' + hpMoney(now.nonschool) + ' now to '
+      + hpMoney(y27.nonschool) + ' in 2027 and ' + hpMoney(y28.nonschool) + ' in 2028.'
+      + (y28.nonschool < 1 ? ' It reaches zero.' : ' It does not reach zero. Even in 2028 you would still be taxed on ' + hpMoney(Math.max(0, p.assessed - c.new_2028 - Math.max(0, p.exempt - c.std_exemption))) + ' of value.') + '</p>'
+      + '<p>If your taxes are escrowed that is about ' + hpMoney(saving / 12) + ' a month. It does not arrive when the votes are counted. '
+      + 'The change first appears on the tax bill mailed in November 2027, and your servicer resets the escrow at its next annual analysis, so a smaller payment lands in early 2028.</p>';
+  } else {
+    /* The saving above is zero for a parcel with no homestead, because the
+       increase does not reach it. The figure worth giving is the one it WOULD
+       get, so the owner can weigh it, and that has to be worked out as though
+       the homestead were in place rather than read off the real bill. */
+    const d0 = now.district;
+    const hypoNow = Math.max(0, p.assessed - c.std_exemption) * d0.nonschool / 1000
+                  + Math.max(0, p.assessed - 25000) * d0.school / 1000;
+    const hypo28 = Math.max(0, p.assessed - c.new_2028) * d0.nonschool / 1000
+                 + Math.max(0, p.assessed - 25000) * d0.school / 1000;
+    const hypoSaving = Math.max(0, (now.nonschool + now.school) - hypo28);
+    h += '<p>This home does not have a homestead exemption on the county records. The amendment only helps homes that do, '
+      + 'so nothing on this bill changes.</p>'
+      + '<p>One thing would change. On a home without homestead, the county can currently raise the amount you are taxed '
+      + 'on by up to 10% a year. The amendment cuts that to 5%. It slows down how fast the bill can grow. It does not '
+      + 'reduce what is owed now.</p>'
+      + '<p>If this became somebody\'s permanent residence and carried a homestead exemption, the bill would be about '
+      + hpMoney(hypoNow) + ' a year today and about ' + hpMoney(hypo28) + ' by 2028, which is '
+      + hpMoney(hypoSaving) + ' a year less than it is paying now. Whether this home can qualify is a question for the '
+      + 'Property Appraiser on 941-861-8200, and there is a date most people have not heard about: anyone who is a '
+      + 'permanent Florida resident by 31 December 2026 is eligible for the larger exemption from the start, and '
+      + 'anyone establishing residency on or after 1 January 2027 begins at $50,000 and waits until the fifth year.</p>';
+  }
+  h += '<table class="bill"><thead><tr><th>Line</th><th class="r">Now</th><th class="r">2027</th><th class="r">2028</th></tr></thead><tbody>'
+    + '<tr><td><strong>The part that changes</strong><br><span class="dim">county, city, hospital and water district</span></td>'
+    + '<td class="r">' + hpMoney(now.nonschool) + '</td><td class="r">' + hpMoney(y27.nonschool) + '</td><td class="r"><strong>' + hpMoney(y28.nonschool) + '</strong></td></tr>'
+    + '<tr><td><strong>School tax</strong><br><span class="dim">the amendment does not touch this</span></td>'
+    + '<td class="r">' + hpMoney(now.school) + '</td><td class="r">' + hpMoney(y27.school) + '</td><td class="r">' + hpMoney(y28.school) + '</td></tr>'
+    + '<tr><td><strong>District, fire, trash and stormwater</strong><br><span class="dim">not touched either, and not counted here</span></td>'
+    + '<td class="r dim" colspan="3">on your TRIM notice, unchanged</td></tr>'
+    + '</tbody></table>'
+    + '<p class="small">Your tax district is ' + hpEsc(now.district.name) + '. The rate is ' + now.district.nonschool
+    + ' per thousand dollars of value on the part that changes, and ' + now.district.school + ' on the school part. '
+    + 'You are taxed on ' + hpMoney(p.assessed) + '. ' + hpEsc(c.roll) + '. '
+    + '2026 rates were not final when this was built, so expect a difference of a few dollars either way. '
+    + 'This assumes the amendment passes as written and your homestead status does not change. Not tax advice.</p>'
+    + '<p class="note"><strong>The part that does not change.</strong> ' + hpEsc(c.cdd_note) + '</p>'
+    + '</div>';
+
+  /* ---- 6. net proceeds ---- */
+  if (range) {
+    h += '<div class="card" id="proceeds">'
+      + '<div class="tag">Net proceeds</div>'
+      + '<h2>What you would actually walk away with</h2>'
+      + '<p>The sale price starts at the middle of the range above. Everything else is empty because '
+      + 'I do not know your numbers and I am not going to guess them. Fill in what you know and the total follows.</p>'
+      + '<div class="calc">'
+      +   '<label>Sale price<input type="number" id="np_price" value="' + range.mid + '" step="1000"></label>'
+      +   '<label>Mortgage payoff<input type="number" id="np_loan" placeholder="what you still owe" step="1000"></label>'
+      +   '<label>Listing side commission %<input type="number" id="np_lc" placeholder="whatever you agree" step="0.25"></label>'
+      +   '<label>Buyer agent compensation %<input type="number" id="np_bc" placeholder="whatever you agree" step="0.25"></label>'
+      +   '<label>Title and other closing costs<input type="number" id="np_cl" placeholder="ask your title company" step="100"></label>'
+      +   '<label>Repairs and credits<input type="number" id="np_rp" placeholder="if any" step="500"></label>'
+      + '</div>'
+      + '<div class="npout" id="np_out"></div>'
+      + '<p class="small"><strong>The commission boxes start empty on purpose.</strong> '
+      + 'There has never been a standard commission rate. It has always been negotiable and it always was, '
+      + 'whatever anyone has told you over the years. What changed in August 2024 is that the rules now make that '
+      + 'plain and put the buyer agent\'s pay in writing between you and your buyer. '
+      + 'Putting a number in those boxes would be inventing a rate that does not exist, so type in what you are '
+      + 'actually being quoted and the total follows.</p>'
+      + '<p class="small">Documentary stamps are the one figure that is fixed: Florida charges $0.70 per $100 of the sale price '
+      + 'on the deed, and in Sarasota County that is customarily the seller\'s. It is worked out from the sale price above '
+      + 'and shown on its own line. Prorated taxes, your exact payoff, and the HOA and district estoppel fees are not in here '
+      + 'and will move the total. This is an estimate for planning, not a closing statement.</p>'
+      + '</div>';
+  }
+
+  /* ---- 7. the sale history ---- */
+  if (sales.length) {
+    h += '<div class="card">'
+      + '<div class="tag">Public record</div>'
+      + '<h2>What the county has recorded on ' + hpEsc(addr) + '</h2>'
+      + '<table class="comps"><thead><tr><th>Date</th><th class="r">Price</th><th>What it was</th></tr></thead><tbody>';
+    sales.forEach(function (s) {
+      h += '<tr><td>' + hpDate(s.date) + '</td><td class="r">' + hpMoney(s.price) + '</td>'
+        + '<td>' + (s.builder ? 'Original closing from ' + hpEsc(c.builder)
+                              : 'Owner to owner resale')
+        /* A builder closing is already kept out of the comp set for its own
+           reason, so tagging it again would say the same thing twice and imply
+           the price was somehow doubtful. The tag is only for a resale the
+           county did not flag as arms length. */
+        + ((!s.builder && !s.qualified) ? ' <span class="chip">not counted as a comp</span>' : '')
+        + '</td></tr>';
+    });
+    h += '</tbody></table><p class="small">Warranty and trustee deeds over $50,000 only. '
+      + 'Quit claims, corrective deeds and transfers for a dollar are left out because they are not sales. '
+      + 'A transfer marked <em>not counted as a comp</em> is a real recorded sale that the county did not flag '
+      + 'as a normal open-market sale, usually because it was between family, between companies, or part of a larger '
+      + 'deal. It stays in your history because it happened, and it is left out of the comparable list because it '
+      + 'would skew the number.</p></div>';
+  }
+
+  /* ---- 8. what the records cannot see ---- */
+  h += '<div class="card quiet">'
+    + '<h2>What the county records cannot see</h2>'
+    + '<p>County records carry square footage, bedrooms, bathrooms, year built and whether there is a pool. That is the whole list. '
+    + 'They do not show whether the kitchen has been redone, what the floors are, how old the roof and air handler are, '
+    + 'whether the lanai is extended or enclosed, or whether you have storm shutters. '
+    + 'On two homes that look identical on paper, that list is usually the whole difference in price.</p>'
+    + '<p>If you want a number that accounts for them, that takes twenty minutes and someone standing in the house. No charge and no obligation either way.</p>'
+    + '<p class="cta"><a class="btn" href="tel:19416629941">Call 941-662-9941</a> <a class="btn ghost" href="sms:19416629941">Text me instead</a></p>'
+    + '</div>';
+
   /* ---- 10. the rest of the community ---- */
   h += '<div class="card quiet">'
     + '<h2>The rest of ' + hpEsc(c.name) + '</h2>'
-    + '<p>' + c.parcels.toLocaleString('en-US') + ' homes, ' + c.homesteads.toLocaleString('en-US') + ' of them homesteaded, '
-    + c.out_of_state.toLocaleString('en-US') + ' owned from out of state. '
-    + 'Over the last 12 months ' + c.resales12 + ' changed hands owner to owner, at a median of ' + hpMoney(c.median_price12)
-    + ' and $' + c.median_psf12 + ' a square foot across all four home types.</p>'
+    + '<p>' + c.parcels.toLocaleString('en-US') + ' homes. ' + c.homesteads.toLocaleString('en-US') + ' of them are somebody\'s main residence, '
+    + 'and ' + c.out_of_state.toLocaleString('en-US') + ' are owned by somebody who lives in another state. '
+    + 'Over the last 12 months ' + c.resales12 + ' were sold by one owner to another. Half went for more than '
+    + hpMoney(c.median_price12) + ' and half for less, which works out at $' + c.median_psf12
+    + ' a square foot across all four kinds of home here.</p>'
     + '<p><a href="https://granparadiso.floridahomevalueai.com/">' + hpEsc(c.name) + ' home values</a> &middot; '
     + '<a href="/property-tax-calculator">the tax calculator for any address</a> &middot; '
     + '<a href="/flood-zones">how to check the flood zone on this address</a> &middot; '
@@ -1222,11 +1611,16 @@ function hpPage(D, p, host) {
      figures the page showed them, so the message arrives with its own context. */
   h += '<form class="card correction" method="POST" action="/h/' + hpEsc(p.slug) + '">'
     + '<input type="hidden" name="form" value="correction">'
-    + '<div class="tag">Corrections</div>'
-    + '<h2>If something on this page is wrong about ' + hpEsc(addr) + '</h2>'
-    + '<p>The county roll is a snapshot taken on 1 January 2026 and it gets things wrong. A pool that was filled in, '
-    + 'a lanai counted as living area, a room that was never finished, a transfer that was not really a sale. '
-    + 'If a figure here does not match what you know about your own house, the house is right and I want to hear about it.</p>'
+    + '<div class="tag">Corrections and ideas</div>'
+    + '<h2>Something wrong here, or something missing?</h2>'
+    + '<p class="lead" style="font-size:19px">' + hpEsc(addr) + '</p>'
+    + '<p>The county record is a snapshot taken on 1 January 2026 and it gets things wrong. A pool that was filled '
+    + 'in years ago, a lanai counted as living space, a room that was never finished, a transfer that was not '
+    + 'really a sale. If a figure here does not match what you know about your own house, the house is right and '
+    + 'I want to hear about it.</p>'
+    + '<p>And if nothing is wrong but something is missing, tell me that too. '
+    + 'This page exists because people kept asking me the same questions, so the best ideas for what goes on it '
+    + 'next are going to come from whoever is reading it, not from me.</p>'
     + '<p class="small">This form already carries your address and the exact numbers you are looking at, '
     + 'so you only have to tell me what is wrong. Nothing else about you is sent.</p>'
     + '<div class="carries">'
@@ -1247,17 +1641,19 @@ function hpPage(D, p, host) {
     +   '<label><input type="checkbox" name="wrong" value="A sale in the history"> Something in the sale history</label>'
     +   '<label><input type="checkbox" name="wrong" value="Homestead or tax"> The homestead or tax figures</label>'
     +   '<label><input type="checkbox" name="wrong" value="A comparable sale"> One of the comparable sales</label>'
-    +   '<label><input type="checkbox" name="wrong" value="Something else"> Something else</label>'
+    +   '<label><input type="checkbox" name="wrong" value="Something else"> Something else is wrong</label>'
++   '<label><input type="checkbox" name="wrong" value="SUGGESTION"> Nothing is wrong, I have a suggestion</label>'
     + '</div>'
-    + '<label class="fieldlab">What is actually true?'
-    +   '<textarea name="detail" rows="4" required placeholder="The pool was filled in when we bought it in 2021."></textarea></label>'
+    + '<label class="fieldlab">Tell me what is wrong, or what you would change'
+    +   '<textarea name="detail" rows="4" required placeholder="The pool was filled in when we bought it in 2021. And it would be useful to see what the HOA fee actually covers."></textarea></label>'
     + '<div class="row">'
     +   '<input type="email" name="email" required placeholder="your email, so I can tell you when it is fixed">'
     +   '<button type="submit">Send it</button>'
     + '</div>'
-    + '<p class="small">I read these myself. If you are right I fix the page and email you to say what changed. '
-    + 'If the county record is the problem rather than my arithmetic, I will tell you that too and point you at '
-    + 'the Property Appraiser on 941-861-8200, who is the only one who can change it at source.</p>'
+    + '<p class="small">I read every one of these myself. If you are right about a figure, I fix it and email you '
+    + 'to say what changed. If the county record is the problem rather than my arithmetic, I will tell you that and '
+    + 'point you at the Property Appraiser on <a href="tel:19418618200">941-861-8200</a>, who are the only ones who '
+    + 'can change it at the source. And if you suggested something I end up building, you will be the first to see it.</p>'
     + '</form>';
 
   h += '<div class="foot">'
@@ -1278,7 +1674,14 @@ function hpPage(D, p, host) {
 /* ------------------------------------------------------- the confirmation */
 function hpDone(D, p, kind, scope) {
   let title, body;
-  if (kind === 'correction') {
+  if (kind === 'idea') {
+    title = 'Thank you. That is a good place for it to come from.';
+    body = '<p>Your idea for ' + hpEsc(hpAddress(p, D.c)) + ' arrived with the address attached, so I know '
+         + 'exactly which page you were looking at when you thought of it.</p>'
+         + '<p>I read every one of these. This page exists because people kept asking me the same questions, '
+         + 'so the best ideas for what goes on it next come from whoever is reading it. '
+         + 'If I end up building what you suggested, you will be the first to see it.</p>';
+  } else if (kind === 'correction') {
     title = 'Got it. That is with me now.';
     body = '<p>Your message about ' + hpEsc(hpAddress(p, D.c)) + ' arrived with the address and the exact figures '
          + 'the page was showing you, so I do not have to come back and ask which house or which number.</p>'
@@ -1314,8 +1717,46 @@ function hpDone(D, p, kind, scope) {
 async function hpRoute(env, request, slug) {
   const u = new URL(request.url);
   const D = await hpData(env, u.origin);
-  const p = D.bySlug[String(slug || '').toLowerCase()];
   const host = u.host;
+
+  /* The lookup page. /my-home is the URL that goes on Facebook and on print.
+     A bare /h with no address lands here too, rather than on a 404, because
+     somebody will trim the address off a link they were sent. */
+  const raw = String(slug || '').trim();
+  if (!raw || raw === '/' || raw.toLowerCase() === 'my-home') {
+    const q = (u.searchParams.get('a') || '').trim();
+
+    /* Someone typed an address and pressed the button. Resolve it here so the
+       common case, one obvious match, goes straight to their page instead of
+       making them pick from a list of one. */
+    if (q) {
+      const exact = D.bySlug[hpNorm(q).replace(/ /g, '-')];
+      if (exact) return Response.redirect('https://' + host + '/h/' + exact.slug, 302);
+      const m = hpSearch(D, q, 12);
+      if (m.length === 1) return Response.redirect('https://' + host + '/h/' + m[0].slug, 302);
+      return new Response(hpLookupPage(D, host, q, m, true), {
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+      });
+    }
+    return new Response(hpLookupPage(D, host, '', [], false), {
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }
+    });
+  }
+
+  /* Type-ahead. Returns rows, nothing else, and is never indexed. */
+  if (raw.toLowerCase() === 'my-home/suggest') {
+    const m = hpSearch(D, u.searchParams.get('q') || '', 8);
+    return new Response(JSON.stringify({ matches: m.map(function (p2) {
+      return { slug: p2.slug, addr: hpEsc(hpStreetLine(p2)),
+               sub: hpEsc(hpTitle(p2.city || D.c.city) + ', FL ' + p2.zip + '  ' + p2.typeName
+                          + ', ' + p2.sqft.toLocaleString('en-US') + ' sq ft') };
+    }) }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8',
+                 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  const p = D.bySlug[raw.toLowerCase()];
 
   if (!p) {
     return new Response(hpNotFound(D, host), {
@@ -1335,6 +1776,12 @@ async function hpRoute(env, request, slug) {
        as a loose sentence about an unnamed property. */
     if (kind === 'correction') {
       const wrong = form.getAll('wrong').map(String);
+      /* Somebody with an idea is not somebody reporting a broken figure, and
+         the two need different subject lines or they get read in the wrong
+         frame of mind. If the only box ticked is the suggestion box, it is a
+         suggestion. */
+      const isIdea = wrong.length === 1 && wrong[0] === 'SUGGESTION';
+      const tag = isIdea ? 'SUGGESTION' : 'CORRECTION';
       const detail = String(form.get('detail') || '').trim();
       const facts = [
         p.typeName, p.sqft + ' sq ft', p.bd + ' bed', (p.fb + (p.hb ? '.5' : '')) + ' bath',
@@ -1346,21 +1793,21 @@ async function hpRoute(env, request, slug) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: '', phone: '', email: email, address: addr,
-          territory_id: D.c.name + ' - CORRECTION on a personal home page',
+          territory_id: D.c.name + ' - ' + tag + ' on a personal home page',
           /* The vault builds its subject line from this field, and it decides
              "lead" purely by whether contact details are present. A correction
              is not a lead. Until the vault itself can tell them apart, putting
              the word here is what makes it obvious in the inbox without
              opening anything. */
-          subdivision: 'CORRECTION, ' + D.c.name,
-          wants: 'CORRECTION REPORTED\nAddress: ' + addr
+          subdivision: tag + ', ' + D.c.name,
+          wants: tag + ' REPORTED\nAddress: ' + addr
                + '\nPage URL: https://' + host + '/h/' + p.slug
-               + '\nWhat they say is wrong: ' + (wrong.length ? wrong.join(', ') : 'not specified')
+               + (isIdea ? '' : '\nWhat they say is wrong: ' + (wrong.length ? wrong.join(', ') : 'not specified'))
                + '\nTheir words: ' + detail
                + '\nWhat the page was showing: ' + facts
         })
       }).catch(function () {});
-      return new Response(hpDone(D, p, 'correction', ''), {
+      return new Response(hpDone(D, p, isIdea ? 'idea' : 'correction', ''), {
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' }
       });
     }
@@ -1368,7 +1815,7 @@ async function hpRoute(env, request, slug) {
     const scope = String(form.get('scope') || 'street');
     if (email) {
       const wants = scope === 'community'
-          ? 'Alerts for all ' + D.c.parcels + ' homes in ' + D.c.name
+          ? 'Alerts for all ' + D.c.parcels.toLocaleString('en-US') + ' homes in ' + D.c.name
         : scope === 'plan'
           ? 'Alerts for ' + p.typeName + ' homes within 10% of ' + p.sqft.toLocaleString('en-US') + ' sq ft anywhere in ' + D.c.name
           : 'Alerts for ' + hpTitle(p.street) + ' only';
@@ -1412,6 +1859,198 @@ function hpNotFound(D, host) {
     + '</div></body></html>';
 }
 
+
+/* ==========================================================================
+   THE WAY IN  —  /my-home
+   ==========================================================================
+
+   THE GAP THIS FILLS. The pages at /h/<address> could only be reached by
+   somebody who already had the exact link. That made them a thing to mail,
+   not a thing to find, and it made every Facebook post in the plan impossible:
+   "type your address" had nowhere to type. This is the address box.
+
+   TWO WAYS IN, BOTH LANDING HERE.
+     1. floridahomevalueai.com/my-home  — the URL to put in a Facebook post,
+        on a postcard, in a letter. Short enough to say out loud.
+     2. A link in the footer of every page on the site, added by the rewriter
+        further down rather than by editing sixty HTML files.
+
+   IT WORKS WITHOUT JAVASCRIPT. The form is a plain GET. The type-ahead is an
+   enhancement on top, and if it never loads, typing an address and pressing
+   the button still works. That matters because this page IS indexed, unlike
+   the address pages it sends people to.                                     */
+
+function hpNorm(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+/* Rank matches so that typing a house number finds the house, and typing a
+   street finds the street. Anything starting with what was typed beats
+   anything merely containing it. */
+function hpSearch(D, q, limit) {
+  const n = hpNorm(q);
+  if (n.length < 2) return [];
+  const hits = [];
+  for (const p of D.parcels) {
+    const hay = hpNorm(p.num + ' ' + p.street + ' ' + p.unit);
+    let score = -1;
+    if (hay === n) score = 0;
+    else if (hay.indexOf(n) === 0) score = 1;
+    else if ((' ' + hay).indexOf(' ' + n) > -1) score = 2;
+    else if (hay.indexOf(n) > -1) score = 3;
+    if (score >= 0) hits.push({ p: p, score: score });
+    if (hits.length > 400) break;
+  }
+  hits.sort(function (a, b) {
+    if (a.score !== b.score) return a.score - b.score;
+    return a.p.slug < b.p.slug ? -1 : 1;
+  });
+  return hits.slice(0, limit || 8).map(function (h) { return h.p; });
+}
+
+function hpLookupPage(D, host, q, matches, tried) {
+  const c = D.c;
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    + '<title>What is my home worth? | Florida Home Value AI</title>'
+    + '<meta name="description" content="Type your address and see what you have gained since you bought, what homes like yours have actually sold for, and what the November ballot does to your tax bill. Sarasota County public records. Free, no signup.">'
+    + '<link rel="canonical" href="https://' + host + '/my-home">'
+    + '<meta property="og:type" content="website">'
+    + '<meta property="og:title" content="See what your own home has gained since you bought it">'
+    + '<meta property="og:description" content="Type your address. Recorded sale prices from your own neighborhood, your Save Our Homes benefit, and your tax bill before and after the November ballot. Free, no signup. Michael Putnam, Putnam Realty Group.">'
+    + '<meta property="og:image" content="https://' + host + '/og-image-fhv.jpg">'
+    + '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
+    + '<meta name="twitter:card" content="summary_large_image">'
+    + '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    + '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">'
+    + '<style>' + HP_CSS + HP_LOOKUP_CSS + '</style></head><body><div class="wrap">';
+
+  h += '<div class="mast">'
+    +   '<div class="brandline"><img src="/putnam-mark.png" alt="" class="mark">'
+    +     'Florida Home Value AI &middot; Putnam Realty Group</div>'
+    +   '<h1>What has your home gained since you bought it?</h1>'
+    +   '<p class="lede">Type your address. You get what you paid against what homes like yours have '
+    +   'actually sold for, what Save Our Homes has saved you, and what the November ballot does to your '
+    +   'tax bill. Every figure comes from Sarasota County public records.</p>'
+    +   '<p class="lede"><strong>Free, no signup, and nothing is hidden behind an email box.</strong> '
+    +   'The page it builds is permanent and it is yours to keep.</p>'
+    + '</div>';
+
+  h += '<form class="card lookup" method="GET" action="/my-home" autocomplete="off">'
+    + '<label class="fieldlab" for="hpq">Your address</label>'
+    + '<div class="row">'
+    +   '<input type="text" id="hpq" name="a" value="' + hpEsc(q || '') + '" required '
+    +     'placeholder="start typing your house number" aria-describedby="hphint">'
+    +   '<button type="submit">Show me</button>'
+    + '</div>'
+    + '<div id="hpsuggest" class="suggest"></div>'
+    + '<p class="small" id="hphint">Start with the house number, for example 20730. '
+    + 'Right now this covers the ' + c.parcels.toLocaleString('en-US') + ' homes in '
+    + hpEsc(c.name) + ', ' + hpEsc(c.city) + '. Other communities are being added. '
+    + 'If yours is not here yet, text the address to <a href="sms:19416629941">941-662-9941</a> and I will '
+    + 'do it by hand and send you the link.</p>'
+    + '</form>';
+
+  if (tried && matches.length > 1) {
+    h += '<div class="card"><h2>' + matches.length + ' addresses match that</h2>'
+      + '<p>Pick yours.</p><ul class="hits">';
+    matches.forEach(function (p) {
+      h += '<li><a href="/h/' + hpEsc(p.slug) + '">' + hpEsc(hpAddress(p, c)) + '</a>'
+        + '<span class="dim"> ' + hpEsc(p.typeName) + ', ' + p.sqft.toLocaleString('en-US')
+        + ' sq ft, built ' + p.yr + '</span></li>';
+    });
+    h += '</ul></div>';
+  } else if (tried && !matches.length) {
+    h += '<div class="card"><h2>Nothing here matches that</h2>'
+      + '<p>Two likely reasons, and neither is your fault.</p>'
+      + '<p><strong>Your community is not built yet.</strong> This currently covers '
+      + hpEsc(c.name) + ' only. IslandWalk, Palmero and Talon Preserve are next.</p>'
+      + '<p><strong>Or the spelling is not what the county has.</strong> Try just the house number on its own, '
+      + 'or just the street name, and pick from the list.</p>'
+      + '<p>Either way, text the address to <a href="sms:19416629941">941-662-9941</a> and I will build it by '
+      + 'hand and send you the link. That costs you nothing and it is how I find out which community to do next.</p>'
+      + '<p class="cta"><a class="btn ghost" href="/property-tax-calculator">Meanwhile, the tax calculator works on any address in Sarasota, Charlotte or Manatee County</a></p>'
+      + '</div>';
+  }
+
+  h += '<div class="card quiet"><h2>What you get, before you give anything</h2>'
+    + '<ul class="what">'
+    + '<li><strong>What you have gained since you bought.</strong> What you paid, against what comparable homes are selling for now.</li>'
+    + '<li><strong>The sales behind that number.</strong> Full addresses, sizes, dates and recorded prices, so you can check every one against the county.</li>'
+    + '<li><strong>What Save Our Homes has saved you</strong>, in dollars a year, and what happens to it when you sell.</li>'
+    + '<li><strong>Your tax bill, line by line, before and after the November ballot.</strong></li>'
+    + '<li><strong>A net proceeds calculator</strong> with your own numbers in it.</li>'
+    + '<li><strong>Everything the county has recorded on your address.</strong></li>'
+    + '</ul>'
+    + '<p class="small">No MLS data appears on these pages. Every figure is a public record or arithmetic on one. '
+    + 'The pages are not indexed by search engines, so yours is not going to turn up in somebody else\'s search results.</p>'
+    + '</div>';
+
+  h += '<div class="foot">'
+    + '<p><strong>Michael Putnam</strong> &middot; Putnam Realty Group &middot; <a href="tel:19416629941">941-662-9941</a><br>'
+    + 'Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275</p>'
+    + '<p class="small">Figures are for general market awareness and are not an appraisal, not tax advice and not '
+    + 'legal advice. Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
+    + 'This is not a solicitation of property currently listed with another broker.</p>'
+    + '<p><a href="/">Home</a> &middot; <a href="/property-tax-calculator">Property tax calculator</a> &middot; '
+    + '<a href="https://granparadiso.floridahomevalueai.com/">' + hpEsc(c.name) + ' home values</a> &middot; '
+    + '<a href="/meet">About Michael Putnam</a></p>'
+    + '</div>';
+
+  h += '</div><script>' + HP_LOOKUP_JS + '</script></body></html>';
+  return h;
+}
+
+const HP_LOOKUP_CSS = `
+.lede{font-size:19px;line-height:1.6;margin:0 0 .8rem}
+.mast h1{font-size:36px;margin:.5rem 0 .8rem}
+.lookup{padding:24px}
+.lookup .row input[type=text]{flex:1;min-width:0;padding:15px;font:400 19px Inter,sans-serif;border:2px solid var(--gold);border-radius:8px;background:#fff;color:var(--ink)}
+.lookup .row button{padding:15px 26px;font:600 18px Inter,sans-serif}
+.suggest{margin:0}
+.suggest a{display:block;padding:12px 14px;border:1px solid var(--line);border-top:0;background:#fff;text-decoration:none;color:var(--ink);font-size:17px}
+.suggest a:first-child{border-top:1px solid var(--line);border-radius:8px 8px 0 0}
+.suggest a:last-child{border-radius:0 0 8px 8px}
+.suggest a:hover,.suggest a:focus{background:var(--warm)}
+.suggest .s2{display:block;font-size:15px;color:var(--dim)}
+ul.hits{list-style:none;padding:0;margin:0}
+ul.hits li{padding:11px 0;border-bottom:1px solid var(--line);font-size:17px}
+ul.hits a{font-weight:600}
+ul.what{padding-left:20px;margin:0 0 .9rem}
+ul.what li{margin-bottom:.6rem;font-size:17px;line-height:1.6}
+@media(max-width:560px){.mast h1{font-size:28px}.lede{font-size:17px}}
+`;
+
+const HP_LOOKUP_JS = `
+(function(){
+  var box=document.getElementById('hpq'), out=document.getElementById('hpsuggest');
+  if(!box||!out) return;
+  var t=null, last='';
+  function draw(list){
+    if(!list.length){ out.innerHTML=''; return; }
+    out.innerHTML=list.map(function(r){
+      return '<a href="/h/'+r.slug+'">'+r.addr+'<span class="s2">'+r.sub+'</span></a>';
+    }).join('');
+  }
+  function go(){
+    var q=box.value.trim();
+    if(q===last) return;
+    last=q;
+    if(q.length<2){ out.innerHTML=''; return; }
+    fetch('/my-home/suggest?q='+encodeURIComponent(q))
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(box.value.trim()===q) draw(d.matches||[]); })
+      .catch(function(){});
+  }
+  box.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(go,120); });
+  box.addEventListener('focus', go);
+  document.addEventListener('click', function(e){
+    if(e.target!==box && !out.contains(e.target)) out.innerHTML='';
+  });
+})();
+`;
+
 /* -------------------------------------------------------------- the styles */
 const HP_CSS = `
 /* Type is set larger than a web default on purpose. The people reading
@@ -1433,6 +2072,7 @@ h2{font:700 22px/1.25 "Playfair Display",Georgia,serif;margin:0 0 .6rem}
 p{margin:0 0 .9rem}
 a{color:var(--goldink)}
 .mast{padding:28px 0 18px;border-bottom:1px solid var(--line)}
+.mark{width:34px;height:34px;vertical-align:middle;margin-right:9px}
 .brandline{font:600 13px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--goldink)}
 .prepared{font-size:15px;color:var(--dim);margin-top:2px}
 .sub{font-size:17px;color:var(--dim)}
@@ -1461,6 +2101,11 @@ td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .rangebar strong{font:800 19px/1.3 "Playfair Display",Georgia,serif}
 .rangebar .mid{background:#fffaf1;border-color:var(--gold)}
 .rangebar .mid strong{color:var(--goldink);font-size:22px}
+.rangebar.wide .mid{background:var(--warm);border-color:var(--line)}
+.rangebar.wide .mid strong{color:var(--ink)}
+.trust{padding:13px 15px;border-radius:8px;font-size:16px;line-height:1.6;margin:4px 0 12px}
+.trust.good{background:#f1f7f3;border-left:4px solid var(--green)}
+.trust.weak{background:#fdf3f1;border-left:4px solid var(--red)}
 .rpr{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:16px;text-align:center;margin:12px 0}
 .rprv{font:800 32px/1.1 "Playfair Display",Georgia,serif}
 .rprr{font-size:15px;color:var(--dim)}
@@ -1482,6 +2127,12 @@ td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .fieldlab{display:block;font-size:15px;color:var(--dim);margin-top:10px}
 .fieldlab textarea{display:block;width:100%;margin-top:4px;padding:11px;font:400 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);resize:vertical}
 .npout .empty span:last-child{color:var(--dim);font-style:italic}
+.extras{display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0}
+.extras label{display:block;font-size:17px;line-height:1.5;padding:10px 12px;background:var(--warm);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.extras select{display:block;width:100%;margin-top:5px;padding:10px;font:400 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.xout{background:#fffaf1;border:1px solid var(--gold);border-radius:8px;padding:16px;text-align:center;margin:14px 0}
+.xout .xbig{font:800 30px/1.15 "Playfair Display",Georgia,serif;color:var(--goldink)}
+.xout .xsub{font-size:16px;color:var(--dim);margin-top:4px}
 .npout .warn{margin-top:10px;padding:10px 12px;background:#fff4e6;border-left:3px solid var(--gold);border-radius:6px;font-size:16px;color:var(--ink)}
 .cta{margin-top:14px}
 .btn{display:inline-block;padding:12px 20px;background:var(--gold);color:#fff;text-decoration:none;border-radius:8px;font-weight:600;margin:0 6px 8px 0}
@@ -1500,6 +2151,30 @@ td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
    The net proceeds calculator. Everything else on the page is already final
    HTML when it leaves the server. */
 const HP_JS = `
+(function(){
+  /* the "what the county cannot see" adjuster */
+  var out=document.getElementById('x_out');
+  if(out){
+    var base=+out.getAttribute('data-base'), lo=+out.getAttribute('data-lo'), hi=+out.getAttribute('data-hi');
+    var m=function(n){return '$'+(Math.round(n/1000)*1000).toLocaleString('en-US');};
+    var draw=function(){
+      var up=0, boxes=document.querySelectorAll('.xf');
+      for(var i=0;i<boxes.length;i++) if(boxes[i].checked) up+=parseFloat(boxes[i].getAttribute('data-up'))||0;
+      if(up>0.12) up=0.12;
+      var v=document.querySelector('.xv'), c=document.querySelector('.xc');
+      var adj=up+(v?parseFloat(v.value)||0:0)+(c?parseFloat(c.value)||0:0);
+      var nb=base*(1+adj), nlo=lo*(1+adj), nhi=hi*(1+adj);
+      var diff=nb-base;
+      out.innerHTML='<div class="xbig">'+m(nb)+'</div>'
+        +'<div class="xsub">'+m(nlo)+' to '+m(nhi)
+        +(Math.abs(diff)>=1000?'  ·  '+(diff>0?'+':'\u2212')+m(Math.abs(diff))+' against the figure above':'')
+        +'</div>';
+    };
+    var all=document.querySelectorAll('.xf,.xv,.xc');
+    for(var j=0;j<all.length;j++) all[j].addEventListener('change',draw);
+    draw();
+  }
+})();
 (function(){
   var ids=['np_price','np_loan','np_lc','np_bc','np_cl','np_rp'];
   function v(id){var e=document.getElementById(id);return e?(parseFloat(e.value)||0):0;}
@@ -1541,12 +2216,17 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');   // tolerate a trailing slash
 
-    /* ---- The personal home page, one per address --------------------------
-       /h/<address-slug>. Handled before anything else so the alias repair and
-       run-on repair below can never touch it. Not indexed. No MLS data. */
-    if (path.toLowerCase().indexOf('/h/') === 0) {
+    /* /my-home is the address box, /h/<slug> is one owner's page. Handled
+       first so the alias repair below cannot rewrite them. Address pages are
+       not indexed, the address box is, and there is no MLS data on either. */
+    const hpPath = path.toLowerCase();
+    if (hpPath === '/my-home' || hpPath === '/my-home/suggest'
+        || hpPath === '/h' || hpPath.indexOf('/h/') === 0) {
       try {
-        return await hpRoute(env, request, path.slice(3));
+        const arg = hpPath.indexOf('/h/') === 0 ? path.slice(3)
+                  : hpPath === '/h'             ? ''
+                  :                               path.slice(1);
+        return await hpRoute(env, request, arg);
       } catch (err) {
         return new Response('That page is temporarily unavailable. Call 941-662-9941.',
           { status: 503, headers: { 'Content-Type': 'text/plain' } });
@@ -1665,7 +2345,24 @@ export default {
 
     /* Everything else is a static asset — the other 60-odd pages, the images,
        sitemap.xml, robots.txt, llms.txt. This line is not optional. */
-    return env.ASSETS.fetch(request);
+    const assetRes = await env.ASSETS.fetch(request);
+
+    /* One link, sixty pages. Every page carries <nav aria-label="Site links">,
+       so the address box is added there as the page streams out rather than by
+       editing sixty files, which is how a link ends up on fifty-seven of them. */
+    const ct = assetRes.headers.get('content-type') || '';
+    if (ct.indexOf('text/html') === -1) return assetRes;
+    return new HTMLRewriter()
+      .on('nav[aria-label="Site links"]', {
+        element(el) {
+          el.prepend(
+            '<a href="https://floridahomevalueai.com/my-home" style="font-size:13px;'
+            + 'color:#fff;padding:4px 12px;border:1px solid #b07d2b;border-radius:999px;'
+            + 'background:#b07d2b;text-decoration:none;font-weight:600;">My Home Page</a>',
+            { html: true });
+        }
+      })
+      .transform(assetRes);
   }
 };
 
