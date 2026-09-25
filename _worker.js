@@ -983,8 +983,26 @@ function hpRange(subj, comps, c) {
   /* How much to trust it. A tight match on three or more nearly identical
      homes is a different thing from a ladder that had to widen twice, and the
      page says so rather than using one confident voice for both. */
-  const tight = comps.step <= 1 && comps.list.length >= 3;
-  const band  = tight ? 0.12 : 0.20;
+  let tight = comps.step <= 1 && comps.list.length >= 3;
+  let band  = tight ? 0.12 : 0.20;
+
+  /* A RANGE THAT SITS ENTIRELY ABOVE EVERY COMP ON THE PAGE IS NOT CREDIBLE,
+     AND 104 PAGES DID EXACTLY THAT. One Grand Palm home showed a low of
+     $331,000 with four comps printed underneath at $280,000, $287,000,
+     $289,000 and $310,000, and called it the strong case. The ratio method does
+     that when the subject's own county value is well above the county values of
+     the homes that sold, so it is extrapolating rather than comparing.
+     The mid is NOT pulled down to meet the comps, because that would be
+     inventing a different number. Instead the page stops claiming a tight case
+     and says out loud that nothing comparable has sold at this level, which is
+     itself real information for the owner. */
+  const hiComp = comps.list.reduce(function (m, r) { return r.price > m ? r.price : m; }, 0);
+  let aboveComps = false;
+  if (hiComp > 0 && mid * (1 - band) > hiComp) {
+    aboveComps = true;
+    tight = false;
+    band = 0.20;
+  }
 
   const r1000 = function (n) { return Math.round(n / 1000) * 1000; };
   return {
@@ -995,6 +1013,8 @@ function hpRange(subj, comps, c) {
     n: comps.list.length,
     band: band,
     tight: tight,
+    aboveComps: aboveComps,
+    hiComp: hiComp,
     trimmed: 0
   };
 }
@@ -1037,6 +1057,27 @@ function hpPage(D, p, host) {
 
   const sohGap = Math.max(0, p.just - p.assessed);
   const canonical = 'https://' + host + '/h/' + p.slug;
+
+  /* THE SAVE OUR HOMES GAP IS NOT ALWAYS THE OWNER'S, AND THE OLD COPY ASSUMED
+     IT WAS. On a certified roll, the assessed value of a home that changed hands
+     recently can still be the SELLER'S capped figure. A capped amount does not
+     transfer to a buyer. 196 of these pages had a purchase inside the last two
+     roll years together with a gap over $5,000, and the page credited that gap
+     to the new owner, told them it widens every year they stay, and offered to
+     port all of it. One of them bought in April 2026 and was shown $145,961.
+     None of that was theirs. So the gap is only ever claimed for an owner whose
+     purchase is old enough for the figure to be their own. A page with no
+     recorded finished-house purchase at all is a custom build whose owner put it
+     up, so the cap there is theirs. */
+  const rollYear = (function () {
+    const m = String(c.roll || '').match(/\b(20\d\d)\b/);
+    return m ? parseInt(m[1], 10) : 2026;
+  })();
+  const boughtYr = lastSale ? (parseInt(String(lastSale.date).slice(0, 4), 10) || 0) : 0;
+  const capMine  = !lastSale || (boughtYr > 0 && boughtYr <= rollYear - 2);
+  /* three of the six communities carry the placeholder "the builder" rather than
+     a verified name, and "the original closing from the builder" is filler. */
+  const namedBuilder = !!(c.builder && /^[A-Z]/.test(String(c.builder)));
 
   let h = '';
 
@@ -1105,27 +1146,144 @@ function hpPage(D, p, host) {
     +   '</div>'
     + '</div>';
 
-  /* ---- 1. the net gain, first, because it is the reason to open the page --- */
+  /* ---- 1. good news and bad news, replacing the single gain figure ---------
+     This used to open with one number, the gain since purchase, at 44px. On 26%
+     of pages that number is negative, and on 89% of 2022 purchases it is
+     negative by a median of $117,000. Opening a person's own home page with
+     -$117,000 is the fastest way to make them close the tab, and softening the
+     number would have meant lying about it.
+     So the page asks the question instead and shows both sides at the same
+     weight. The good news panel is always a real checkable figure rather than a
+     consolation: an untaxed homestead gap that is genuinely theirs, an
+     exemption they are entitled to and have not claimed, a rising price per
+     foot, or the November ballot. Nothing is invented and nothing is hidden.
+     THE SOH PANEL SHOWS THE GAP, NOT AN ANNUAL SAVING, ON PURPOSE. Section 2
+     prints its own annual figure and two different dollar amounts for the same
+     thing on one page is a contradiction. The gap matches section 2's heading.
+     A GAIN UNDER THE GREATER OF $10,000 OR 3% IS NOT A GAIN. 600 pages sit
+     inside that. One Talon home was $1,400 off a $716,400 purchase, and putting
+     a big red minus $1,400 on a $715,000 house reads as though the page cannot
+     tell signal from noise. Those get their own wording. */
   if (range && lastSale) {
-    const gain = range.mid - lastSale.price;
-    const up = gain >= 0;
-    h += '<div class="hero ' + (up ? 'up' : 'down') + '">'
-      + '<div class="herolabel">Since you bought</div>'
-      + '<div class="herobig">' + (up ? '+' : '−') + hpMoney(Math.abs(gain)) + '</div>'
-      + '<p>You paid ' + hpMoney(lastSale.price) + ' in ' + hpShortDate(lastSale.date) + '.'
-      + ' What ' + (comps.list.length) + ' comparable ' + hpEsc(p.typeName.toLowerCase())
-      + ' sales point to today is around <strong>' + hpMoney(range.mid) + '</strong>, in a range of '
-      + hpMoney(range.lo) + ' to ' + hpMoney(range.hi) + '.</p>'
-      + '<p class="small">That is before the cost of selling. '
-      + '<a href="#proceeds">See what you would actually walk away with</a>. '
-      + (lastSale.builder ? 'Your purchase was the original closing from ' + hpEsc(c.builder) + '.' : '')
-      + '</p>'
+    const gain  = range.mid - lastSale.price;
+    const flat  = Math.abs(gain) < Math.max(10000, range.mid * 0.03);
+    const up    = gain >= 0;
+    const chg   = (typeof trend.chg === 'number') ? trend.chg : null;
+    const typeL = hpEsc(p.typeName.toLowerCase());
+    const held  = boughtYr > 0 ? rollYear - boughtYr : 0;
+    const offPk = (c.ratio_peak && c.ratio_now && c.ratio_peak > c.ratio_now)
+                ? Math.round((1 - c.ratio_now / c.ratio_peak) * 100) : null;
+    const peakWhen = hpEsc(String(c.ratio_peak_when || '')
+                       .replace('H1', ' first half').replace('H2', ' second half'));
+
+    const paid  = 'You paid ' + hpMoney(lastSale.price) + ' in ' + hpShortDate(lastSale.date) + '.'
+                + (lastSale.builder && namedBuilder
+                   ? ' That was the original closing from ' + hpEsc(c.builder) + '.' : '');
+    const nC = comps.list.length;
+    const today = nC + ' comparable ' + typeL + (nC === 1 ? ' sale points' : ' sales point')
+                + ' to about <strong>'
+                + hpMoney(range.mid) + '</strong> today, in a range of ' + hpMoney(range.lo)
+                + ' to ' + hpMoney(range.hi) + '.';
+
+    /* The good news for any page where the gain itself is not the good news.
+       Money first, information second. */
+    function hpUpside() {
+      if (p.hs && sohGap > 5000 && capMine) {
+        return { big: hpMoney(sohGap), txt: false,
+          body: 'is the part of this home’s value you are never taxed on. The county’s value is '
+              + hpMoney(p.just) + '. The figure your bill is worked out from is '
+              + hpMoney(p.assessed) + '. Save Our Homes holds that gap open and widens it every year '
+              + 'you stay.',
+          small: '<a href="#soh">How that works, and what happens to it the day you sell</a>' };
+      }
+      /* Florida homestead needs permanent Florida residency, so this headline is
+         a promise of nothing to the 676 owners the county records as out of
+         state. The data file carried that flag all along and the condition
+         never looked at it. */
+      if (!p.hs && !p.oos) {
+        return { big: 'There is money on the table', txt: true,
+          body: 'The county has no homestead exemption recorded on this address. If you live here as your '
+              + 'main home and have never filed for one, it caps what you can be taxed on for as long as '
+              + 'you stay, and it costs nothing to apply. One call to the Property Appraiser on '
+              + '<a href="tel:19418618200">941-861-8200</a> settles it either way. If this is a rental or '
+              + 'a second home it does not apply.', small: '' };
+      }
+      if (chg !== null && chg > 0) {
+        return { big: '+' + chg.toFixed(1) + '%', txt: false,
+          body: 'Price per square foot for ' + typeL + ' homes in ' + hpEsc(c.name) + ' is up '
+              + chg.toFixed(1) + '% over the last 12 months against the 12 before. The figure beside '
+              + 'this one looks back at what you paid. This one looks at where the market is heading.',
+          small: '' };
+      }
+      if (saving > 200) {
+        return { big: hpMoney(saving) + ' a year', txt: false,
+          body: 'is what the homestead amendment on the November 3 ballot would take off this bill by '
+              + '2028, if it passes. It is a fixed dollar exemption, so what you get back does not depend '
+              + 'on what your home is worth or on which way the market went.',
+          small: '<a href="#ballot">The year by year figures for this address</a>' };
+      }
+      return { big: 'Nothing is settled', txt: true,
+        body: 'The figure beside this one is a comparison, not a verdict'
+            + (offPk ? '. ' + hpEsc(c.name) + ' is running about ' + offPk + '% below where it peaked in '
+               + peakWhen + ', so everyone who bought near the top is in the same position' : '')
+            + '. None of it is locked in while you still own the house.', small: '' };
+    }
+
+    let G, B;
+
+    if (flat) {
+      G = hpUpside();
+      B = { big: 'About where you started', txt: true,
+        body: paid + ' ' + today + ' That is a difference of ' + hpMoney(Math.abs(gain))
+            + ' apart, which on a house this size sits inside the margin rather than counting as a '
+            + 'real move.'
+            + (held >= 3 ? ' Holding for ' + held + ' years and landing back where you started is a small '
+               + 'step backwards once you allow for the cost of selling.' : '') };
+    } else if (up) {
+      G = { big: '+' + hpMoney(gain), txt: false, body: paid + ' ' + today, small: '' };
+      if (chg !== null && chg < 0) {
+        B = { big: '−' + Math.abs(chg).toFixed(1) + '%', txt: false,
+          body: 'It was bigger a year ago. Price per square foot for ' + typeL + ' homes in '
+              + hpEsc(c.name) + ' is down ' + Math.abs(chg).toFixed(1) + '% over the last 12 months '
+              + 'against the 12 before'
+              + (offPk ? ', and the community as a whole is running about ' + offPk
+                 + '% below where it was in ' + peakWhen : '')
+              + '. A gain that is shrinking is still a gain, but you should know which way it is moving.' };
+      } else {
+        B = { big: 'None of it is cash', txt: true,
+          body: 'A gain on paper is not money in your account. Commission, title, doc stamps and whatever '
+              + 'is left on the mortgage all come out of it first, and most people are out by tens of '
+              + 'thousands when they guess at that.' };
+      }
+    } else {
+      G = hpUpside();
+      B = { big: '−' + hpMoney(Math.abs(gain)), txt: false,
+        body: paid + ' ' + today + ' That is a paper figure. It is not a loss unless you sell into it.' };
+    }
+
+    h += '<div class="hero ask">'
+      + '<h2 class="askq">Do you want the good news first, or the bad news?</h2>'
+      + '<p class="small">Good news first. The bad news is sitting right beside it, because a page that '
+      + 'showed you only one of them would not be worth opening.</p>'
+      + '<div class="gnbn">'
+      +   '<div class="gn"><div class="gnlabel">The good news</div>'
+      +     '<div class="gnbig' + (G.txt ? ' txt' : '') + '">' + G.big + '</div><p>' + G.body + '</p>'
+      +     (G.small ? '<p class="small">' + G.small + '</p>' : '')
+      +   '</div>'
+      +   '<div class="bn"><div class="gnlabel">The bad news</div>'
+      +     '<div class="gnbig' + (B.txt ? ' txt' : '') + '">' + B.big + '</div><p>' + B.body + '</p>'
+      +   '</div>'
+      + '</div>'
+      + '<p class="small">Neither of those is what you would walk away with. '
+      + '<a href="#proceeds">That is further down the page, and you can put your own mortgage balance '
+      + 'into it</a>.</p>'
       + '</div>';
   } else if (range) {
     h += '<div class="hero up"><div class="herolabel">What this home looks like today</div>'
       + '<div class="herobig">' + hpMoney(range.mid) + '</div>'
       + '<p>In a range of ' + hpMoney(range.lo) + ' to ' + hpMoney(range.hi)
-      + ', from ' + comps.list.length + ' comparable recorded sales.</p>'
+      + ', from ' + comps.list.length + ' comparable recorded sale'
+      + (comps.list.length === 1 ? '' : 's') + '.</p>'
       + '<p class="small">There is no gain figure here because the county has no record of a finished house '
       + 'being bought on this address. What it shows is a lot purchase followed by construction, which is what '
       + 'a custom build looks like in the record. If you tell me what the house cost to put up I can work the '
@@ -1142,29 +1300,68 @@ function hpPage(D, p, host) {
   }
 
   /* ---- 2. Save Our Homes ---- */
-  if (p.hs && sohGap > 5000) {
-    const d = now.district;
-    const atMarket = Math.max(0, p.just - 250000) * d.nonschool / 1000
-                   + Math.max(0, p.just - 25000) * d.school / 1000;
-    const worth = Math.max(0, atMarket - (y28.nonschool + y28.school));
-    h += '<div class="card gold">'
+  if (p.hs && sohGap > 5000 && capMine) {
+    /* WHAT SAVE OUR HOMES SAVES TODAY, NOT UNDER SOME FUTURE EXEMPTION.
+       The old version hardcoded a $250,000 exemption on the market-value side,
+       ignored this parcel's own exemptions entirely, and then subtracted the
+       2028 bill. Two different tax regimes subtracted from each other. It was
+       wrong on 3,074 of the 3,179 pages that printed it, 665 of them printing
+       "$0 a year" three lines under "the gap is never taxed", and one
+       overstating by four and a half times.
+       The fix runs this parcel through the page's OWN bill function with the
+       county's market value in place of the capped value, so the figure cannot
+       drift from the tax table further down and cannot go stale if exemption
+       rules change in the data file. */
+    const atMkt = hpBill(D, Object.assign({}, p, { assessed: p.just }), null);
+    const worth = Math.max(0, (atMkt.nonschool + atMkt.school) - (now.nonschool + now.school));
+    h += '<div class="card gold" id="soh">'
       + '<h2>You are taxed on ' + hpMoney(sohGap) + ' less than the county\'s own value</h2>'
       + '<p>Two different numbers sit on your county record, and they are not the same thing. '
       + 'The county\'s value for this home is <strong>' + hpMoney(p.just) + '</strong>. '
-      + 'The figure you are actually taxed on is <strong>' + hpMoney(p.assessed) + '</strong>. '
-      + 'The ' + hpMoney(sohGap) + ' in between is never taxed.</p>'
+      + 'The figure your bill is worked out from is <strong>' + hpMoney(p.assessed) + '</strong>, '
+      + 'before your exemptions come off that. '
+      + 'The ' + hpMoney(sohGap) + ' in between is never taxed at all.</p>'
       + '<p class="small">Both of those are the county\'s figures, not mine, and neither is the same as what the '
       + 'home would sell for. The selling figure is the one further up this page.</p>'
       + '<p>That comes from a Florida rule called Save Our Homes. Once you have a homestead exemption, '
-      + 'the county can only raise the amount you are taxed on by 3% a year, however far the home itself goes up. '
+      + 'the county can raise the amount you are taxed on by no more than 3% a year, and by less than that in '
+      + 'years when inflation runs lower, however far the home itself goes up. '
       + 'The longer you stay, the wider that gap gets.</p>'
       + '<p><strong>It saves you about ' + hpMoney(worth) + ' a year.</strong></p>'
       + '<p>Here is the part that takes people by surprise. The day you sell, that gap goes to zero. '
       + 'Whoever buys this home starts paying tax on the full value, not on your protected amount.</p>'
-      + '<p>If you buy another Florida home and live in it, you can take the gap with you. Florida calls that '
-      + 'portability. It covers up to $500,000, so all ' + hpMoney(sohGap) + ' of yours would move across. '
-      + 'It does not happen on its own. You have to file for it and there is a deadline. One free call to the '
-      + 'Property Appraiser on <a href="tel:19418618200">941-861-8200</a> before you list is all it takes.</p>'
+      + '<p>If you buy another Florida home and live in it, you can take that gap with you. Florida calls it '
+      + 'portability and it covers up to $500,000. How much of your ' + hpMoney(sohGap) + ' actually moves '
+      + 'across depends on what you buy. Buy a home the county values at or above this one and the whole gap '
+      + 'transfers. Buy something less expensive and you get a proportional share of it instead, which is the '
+      + 'part that catches downsizers.</p>'
+      + '<p>It does not happen on its own. You have to file for it and there is a deadline. One free call to '
+      + 'the Property Appraiser on <a href="tel:19418618200">941-861-8200</a> before you list will tell you '
+      + 'exactly what your own number would be.</p>'
+      + '</div>';
+  } else if (p.hs && sohGap > 5000 && lastSale) {
+    /* The 196-page case. Same gap, but the purchase is too recent for the
+       figure to be theirs, so every sentence in the card above would be wrong
+       for them, including the offer to port the whole gap. The honest version
+       is more use to them than the wrong version was: their bill is going up
+       and nobody is telling them. WHEN a cap resets is the Property Appraiser's
+       to state, so this points at them instead of reciting a rule. */
+    h += '<div class="card gold" id="soh">'
+      + '<h2>The figure you are taxed on this year is unlikely to hold</h2>'
+      + '<p>Two numbers sit on your county record. The county’s value for this home is <strong>'
+      + hpMoney(p.just) + '</strong>. The figure your bill is worked out from is <strong>'
+      + hpMoney(p.assessed) + '</strong>, which is ' + hpMoney(sohGap) + ' lower.</p>'
+      + '<p>On a home that has not changed hands in years, that gap belongs to the owner and it widens '
+      + 'every year they stay. This address changed hands in ' + hpShortDate(lastSale.date) + ', so the '
+      + 'lower figure on the ' + rollYear + ' roll is very likely still the previous owner’s. '
+      + 'A capped amount does not come with the house. It resets.</p>'
+      + '<p><strong>What that means for you is that the amount you are taxed on should be expected to go '
+      + 'up, and the bill with it.</strong> I am not going to guess by how much or in which year, because '
+      + 'the exact timing is the Property Appraiser’s call and not mine.</p>'
+      + '<p>One free call to them on <a href="tel:19418618200">941-861-8200</a> with this address gets you '
+      + 'the real answer, and it is worth making before you budget around this year’s bill. Ask two '
+      + 'things: when the assessed value resets, and whether your own homestead exemption and any '
+      + 'portability you brought with you are both on the record.</p>'
       + '</div>';
   }
 
@@ -1215,6 +1412,15 @@ function hpPage(D, p, host) {
                      + 'actual selling price ' + c.bt.cov + '% of the time and the middle figure was out by about '
                      + c.bt.err + '%.' : '')
           + '</div>';
+      } else if (range.aboveComps) {
+        h += '<div class="trust weak"><strong>Read this one carefully.</strong> '
+          + 'The figure above is higher than anything comparable has actually sold for here. The highest of '
+          + 'the ' + range.n + ' sales in the table below is ' + hpMoney(range.hiComp) + '. The county values '
+          + 'your home well above the homes that sold, so the arithmetic is reaching past its own evidence '
+          + 'rather than sitting inside it, and I have widened the range instead of pretending otherwise. '
+          + 'That usually means the home is genuinely at the top of what is here, which is worth money, but '
+          + 'it is not something a page can settle. Twenty minutes in the house does settle it. '
+          + '<a href="tel:19416629941">941-662-9941</a>.</div>';
       } else {
         h += '<div class="trust weak"><strong>Treat this one as a wide guess.</strong> '
           + 'I could not find enough recent sales genuinely like your home, so the net had to be cast wider '
@@ -1391,7 +1597,7 @@ function hpPage(D, p, host) {
   }
 
   /* ---- 5. the tax bill ---- */
-  h += '<div class="card">'
+  h += '<div class="card" id="ballot">'
     + '<div class="tag">November 3 ballot</div>'
     + '<h2>What the homestead amendment does to this bill</h2>';
   if (p.hs) {
@@ -1434,10 +1640,26 @@ function hpPage(D, p, host) {
     + '</tbody></table>'
     + '<p class="small">Your tax district is ' + hpEsc(now.district.name) + '. The rate is ' + now.district.nonschool
     + ' per thousand dollars of value on the part that changes, and ' + now.district.school + ' on the school part. '
-    + 'You are taxed on ' + hpMoney(p.assessed) + '. ' + hpEsc(c.roll) + '. '
-    + '2026 rates were not final when this was built, so expect a difference of a few dollars either way. '
+    /* THERE IS NO SINGLE "YOU ARE TAXED ON" FIGURE AND THE PAGE USED TO PRINT
+       ONE. It printed the assessed value on 5,862 pages, which is the figure
+       BEFORE exemptions. The school side and the non-school side have different
+       taxable amounts because the extra homestead band does not apply to
+       schools. On one parcel the printed number was four times the real taxable
+       base. Both bases are now stated, and both are derived the same way the
+       table above derives them. */
+    + 'Your assessed value is ' + hpMoney(p.assessed) + '. Exemptions come off that before the rate is '
+    + 'applied, so the part that changes is taxed on ' + hpMoney(Math.max(0, p.assessed - p.exempt))
+    + ' and the school part on '
+    + hpMoney(Math.max(0, p.assessed - (p.hs ? 25000 + Math.max(0, p.exempt - c.std_exemption)
+                                             : Math.max(0, p.exempt - c.std_exemption))))
+    + '. Those two are the figures your TRIM notice calls taxable value. ' + hpEsc(c.roll) + '. '
+    + 'A final certified rate can move the total by a few dollars either way. '
     + 'This assumes the amendment passes as written and your homestead status does not change. Not tax advice.</p>'
-    + '<p class="note"><strong>The part that does not change.</strong> ' + hpEsc(c.cdd_note) + '</p>'
+    /* Grand Palm and Sunrise Preserve have no verified TRIM notice, so cdd_note
+       is empty and 2,056 pages printed this bold heading followed by nothing.
+       No note means say nothing, which is the same rule the build script uses. */
+    + (c.cdd_note ? '<p class="note"><strong>The part that does not change.</strong> '
+        + hpEsc(c.cdd_note) + '</p>' : '')
     + '</div>';
 
   /* ---- 6. net proceeds ---- */
@@ -1543,7 +1765,7 @@ function hpPage(D, p, host) {
       + '<p class="small"><strong>Where these percentages come from, honestly.</strong> '
       + 'They are the same ones behind the ' + hpEsc(c.name) + ' valuation tool, and they are local judgment '
       + 'from what buyers here pay attention to. They are not measured from recorded sales, because a deed does '
-      + 'not record whether a house has an outdoor kitchen. The uplift is capped at 12% however many boxes you '
+      + 'not record whether a house has an outdoor kitchen. The total uplift is capped at 12% however much you '
       + 'check, because these things stop adding up after a point.</p>'
       + '<p class="small">A pool is not on the list on purpose. The county does record pools, so the comparable '
       + 'sales above are already matched pool against pool and it is in the figure already. For the record, '
@@ -1645,15 +1867,31 @@ function hpPage(D, p, host) {
   h += '<div class="foot">'
     + '<p><strong>Michael Putnam</strong> &middot; Putnam Realty Group &middot; <a href="tel:19416629941">941-662-9941</a><br>'
     + 'Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275</p>'
+    /* There was no licence number and no broker named on any of the 8,706
+       pages, and the only use of the word broker positioned Michael as one.
+       Brian sets the final wording; this is correct-by-default until he does. */
+    + '<p class="small">' + HP_LICENCE + '</p>'
     + '<p class="small">Sale prices are recorded transactions from Sarasota County public records, owner to owner, builder sales excluded. '
     + 'Figures are for general market awareness and are not an appraisal, not tax advice and not legal advice. '
     /* Same fact, stated as the reason the page can be checked rather than as a
        thing the page lacks. Stellar still needs it unambiguous that no IDX data
        is used here, and it still is. */
-    + 'Every figure here comes from Sarasota County public records rather than from the MLS, which is why you '
-    + 'can look up any of it yourself. Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
-    + 'This is not a solicitation of property currently listed with another broker. '
+    /* THE OLD SENTENCE WAS FALSE AND THE PAGE PROVED IT TWO SECTIONS EARLIER.
+       It claimed every figure came from county records rather than the MLS,
+       while the RPR widget sits on every page and the page itself says RPR
+       draws on listing photos and asking price histories. Narrowed so it is
+       true either way: what Michael works out is county record, RPR's number is
+       RPR's own. Whether the widget is permitted under the Stellar PDAA went to
+       Brian on 25 September 2026. */
+    + 'Every figure I work out here comes from Sarasota County public records rather than from the MLS, which '
+    + 'is why you can look any of it up yourself. The RPR estimate on this page is RPR\'s own, produced from '
+    + 'their data and not from mine. '
+    + 'Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
+    + 'This is not a solicitation of property currently listed with another brokerage. '
     + 'This page was built for one address and is not published or indexed.</p>'
+    + '<p class="small">I record that this page was opened, and which figures were typed into the net proceeds '
+    + 'calculator, so I know which addresses to follow up on. No cookies, no third party tracking, and nothing '
+    + 'here is ever sold or shared.</p>'
     + '<p class="small">Built from the ' + hpEsc(c.roll) + '. Page generated ' + hpDate(new Date().toISOString().slice(0, 10)) + '.</p>'
     + '</div>';
 
@@ -1956,7 +2194,10 @@ async function hpRoute(env, request, slug) {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'X-Robots-Tag': 'noindex, nofollow',
-      'Cache-Control': 'public, max-age=900'
+      /* private, not public. noindex is not access control, and these pages
+         carry one household's purchase price, assessed value and homestead
+         status. A shared proxy has no business holding that. */
+      'Cache-Control': 'private, max-age=900'
     }
   });
 }
@@ -2234,9 +2475,10 @@ function hpLookupPage(REG, host, q, matches, tried, loose) {
   h += '<div class="foot">'
     + '<p><strong>Michael Putnam</strong> &middot; Putnam Realty Group &middot; <a href="tel:19416629941">941-662-9941</a><br>'
     + 'Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275</p>'
+    + '<p class="small">' + HP_LICENCE + '</p>'
     + '<p class="small">Figures are for general market awareness and are not an appraisal, not tax advice and not '
     + 'legal advice. Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
-    + 'This is not a solicitation of property currently listed with another broker.</p>'
+    + 'This is not a solicitation of property currently listed with another brokerage.</p>'
     + '<p><a href="/">Home</a> &middot; <a href="/property-tax-calculator">Property tax calculator</a> &middot; '
     + '<a href="https://granparadiso.floridahomevalueai.com/">Gran Paradiso home values</a> &middot; '
     + '<a href="https://islandwalk.floridahomevalueai.com/">IslandWalk home values</a> &middot; '
@@ -2308,12 +2550,18 @@ const HP_LOOKUP_JS = `
 })();
 `;
 
+/* The licence and brokerage line for every page. One constant, so it changes
+   in one place once Brian settles the exact wording. */
+const HP_LICENCE = 'Michael Putnam, Florida Real Estate Sales Associate with Putnam Realty Group';
+
 /* -------------------------------------------------------------- the styles */
 const HP_CSS = `
-/* Type is set larger than a web default on purpose. The people reading
-   these pages own homes in Gran Paradiso and are mostly over sixty, and
-   a lot of what matters here sits in the explanatory text rather than the
-   headline. 18px body, and nothing on the page below 15px.
+/* Type is set larger than a web default on purpose. A lot of what matters
+   here sits in the explanatory text rather than in the headline, and this gets
+   read on phones as often as on a desktop. 18px body, nothing below 15px.
+   (An earlier version of this comment described the readers of a named
+   community by age. It shipped in the HTML of all 8,706 pages and was visible
+   in View Source. Nothing about who the readers are goes in here.)
    --dim is the gray for secondary text. At #6b6259 it cleared the AA
    contrast bar at 5.59:1 but not AAA. #57504a reaches 7.41:1.
    --gold is the brand color and stays as it is for rules, borders and
@@ -2339,6 +2587,22 @@ a{color:var(--goldink)}
 .herolabel{font:600 13px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
 .herobig{font:800 44px/1.05 "Playfair Display",Georgia,serif;margin:.15rem 0 .7rem;color:var(--green)}
 .hero.down .herobig{color:var(--red)}
+/* the good news / bad news pair. Two panels, equal weight, so neither number
+   is the headline. Stacks on a phone with the good news first. */
+.hero.ask{border-left-color:var(--gold)}
+.askq{font:800 27px/1.2 "Playfair Display",Georgia,serif;margin:0 0 .5rem}
+.gnbn{display:grid;gap:16px;margin:16px 0 14px}
+@media(min-width:700px){.gnbn{grid-template-columns:1fr 1fr}}
+.gn,.bn{padding:15px 16px;border-radius:8px;background:var(--warm);border:1px solid var(--line)}
+.gn{border-left:4px solid var(--green)}
+.bn{border-left:4px solid var(--red)}
+.gnlabel{font:600 12px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.gnbig{font:800 31px/1.08 "Playfair Display",Georgia,serif;margin:.2rem 0 .5rem}
+.gnbig.txt{font-size:21px;line-height:1.25}
+.gn .gnbig{color:var(--green)}
+.bn .gnbig{color:var(--red)}
+.gn p,.bn p{margin:0;font-size:16px;line-height:1.62}
+.gn p+p,.bn p+p{margin-top:.55rem}
 .card{margin:18px 0;padding:22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
 .card.quiet{background:transparent;border-style:dashed}
 .card.gold{border-left:4px solid var(--gold);background:#fffaf1}
@@ -2500,9 +2764,13 @@ const HP_JS = `
     var draw=function(){
       var up=0, boxes=document.querySelectorAll('.xf');
       for(var i=0;i<boxes.length;i++) if(boxes[i].checked) up+=parseFloat(boxes[i].getAttribute('data-up'))||0;
-      if(up>0.12) up=0.12;
       var v=document.querySelector('.xv'), c=document.querySelector('.xc');
       var adj=up+(v?parseFloat(v.value)||0:0)+(c?parseFloat(c.value)||0:0);
+      /* The cap has to apply to the TOTAL. The three boxes only add to 9%, so
+         clamping them alone could never bind, and the view dropdown then added
+         up to 4% more on top of a figure the page called capped at 12%. A
+         downward condition adjustment is left alone. */
+      if(adj>0.12) adj=0.12;
       var nb=base*(1+adj), nlo=lo*(1+adj), nhi=hi*(1+adj);
       var diff=nb-base;
       out.innerHTML='<div class="xbig">'+m(nb)+'</div>'
