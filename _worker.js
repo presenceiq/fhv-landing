@@ -1630,7 +1630,11 @@ function hpPage(D, p, host) {
     + 'Michael@PutnamRealtyGroup.com &middot; Nokomis, FL 34275</p>'
     + '<p class="small">Sale prices are recorded transactions from Sarasota County public records, owner to owner, builder sales excluded. '
     + 'Figures are for general market awareness and are not an appraisal, not tax advice and not legal advice. '
-    + 'There is no MLS data on this page. Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
+    /* Same fact, stated as the reason the page can be checked rather than as a
+       thing the page lacks. Stellar still needs it unambiguous that no IDX data
+       is used here, and it still is. */
+    + 'Every figure here comes from Sarasota County public records rather than from the MLS, which is why you '
+    + 'can look up any of it yourself. Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
     + 'This is not a solicitation of property currently listed with another broker. '
     + 'This page was built for one address and is not published or indexed.</p>'
     + '<p class="small">Built from the ' + hpEsc(c.roll) + '. Page generated ' + hpDate(new Date().toISOString().slice(0, 10)) + '.</p>'
@@ -2181,8 +2185,9 @@ function hpLookupPage(REG, host, q, matches, tried, loose) {
     + '<li><strong>What you would walk away with</strong> after the costs of selling.</li>'
     + '<li><strong>Every sale the county has recorded on your address</strong>, back to the day it was built.</li>'
     + '</ul>'
-    + '<p class="small">No MLS data appears on these pages. Every figure is a public record or arithmetic on one. '
-    + 'The pages are not indexed by search engines, so yours is not going to turn up in somebody else\'s search results.</p>'
+    + '<p class="small">Every figure is a Sarasota County public record or arithmetic on one, not MLS data, which is '
+    + 'what makes all of it checkable. The pages are not indexed by search engines, so yours is not going to turn up '
+    + 'in somebody else\'s search results.</p>'
     + '</div>';
 
   h += '<div class="foot">'
