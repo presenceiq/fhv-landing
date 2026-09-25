@@ -657,7 +657,9 @@ let HP_REG  = null;   /* every community this worker serves */
 /* Each community is one file in the repo root. Adding a community is one line
    here plus the file. A file that is missing or broken is skipped rather than
    taking the other communities down with it. */
-const HP_FILES = ['/hp-granparadiso.json', '/hp-islandwalk.json'];
+const HP_FILES = ['/hp-granparadiso.json', '/hp-islandwalk.json',
+                  '/hp-grandpalm.json', '/hp-sarasotanational.json',
+                  '/hp-talonpreserve.json', '/hp-sunrisepreserve.json'];
 
 /* Load every community once per isolate, and index every address across all of
    them. Slugs carry the city, and no two communities have shared one yet, but
@@ -1970,8 +1972,8 @@ function hpLookupPage(REG, host, q, matches, tried) {
     + '</div>'
     + '<div id="hpsuggest" class="suggest"></div>'
 + '<div class="coverage"><strong>Built so far: ' + hpNames(REG) + '.</strong> '
-+ 'That is ' + REG.homes.toLocaleString('en-US') + ' homes. Palmero, Talon Preserve, Grand Palm, '
-+ 'Sarasota National and Sunrise Preserve are being added next. '
++ 'That is ' + REG.homes.toLocaleString('en-US') + ' homes, which is almost every home in the '
++ 'communities I cover. Palmero is the one still to come. '
 + 'If your home is not in yet, text the address to <a href="sms:19416629941">941-662-9941</a>. '
 + 'I will build your page by hand and send you the link, and it tells me which community to do first.</div>'
     + '<p class="small" id="hphint">Start with the house number, for example 20730.</p>'
@@ -1989,9 +1991,8 @@ function hpLookupPage(REG, host, q, matches, tried) {
   } else if (tried && !matches.length) {
     h += '<div class="card"><h2>Nothing here matches that</h2>'
       + '<p>Two likely reasons, and neither is your fault.</p>'
-      + '<p><strong>Your community is not built yet.</strong> This currently covers '
-      + hpNames(REG) + '. Palmero, Talon Preserve, Grand Palm, Sarasota National and '
-      + 'Sunrise Preserve are next.</p>'
+      + '<p><strong>Your community may not be built yet.</strong> This currently covers '
+      + hpNames(REG) + '. Palmero is the one still to come.</p>'
       + '<p><strong>Or the spelling is not what the county has.</strong> Try just the house number on its own, '
       + 'or just the street name, and pick from the list.</p>'
       + '<p>Either way, text the address to <a href="sms:19416629941">941-662-9941</a> and I will build it by '
@@ -2024,6 +2025,8 @@ function hpLookupPage(REG, host, q, matches, tried) {
     + '<p><a href="/">Home</a> &middot; <a href="/property-tax-calculator">Property tax calculator</a> &middot; '
     + '<a href="https://granparadiso.floridahomevalueai.com/">Gran Paradiso home values</a> &middot; '
     + '<a href="https://islandwalk.floridahomevalueai.com/">IslandWalk home values</a> &middot; '
+    + '<a href="https://grandpalm.floridahomevalueai.com/">Grand Palm home values</a> &middot; '
+    + '<a href="https://talonpreserve.floridahomevalueai.com/">Talon Preserve home values</a> &middot; '
     + '<a href="/meet">About Michael Putnam</a></p>'
     + '</div>';
 
