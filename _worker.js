@@ -1312,7 +1312,7 @@ function hpPage(D, p, host) {
      below it stays free. What it offers is delivery of something they
      have already seen and liked, which is a different and easier ask
      than paying with an address to get in. */
-  h += '<form class="card signup" method="POST" action="/h/' + hpEsc(p.slug) + '">'
+  h += '<form class="card signup" id="alerts" method="POST" action="/h/' + hpEsc(p.slug) + '">'
     + '<input type="hidden" name="form" value="alerts">'
     /* ---- the alerts signup ----------------------------------------------
        WHAT THIS PROMISES, AND WHY IT IS NARROWER THAN IT WAS.
@@ -1446,7 +1446,8 @@ function hpPage(D, p, host) {
       + '<h2>What you would actually walk away with</h2>'
       + '<p>The sale price starts at the middle of the range above. Everything else is empty because '
       + 'I do not know your numbers and I am not going to guess them. Fill in what you know and the total follows.</p>'
-      + '<div class="calc">'
+      + '<div class="npwrap">'
+      +   '<div class="calc">'
       +   '<label>Sale price<input type="number" id="np_price" value="' + range.mid + '" step="1000"></label>'
       +   '<label>Mortgage payoff<input type="number" id="np_loan" placeholder="what you still owe" step="1000"></label>'
       +   '<label>Listing side commission %<input type="number" id="np_lc" placeholder="whatever you agree" step="0.25"></label>'
@@ -1454,7 +1455,8 @@ function hpPage(D, p, host) {
       +   '<label>Title and other closing costs<input type="number" id="np_cl" placeholder="ask your title company" step="100"></label>'
       +   '<label>Repairs and credits<input type="number" id="np_rp" placeholder="if any" step="500"></label>'
       + '</div>'
-      + '<div class="npout" id="np_out"></div>'
+      +   '<div class="npout" id="np_out"></div>'
+      + '</div>'
       + '<p class="small"><strong>The commission boxes start empty on purpose.</strong> '
       + 'There has never been a standard commission rate. It has always been negotiable and it always was, '
       + 'whatever anyone has told you over the years. What changed in August 2024 is that the rules now make that '
@@ -1576,7 +1578,7 @@ function hpPage(D, p, host) {
      reading a page about their own address is the kind of thing that makes
      people give up instead. The hidden fields below carry the address and the
      figures the page showed them, so the message arrives with its own context. */
-  h += '<form class="card correction" method="POST" action="/h/' + hpEsc(p.slug) + '">'
+  h += '<form class="card correction" id="corrections" method="POST" action="/h/' + hpEsc(p.slug) + '">'
     + '<input type="hidden" name="form" value="correction">'
     + '<div class="tag">Corrections and ideas</div>'
     + '<h2>Something wrong here, or something missing?</h2>'
@@ -1676,7 +1678,12 @@ function hpDone(D, p, kind, scope) {
     + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">'
     + '<style>' + HP_CSS + '</style></head><body><div class="wrap">'
     + '<div class="card gold" style="margin-top:32px"><h2>' + hpEsc(title) + '</h2>' + body
-    + '<p><a class="btn" href="/h/' + hpEsc(p.slug) + '">Back to ' + hpEsc(hpAddress(p, D.c)) + '</a></p></div>'
+    /* Back to WHERE THEY WERE, not the top of a page they already read. The
+       form sits two thirds of the way down, so landing at the top means
+       scrolling all of it again to get back to the spot. */
+    + '<p><a class="btn" href="/h/' + hpEsc(p.slug)
+    +   (kind === 'alerts' ? '#alerts' : '#corrections') + '">Back to '
+    +   hpEsc(hpAddress(p, D.c)) + '</a></p></div>'
     + '<div class="foot"><p><strong>Michael Putnam</strong> &middot; Putnam Realty Group &middot; <a href="tel:19416629941">941-662-9941</a></p></div>'
     + '</div></body></html>';
 }
@@ -1703,9 +1710,56 @@ async function hpRoute(env, request, slug) {
       const exact = REG.bySlug[hpClean(q, false).join('-')]
                  || REG.bySlug[hpClean(q, true).join('-')];
       if (exact) return Response.redirect('https://' + host + '/h/' + exact.slug, 302);
-      const m = hpSearch(REG, q, 12);
-      if (m.length === 1) return Response.redirect('https://' + host + '/h/' + m[0].slug, 302);
-      return new Response(hpLookupPage(REG, host, q, m, true), {
+      let m = hpSearch(REG, q, 12);
+
+      /* ---- a misspelled street must not be a dead end ----------------------
+         These communities are full of Italian street names. Ragazza, Cinqueterre,
+         Campanile, Passagio. "20181 Ragaza Cir 101" found nothing and told the
+         owner their own address did not exist, which is the worst thing this page
+         can do. A house number is short and people get it right, so when nothing
+         matches, fall back to every home at that number and let them pick. This
+         recovers every possible street misspelling, not one particular typo. */
+      let loose = false;
+      if (!m.length) {
+        /* ONLY the first number with three or more digits, which is the house
+           number. Trying the others walks into nonsense: "99999 Ragazza Cir 101"
+           does not exist, and falling through to the 101 listed every home with
+           101 anywhere in it. */
+        const toks2 = hpClean(q, true);
+        const nums = toks2.filter(function (t) { return /^[0-9]{3,}$/.test(t); });
+        const words = toks2.filter(function (t) { return /^[a-z]{4,}$/.test(t); });
+        if (nums.length) {
+          const at = hpSearch(REG, nums[0], 40);
+
+          /* ---- a misspelled street is not the same as a street we do not have.
+             "20181 Ragaza Cir" is a typo for Ragazza and the owner should get
+             their page. "5754 Archipelago" is in Palmero, which is not built, and
+             showing them other homes numbered 5754 would be nonsense. So a
+             candidate only counts if one of the typed words shares a four letter
+             opening with its street. Ragaza and Ragazza share "raga". Archipelago
+             shares nothing with anything at 5754. */
+          const near = at.filter(function (p2) {
+            const st = hpNorm(p2.street).split(' ');
+            for (let i = 0; i < words.length; i++) {
+              for (let j = 0; j < st.length; j++) {
+                if (st[j].length < 4) continue;
+                /* same opening four letters, which catches a doubled or dropped
+                   letter in the middle, or within two typos of each other, which
+                   catches a wrong first letter. */
+                if (words[i].slice(0, 4) === st[j].slice(0, 4)) return true;
+                if (hpNear(words[i], st[j])) return true;
+              }
+            }
+            return false;
+          });
+
+          if (near.length) { m = near.slice(0, 12); loose = true; }
+          else if (!words.length) { m = at.slice(0, 12); loose = at.length > 0; }
+        }
+      }
+
+      if (m.length === 1 && !loose) return Response.redirect('https://' + host + '/h/' + m[0].slug, 302);
+      return new Response(hpLookupPage(REG, host, q, m, true, loose), {
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
       });
     }
@@ -1915,6 +1969,27 @@ function hpNorm(s) {
 /* Rank matches so that typing a house number finds the house, and typing a
    street finds the street. Anything starting with what was typed beats
    anything merely containing it. */
+/* Is one word within two typos of another? Only used to rescue a misspelled
+   street when the house number already matched, so it can afford to be strict:
+   lengths within two, and at most two edits. Cheap Levenshtein, capped. */
+function hpNear(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return false;
+  if (a.length < 5 || b.length < 5) return false;
+  const prev = [];
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    let last = prev[0]; prev[0] = i; let best = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cur = Math.min(prev[j] + 1, prev[j - 1] + 1,
+                           last + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+      last = prev[j]; prev[j] = cur;
+      if (cur < best) best = cur;
+    }
+    if (best > 2) return false;
+  }
+  return prev[b.length] <= 2;
+}
+
 /* Small numbers read better as words in a sentence. */
 function hpWords(n) {
   const w = ['no', 'one', 'two', 'three', 'four', 'five', 'six'];
@@ -1954,7 +2029,10 @@ const HP_STYPE = {
    nothing. Collapsing the haystack too makes it symmetric and those work again. */
 function hpClean(q, map) {
   const out = [];
-  hpNorm(q).split(' ').forEach(function (t) {
+  /* "Unit101" and "Apt101" arrive glued together often enough to be worth
+     splitting before anything else looks at them. */
+  const pre = hpNorm(q).replace(/\b(unit|apt|apartment|ste|suite|no|num|lot)([0-9])/g, '$1 $2');
+  pre.split(' ').forEach(function (t) {
     if (!t) return;
     if (HP_NOISE.indexOf(t) > -1) return;
     if (/^3[0-9]{4}$/.test(t)) return;        /* a Florida zip is not a house number */
@@ -2005,16 +2083,16 @@ function hpNames(REG) {
   return hpEsc(n.slice(0, -1).join(', ')) + ' and ' + hpEsc(n[n.length - 1]);
 }
 
-function hpLookupPage(REG, host, q, matches, tried) {
+function hpLookupPage(REG, host, q, matches, tried, loose) {
   const c = REG.comms[0].c;
   let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-    + '<title>What homes on your street actually sold for | Florida Home Value AI</title>'
-    + '<meta name="description" content="Type your address and see the recorded price of every comparable home near you, what the November ballot does to your tax bill, and what you would walk away with if you sold. Sarasota County public records.">'
+    + '<title>What your home is worth, and every sale that says so | Florida Home Value AI</title>'
+    + '<meta name="description" content="One page about your own home. What it is worth today with every comparable sale listed underneath, what Save Our Homes has saved you, what the November ballot does to your tax bill, and what you would walk away with if you sold. Sarasota County public records.">'
     + '<link rel="canonical" href="https://' + host + '/my-home">'
     + '<meta property="og:type" content="website">'
-    + '<meta property="og:title" content="What homes on your street actually sold for">'
-    + '<meta property="og:description" content="Type your address. The recorded price of every comparable home near you, from Sarasota County records. Not an asking price, not an estimate from a national website. Michael Putnam, Putnam Realty Group.">'
+    + '<meta property="og:title" content="What your home is worth, and every sale that says so">'
+    + '<meta property="og:description" content="Type your address and get one page about your own home, built from Sarasota County public records, with every comparable sale listed so you can check the work. Michael Putnam, Putnam Realty Group.">'
     + '<meta property="og:image" content="https://' + host + '/og-image-fhv.jpg">'
     + '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
     + '<meta name="twitter:card" content="summary_large_image">'
@@ -2026,12 +2104,22 @@ function hpLookupPage(REG, host, q, matches, tried) {
   h += '<div class="mast">'
     +   '<div class="brandline"><img src="/putnam-mark.png" alt="" class="mark">'
     +     'Florida Home Value AI &middot; Putnam Realty Group</div>'
-    +   '<h1>What homes on your street actually sold for</h1>'
-    +   '<p class="lede">Not asking prices. Not an estimate from a national website. The price that was actually '
-    +   'recorded on the deed when the house down the street changed hands.</p>'
-    +   '<p class="lede">Type your address and the page builds itself around your home, from Sarasota County '
-    +   'public records.</p>'
-    +   '<p class="lede">The page it builds is yours to keep. The link is permanent and it still works in two '
+    /* WHOSE HOME IS THIS ABOUT. The headline used to be "What homes on your
+       street actually sold for", which is about the neighbors and not about the
+       person reading it, when the entire page is about one address: theirs. And
+       it used to say "not an estimate from a national website", which stopped
+       being true the day RPR went on these pages. Both were Michael's catch. */
+    +   '<h1>What your home is worth, and every sale that says so</h1>'
+    +   '<p class="lede">One page about your own home. Not a neighborhood average and not a figure with '
+    +   'nothing behind it: the comparable sales it rests on are listed underneath with full addresses, '
+    +   'so you can look up any deed yourself.</p>'
+    +   '<p class="lede">Type your address and the page builds itself. What your home is worth today, what '
+    +   'Save Our Homes has saved you, what the November ballot does to your tax bill, and what you would '
+    +   'walk away with if you sold. Every figure comes from Sarasota County public records.</p>'
+    +   '<p class="lede">RPR, which is run by the National Association of Realtors, works out its own '
+    +   'estimate for your address, and it sits on the page beside mine. Where the two disagree the page '
+    +   'says so rather than picking a winner.</p>'
+    +   '<p class="lede">The page is yours to keep. The link is permanent and it still works in two '
     +   'years. There is nothing to fill in.</p>'
     + '</div>';
 
@@ -2048,12 +2136,21 @@ function hpLookupPage(REG, host, q, matches, tried) {
 + 'communities I cover. Palmero is the one still to come. '
 + 'If your home is not in yet, text the address to <a href="sms:19416629941">941-662-9941</a>. '
 + 'I will build your page by hand and send you the link, and it tells me which community to do first.</div>'
-    + '<p class="small" id="hphint">Start with the house number, for example 20730.</p>'
+    + '<p class="small" id="hphint">Start with the house number, for example 20730. '
+    + 'In a condo, your house number and your unit number together will find it, '
+    + 'like 20181 101. Punctuation does not matter.</p>'
     + '</form>';
 
-  if (tried && matches.length > 1) {
-    h += '<div class="card"><h2>' + matches.length + ' addresses match that</h2>'
-      + '<p>Pick yours.</p><ul class="hits">';
+  if (tried && matches.length) {
+    h += '<div class="card"><h2>'
+      + (loose ? 'Not quite, but here is every home at that number'
+               : matches.length + (matches.length === 1 ? ' address matches that' : ' addresses match that'))
+      + '</h2>'
+      + (loose ? '<p>I could not match that street name, so this is every home at number '
+               + hpEsc(hpClean(q, true).filter(function (t) { return /^[0-9]{3,}$/.test(t); })[0] || '')
+               + '. Yours is almost certainly here.</p>'
+               : '<p>Pick yours.</p>')
+      + '<ul class="hits">';
     matches.forEach(function (p) {
       h += '<li><a href="/h/' + hpEsc(p.slug) + '">' + hpEsc(hpAddress(p, p.cd.c)) + '</a>'
         + '<span class="dim"> ' + hpEsc(p.cd.c.name) + ' &middot; ' + hpEsc(p.typeName) + ', '
@@ -2223,7 +2320,18 @@ td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .rpr{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:16px;text-align:center;margin:12px 0}
 .rprv{font:800 32px/1.1 "Playfair Display",Georgia,serif}
 .rprr{font-size:15px;color:var(--dim)}
-.calc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+/* The calculator and its total sit SIDE BY SIDE on anything wide enough, and
+   the total sticks, so the number moves in front of you as you type instead of
+   being a screen and a half below the box you are filling in. On a phone there
+   is no room for two columns, so the total sticks to the top of the screen
+   instead and follows you down the inputs. */
+.npwrap{display:grid;gap:14px;margin:14px 0}
+@media(min-width:820px){.npwrap{grid-template-columns:1.1fr 1fr;align-items:start}
+  .npwrap .npout{position:sticky;top:14px}}
+@media(max-width:819px){.npwrap .npout{position:sticky;top:0;z-index:5;
+  box-shadow:0 6px 18px rgba(26,24,20,.10)}}
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.calc{grid-template-columns:1fr}}
 .calc label{display:block;font-size:15px;color:var(--dim)}
 .calc input{display:block;width:100%;margin-top:3px;padding:10px;font:600 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
 .npout{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:17px}
