@@ -688,6 +688,7 @@ async function hpData(env, origin) {
     });
   });
   HP_DATA = comms[0];
+  HP_COVERED = hpNamesOf(comms.map(function (D) { return D.c.name; }));
   HP_REG = {
     comms: comms,
     parcels: allParcels,
@@ -1557,6 +1558,22 @@ function hpPage(D, p, host) {
       + '</div>';
   }
 
+  /* ---- THE SHARED PAGE WAS A DEAD END ----------------------------------
+     Somebody's neighbor reads a page about a house that is not theirs and had
+     no way to get their own, because nothing on an address page pointed back at
+     the lookup. Owner sharing is the cheapest reach there is and the page threw
+     it away. The communities are named on purpose: a stranger can tell in one
+     glance whether this applies to them instead of clicking to find out. */
+  h += '<div class="card quiet">'
+    + '<h2>Not your house?</h2>'
+    + '<p>This page was built for ' + hpEsc(hpAddress(p, c)) + ' and nothing else. '
+    + 'If you live somewhere else, there is a page like this one waiting for your own address.</p>'
+    + '<p>Covered right now: ' + hpEsc(HP_COVERED) + '. '
+    + '<a href="/my-home">Type your address here</a> and it builds itself. '
+    + 'If your community is not on that list, text the address to '
+    + '<a href="sms:19416629941">941-662-9941</a> and I will build it by hand.</p>'
+    + '</div>';
+
   /* ---- 10. the rest of the community ---- */
   h += '<div class="card quiet">'
     + '<h2>The rest of ' + hpEsc(c.name) + '</h2>'
@@ -1690,6 +1707,37 @@ function hpDone(D, p, kind, scope) {
     +   hpEsc(hpAddress(p, D.c)) + '</a></p></div>'
     + '<div class="foot"><p><strong>Michael Putnam</strong> &middot; Putnam Realty Group &middot; <a href="tel:19416629941">941-662-9941</a></p></div>'
     + '</div></body></html>';
+}
+
+/* Write a row straight into the leads table.
+
+   ★ WHY NOTHING GOES THROUGH THE VAULT ANY MORE.
+   The vault worker emails Michael the moment a row arrives, and it decides what
+   to say by one test: are there contact details. So a suggestion saying "Love
+   it" arrived titled "Gran Paradiso enquiry" with "THEY LEFT CONTACT DETAILS.
+   CALL THEM" across it, and the community read "SUGGESTION, Gran Paradiso"
+   because the only way to get the word into the subject was to stuff it in the
+   subdivision field. British spelling, wrong instruction, mangled field, and no
+   filter for Michael's own test address.
+
+   fhv-alerts already knows the difference between a correction, a suggestion, an
+   alerts signup and a calculator hit, and already has the right wording and the
+   self-filter for his own email. So rows land in the table directly and
+   fhv-alerts does the talking. The vault still serves its own leads list off
+   the same table, so nothing is lost. */
+async function hpLog(env, row) {
+  try {
+    await env.DB.prepare(
+      'INSERT INTO leads (received_at, notify_status, territory_id, subdivision, address, ' +
+      'name, email, phone, wants, homeowner_note, raw_json) ' +
+      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(
+      new Date().toISOString(), row.notify || 'logged',
+      row.territory, row.community, row.address,
+      '', row.email || '', '', row.wants, row.note || null,
+      JSON.stringify(row.raw || {})
+    ).run();
+  } catch (err) { /* a page must never fail because a row did not land */ }
 }
 
 /* --------------------------------------------------------------- the route */
@@ -1844,16 +1892,11 @@ async function hpRoute(env, request, slug) {
                       : 'PAGE VIEW on a personal home page')
                   + '\nAddress: ' + addr
                   + '\nPage URL: https://' + host + '/h/' + p.slug;
-      try {
-        await env.DB.prepare(
-          'INSERT INTO leads (received_at, notify_status, territory_id, subdivision, address, ' +
-          'wants, homeowner_note, raw_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-        ).bind(
-          new Date().toISOString(), 'logged', territory, D.c.name, addr, wants,
-          'CAME FROM ' + src + ' ON a personal address page',
-          JSON.stringify({ kind: what, slug: p.slug, source: src, detail: detail })
-        ).run();
-      } catch (err) { /* a page must never fail because a log row did */ }
+      await hpLog(env, {
+        territory: territory, community: D.c.name, address: addr, wants: wants,
+        note: 'CAME FROM ' + src + ' ON a personal address page',
+        raw: { kind: what, slug: p.slug, source: src, detail: detail }
+      });
       return new Response(null, { status: 204, headers: { 'X-Robots-Tag': 'noindex, nofollow' } });
     }
 
@@ -1875,24 +1918,16 @@ async function hpRoute(env, request, slug) {
         'assessed ' + p.assessed, 'county market value ' + p.just,
         (p.hs ? 'homesteaded' : 'no homestead')
       ].join(' | ');
-      await fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: '', phone: '', email: email, address: addr,
-          territory_id: D.c.name + ' - ' + tag + ' on a personal home page',
-          /* The vault builds its subject line from this field, and it decides
-             "lead" purely by whether contact details are present. A correction
-             is not a lead. Until the vault itself can tell them apart, putting
-             the word here is what makes it obvious in the inbox without
-             opening anything. */
-          subdivision: tag + ', ' + D.c.name,
-          wants: tag + ' REPORTED\nAddress: ' + addr
-               + '\nPage URL: https://' + host + '/h/' + p.slug
-               + (isIdea ? '' : '\nWhat they say is wrong: ' + (wrong.length ? wrong.join(', ') : 'not specified'))
-               + '\nTheir words: ' + detail
-               + '\nWhat the page was showing: ' + facts
-        })
-      }).catch(function () {});
+      await hpLog(env, {
+        notify: 'pending', email: email, address: addr, community: D.c.name,
+        territory: D.c.name + ' - ' + tag + ' on a personal home page',
+        wants: tag + ' REPORTED\nAddress: ' + addr
+             + '\nPage URL: https://' + host + '/h/' + p.slug
+             + (isIdea ? '' : '\nWhat they say is wrong: ' + (wrong.length ? wrong.join(', ') : 'not specified'))
+             + '\nTheir words: ' + detail
+             + '\nWhat the page was showing: ' + facts,
+        raw: { kind: tag.toLowerCase(), slug: p.slug, wrong: wrong, detail: detail }
+      });
       return new Response(hpDone(D, p, isIdea ? 'idea' : 'correction', ''), {
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' }
       });
@@ -1905,15 +1940,12 @@ async function hpRoute(env, request, slug) {
         : scope === 'plan'
           ? 'Alerts for ' + p.typeName + ' homes within 10% of ' + p.sqft.toLocaleString('en-US') + ' sq ft anywhere in ' + D.c.name
           : 'Alerts for ' + hpTitle(p.street) + ' only';
-      await fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: '', phone: '', email: email, address: addr,
-          territory_id: D.c.name + ' - personal home page',
-          subdivision: D.c.name,
-          wants: wants + '\nPage URL: https://' + host + '/h/' + p.slug
-        })
-      }).catch(function () {});
+      await hpLog(env, {
+        notify: 'pending', email: email, address: addr, community: D.c.name,
+        territory: D.c.name + ' - personal home page',
+        wants: wants + '\nPage URL: https://' + host + '/h/' + p.slug,
+        raw: { kind: 'alerts', slug: p.slug, scope: scope }
+      });
     }
     return new Response(hpDone(D, p, 'alerts', scope), {
       headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' }
@@ -1993,6 +2025,10 @@ function hpNear(a, b) {
   }
   return prev[b.length] <= 2;
 }
+
+/* Filled in once per isolate from whatever data files actually loaded, so it can
+   never claim a community that is not really there. */
+let HP_COVERED = '';
 
 /* Small numbers read better as words in a sentence. */
 function hpWords(n) {
@@ -2081,10 +2117,15 @@ function hpSearch(REG, q, limit) {
 
 /* A plain English list: "Gran Paradiso and IslandWalk", or with three or more,
    "A, B and C". */
+function hpNamesOf(list) {
+  const n = list.slice();
+  if (!n.length) return '';
+  if (n.length === 1) return n[0];
+  return n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+}
+
 function hpNames(REG) {
-  const n = REG.names.slice();
-  if (n.length === 1) return hpEsc(n[0]);
-  return hpEsc(n.slice(0, -1).join(', ')) + ' and ' + hpEsc(n[n.length - 1]);
+  return hpEsc(hpNamesOf(REG.names));
 }
 
 function hpLookupPage(REG, host, q, matches, tried, loose) {
