@@ -1142,7 +1142,7 @@ function hpPage(D, p, host) {
       + 'the county can only raise the amount you are taxed on by 3% a year, however far the home itself goes up. '
       + 'The longer you stay, the wider that gap gets.</p>'
       + '<p><strong>It saves you about ' + hpMoney(worth) + ' a year.</strong></p>'
-      + '<p>Here is the part that catches people out. The day you sell, that gap goes to zero. '
+      + '<p>Here is the part that takes people by surprise. The day you sell, that gap goes to zero. '
       + 'Whoever buys this home starts paying tax on the full value, not on your protected amount.</p>'
       + '<p>If you buy another Florida home and live in it, you can take the gap with you. Florida calls that '
       + 'portability. It covers up to $500,000, so all ' + hpMoney(sohGap) + ' of yours would move across. '
@@ -1226,7 +1226,7 @@ function hpPage(D, p, host) {
           const normal = haveRatio && Math.abs(mult - c.ratio_now) < 0.15;
           h += '<p class="note"><strong>Why this is not the county\'s number.</strong> '
             + 'The county puts the market value of this home at ' + hpMoney(p.just) + '. '
-            + 'The figure above works out at ' + mult.toFixed(2) + ' times that. '
+            + 'The figure above works out to ' + mult.toFixed(2) + ' times that. '
             + (!haveRatio
                 ? 'Homes here routinely sell for more than the county figure.'
               : normal
@@ -1237,7 +1237,7 @@ function hpPage(D, p, host) {
                   + ' that is typical here, which is worth knowing rather than glossing over. It usually means '
                   + 'the comparable homes carry something the county roll does not price the same way, most often '
                   + 'a pool or a lot premium. It is a reason to check the sales in the table above rather than '
-                  + 'take the figure on trust.')
+                  + 'take the figure on faith.')
             + ' Either way, the county value is not a price. The county values every home in Sarasota County at once, '
             + 'off records, without ever going inside, and it does it as at 1 January 2026. It cannot see your '
             + 'kitchen, your roof or your view. You can check both yourself: your own record is on '
@@ -1500,7 +1500,7 @@ function hpPage(D, p, host) {
       + 'and whether there is a pool. That is the entire list. It has never been inside. '
       + 'It does not know whether the kitchen was redone last year, whether the lanai is screened or under air, '
       + 'what you look at from the back, or how old the roof is.</p>'
-      + '<p>Tick what applies and watch the number move.</p>'
+      + '<p>Check the ones that apply and watch the number move.</p>'
       + '<div class="extras">'
       +   '<label><input type="checkbox" class="xf" data-up="0.03"> Outdoor kitchen</label>'
       +   '<label><input type="checkbox" class="xf" data-up="0.03"> Kitchen or bathrooms recently redone to a high standard</label>'
@@ -1527,7 +1527,7 @@ function hpPage(D, p, host) {
       + 'They are the same ones behind the ' + hpEsc(c.name) + ' valuation tool, and they are local judgment '
       + 'from what buyers here pay attention to. They are not measured from recorded sales, because a deed does '
       + 'not record whether a house has an outdoor kitchen. The uplift is capped at 12% however many boxes you '
-      + 'tick, because these things stop adding up after a point.</p>'
+      + 'check, because these things stop adding up after a point.</p>'
       + '<p class="small">A pool is not on the list on purpose. The county does record pools, so the comparable '
       + 'sales above are already matched pool against pool and it is in the figure already. For the record, '
       + 'a pool is already priced into the figure above rather than being added on here.</p>'
@@ -1547,7 +1547,7 @@ function hpPage(D, p, host) {
     + '<p>' + c.parcels.toLocaleString('en-US') + ' homes. ' + c.homesteads.toLocaleString('en-US') + ' of them are somebody\'s main residence, '
     + 'and ' + c.out_of_state.toLocaleString('en-US') + ' are owned by somebody who lives in another state. '
     + 'Over the last 12 months ' + c.resales12 + ' were sold by one owner to another. Half went for more than '
-    + hpMoney(c.median_price12) + ' and half for less, which works out at $' + c.median_psf12
+    + hpMoney(c.median_price12) + ' and half for less, which works out to $' + c.median_psf12
     + ' a square foot across ' + (c.n_types >= 2 ? hpWords(c.n_types) + ' kinds of home' : 'every home') + ' here.</p>'
     + '<p>' + (c.site ? '<a href="' + hpEsc(c.site) + '">' + hpEsc(c.name) + ' home values</a> &middot; ' : '')
     + '<a href="/property-tax-calculator">the tax calculator for any address</a> &middot; '
