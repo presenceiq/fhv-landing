@@ -1040,7 +1040,33 @@ function hpPage(D, p, host) {
     + '<link rel="preconnect" href="https://fonts.googleapis.com">'
     + '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
     + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">'
-    + '<style>' + HP_CSS + '</style></head><body data-slug="' + hpEsc(p.slug) + '">';
+    + '<style>' + HP_CSS + '</style>'
+
+    /* ---- RPR, and why it is set up exactly like this -----------------------
+       The widget is browser only. It uses document.write and it wants the
+       visitor's own IP address, so there is no server side call that returns a
+       number and nothing for the worker to fetch. What the worker CAN do is
+       write the address into the widget's options before the script loads,
+       which is all the widget needs. No reload, no ?address= parameter, no
+       box to fill in. The visitor lands on their page and RPR fills itself.
+
+       THE SCRIPT MUST LOAD NORMALLY, HERE IN THE HEAD. It calls document.write,
+       so injecting it later blows the page away. This is the same pattern as
+       the community pages, which is the pattern already proven on this domain
+       with this token.
+
+       Token and co-brand are the ones already in use. The domain matters:
+       RPR authorises floridahomevalueai.com separately from the wildcard, so
+       these root domain pages are covered and a community subdomain is not.
+       Nothing is sent to RPR beyond the address, which is on the page anyway. */
+    + '<script>window.rprAvmWidgetOptions={'
+    +   'Token:"B7078914-3207-44B1-A650-21ECA3E39AB7",'
+    +   'Query:' + JSON.stringify(addr) + ','
+    +   'CoBrandCode:"btsputnamrealtygroup",'
+    +   'ContainerSelector:"#rprWidgetContainer",'
+    +   'ShowRprLinks:false};<\/script>'
+    + '<script src="https://www.narrpr.com/widgets/avm-widget/widget.ashx/script"><\/script>'
+    + '</head><body data-slug="' + hpEsc(p.slug) + '">';
 
   /* ---- masthead ---- */
   h += '<div class="wrap">'
@@ -1322,8 +1348,20 @@ function hpPage(D, p, host) {
       + '</div>';
   } else {
     h += '<div class="card quiet">'
-      + '<h2>Want a second opinion on the number?</h2>'
-      + '<p>I can pull an independent estimate for this address from RPR, which is run by the National Association of Realtors, and put it on this page next to the recorded sales. It works a different way, and it draws on listing photos, descriptions and price histories that county records never contain. Text me the address and I will add it. There is no charge and nothing follows from it.</p>'
+      + '<h2>A second opinion, worked out a different way</h2>'
+      + '<p>Below is an independent estimate for this address from RPR, which is run by the National '
+      + 'Association of Realtors. I have not touched the number and I cannot change it. It is here because '
+      + 'two methods agreeing tells you more than one method sounding confident.</p>'
+      + '<p>It works differently from everything above. Mine is built only from recorded sale prices on deeds. '
+      + 'RPR also draws on listing photos, descriptions and asking price histories, which county records do '
+      + 'not contain. So where the two disagree, neither one is lying. They are looking at different things.</p>'
+      + '<div id="rprWidgetContainer"></div>'
+      + '<p class="small">If nothing appears in the space above, that is RPR, not this page. It comes up '
+      + 'empty for some addresses, most often '
+      + (p.unit ? 'condominiums with a unit number, like this one. '
+               : 'condominiums with a unit number. ')
+      + 'Call me on <a href="tel:19416629941">941-662-9941</a> and I will pull it by hand and tell you what it says. '
+      + 'RPR is an estimate too, not an appraisal.</p>'
       + '</div>';
   }
 
