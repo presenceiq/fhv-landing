@@ -713,7 +713,7 @@ function hpLoadOne(raw) {
   if (!c.districts)    c.districts = { '0100': { name: 'Sarasota County (unincorporated)', nonschool: 5.3787, school: 6.095 } };
   if (!c.std_exemption) c.std_exemption = 51411;
   if (!c.new_2027)     c.new_2027 = 150000;
-  if (!c.new_2028)     c.new_2028 = 250000;
+  if (!c.new_2028)     c.new_2028 = 175000;   /* the amendment's 2028 figure */
   if (!c.trend)        c.trend = {};
   if (!c.name)         c.name = 'this community';
   if (!c.city)         c.city = '';
@@ -784,6 +784,11 @@ function hpLoadOne(raw) {
     });
   });
   resales.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  /* Newest first, so resales[0] is the freshest sale in the file. That date is
+     what every window on this page is measured back from, and what the page
+     prints as its vintage. */
+  c.asof = resales.length ? resales[0].date : null;
+  c.asofLabel = c.asof ? hpMonthYear(c.asof) : '';
 
   const D = { c: c, parcels: parcels, bySlug: bySlug, sales: salesByParcel,
               resales: resales, rpr: raw.rpr || {} };
@@ -851,9 +856,55 @@ function hpPct(arr, q) {
   const pos = (s.length - 1) * q, lo = Math.floor(pos), hi = Math.ceil(pos);
   return lo === hi ? s[lo] : s[lo] + (s[hi] - s[lo]) * (pos - lo);
 }
-function hpDaysAgo(n) {
-  const d = new Date(Date.now() - n * 86400000);
+/* ===========================================================================
+   THE TWO THINGS THAT GO WRONG ON THEIR OWN
+   ===========================================================================
+   These pages are permanent and the copy is in the present tense. Two separate
+   ways that breaks, both found in an audit on 25 September 2026:
+
+   THE BALLOT. Every page discussed the homestead amendment as something that
+   "would" happen "if it passes", and no sentence anywhere named the year. On
+   4 November 2026 that is wrong on all 8,706 pages whichever way the vote went,
+   and one paragraph on 2,900 pages stated a residency deadline as settled law
+   with no contingency at all. Michael's decision: after the vote, pivot to the
+   homestead registration deadline rather than guess at the result.
+   HP_BALLOT.result stays null until he tells a session the outcome. Once the
+   day has passed and result is still null the page says nothing about figures
+   it has not been told, which is the honest state rather than a stale forecast.
+
+   THE CLOCK. The comparable-sale windows were measured against Date.now() while
+   the data file is frozen. Simulated across all 8,706 parcels: around
+   1 September 2027 every one of the 7,555 "strong case" pages flips to "treat
+   this one as a wide guess" and the published band widens from 12% to 20% with
+   no market change behind it, and by 3 September 2029 every page loses its value
+   entirely. Meanwhile the page tells people "the same link still works in two
+   years". So the windows are now measured from the newest sale in the data, and
+   the page prints that date. Michael's call: visible ageing beats silent
+   ageing. =========================================================== */
+const HP_BALLOT = {
+  day:    '2026-11-03',
+  label:  '3 November 2026',
+  /* null until the result is known. Set to 'passed' or 'failed' and the
+     forecast copy can come back, written for that outcome. */
+  result: null
+};
+function hpBallotOpen() {
+  if (HP_BALLOT.result) return false;
+  return new Date().toISOString().slice(0, 10) <= HP_BALLOT.day;
+}
+
+/* Counted back from the data, not from today. asOf is the newest sale in the
+   community file. */
+function hpDaysAgo(n, asOf) {
+  const base = asOf ? Date.parse(asOf + 'T12:00:00Z') : Date.now();
+  const d = new Date((isNaN(base) ? Date.now() : base) - n * 86400000);
   return d.toISOString().slice(0, 10);
+}
+/* "September 2026", for saying out loud how old the figures are. */
+function hpMonthYear(iso) {
+  const m = String(iso || '').match(/^(\d{4})-(\d{2})/);
+  if (!m) return '';
+  return HP_MONTHS[parseInt(m[2], 10) - 1] + ' ' + m[1];
 }
 
 /* ---------------------------------------------------------------- the comps
@@ -865,8 +916,8 @@ function hpDaysAgo(n) {
    says which step it had to reach. Three is the floor because two sales is an
    anecdote.                                                                */
 const HP_TIERS = [
-  { pct: 0.05, days: 365,  pool: 1, label: 'within 5% of your size, sold in the last 12 months' },
-  { pct: 0.10, days: 365,  pool: 1, label: 'within 10% of your size, sold in the last 12 months' },
+  { pct: 0.05, days: 365,  pool: 1, label: 'within 5% of your size, sold in the most recent 12 months on record' },
+  { pct: 0.10, days: 365,  pool: 1, label: 'within 10% of your size, sold in the most recent 12 months on record' },
   { pct: 0.10, days: 730,  pool: 1, label: 'within 10% of your size, sold in the last 24 months' },
   { pct: 0.15, days: 730,  pool: 1, label: 'within 15% of your size, sold in the last 24 months' },
   { pct: 0.15, days: 1095, pool: 1, label: 'within 15% of your size, sold in the last 3 years' },
@@ -883,7 +934,7 @@ const HP_TIERS = [
 function hpComps(D, subj) {
   for (let t = 0; t < HP_TIERS.length; t++) {
     const tier = HP_TIERS[t];
-    const cut = hpDaysAgo(tier.days);
+    const cut = hpDaysAgo(tier.days, D.c.asof);
     const lo = subj.sqft * (1 - tier.pct), hi = subj.sqft * (1 + tier.pct);
     const list = D.resales.filter(function (r) {
       return r.type === subj.type && r.i !== subj.i &&
@@ -1089,7 +1140,7 @@ function hpPage(D, p, host) {
     + '<meta name="description" content="' + hpEsc(addr) + '. What homes like it actually sold for, from Sarasota County public records.">'
     + '<meta property="og:type" content="website">'
     + '<meta property="og:title" content="' + hpEsc(addr) + '">'
-    + '<meta property="og:description" content="What homes like this one actually sold for, and what the November ballot does to this tax bill. Sarasota County public records. Michael Putnam, Putnam Realty Group, 941-662-9941.">'
+    + '<meta property="og:description" content="What homes like this one actually sold for, and what the homestead rules do to this tax bill. Sarasota County public records. Michael Putnam, Putnam Realty Group, 941-662-9941.">'
     /* The site's existing share card, already 1200x630 and already deployed.
        Facebook needs at least 1200x630 or it ignores the tag and picks some
        other image off the page, which is how a competitor's listing photo
@@ -1173,6 +1224,10 @@ function hpPage(D, p, host) {
     const held  = boughtYr > 0 ? rollYear - boughtYr : 0;
     const offPk = (c.ratio_peak && c.ratio_now && c.ratio_peak > c.ratio_now)
                 ? Math.round((1 - c.ratio_now / c.ratio_peak) * 100) : null;
+    /* "in the 12 months to September 2026" rather than "over the last 12
+       months", which is a rolling claim against a frozen number. */
+    const win = c.asofLabel ? 'in the 12 months to ' + hpEsc(c.asofLabel)
+                            : 'in the most recent 12 months on record';
     const peakWhen = hpEsc(String(c.ratio_peak_when || '')
                        .replace('H1', ' first half').replace('H2', ' second half'));
 
@@ -1211,15 +1266,15 @@ function hpPage(D, p, host) {
       if (chg !== null && chg > 0) {
         return { big: '+' + chg.toFixed(1) + '%', txt: false,
           body: 'Price per square foot for ' + typeL + ' homes in ' + hpEsc(c.name) + ' is up '
-              + chg.toFixed(1) + '% over the last 12 months against the 12 before. The figure beside '
+              + chg.toFixed(1) + '% ' + win + ', against the 12 before that. The figure beside '
               + 'this one looks back at what you paid. This one looks at where the market is heading.',
           small: '' };
       }
-      if (saving > 200) {
+      if (saving > 200 && hpBallotOpen()) {
         return { big: hpMoney(saving) + ' a year', txt: false,
-          body: 'is what the homestead amendment on the November 3 ballot would take off this bill by '
-              + '2028, if it passes. It is a fixed dollar exemption, so what you get back does not depend '
-              + 'on what your home is worth or on which way the market went.',
+          body: 'is what the homestead amendment on the ' + HP_BALLOT.label + ' ballot would take off this '
+              + 'bill by 2028, if it passes. It is a fixed dollar exemption, so what you get back does not '
+              + 'depend on what your home is worth or on which way the market went.',
           small: '<a href="#ballot">The year by year figures for this address</a>' };
       }
       return { big: 'Nothing is settled', txt: true,
@@ -1244,8 +1299,8 @@ function hpPage(D, p, host) {
       if (chg !== null && chg < 0) {
         B = { big: '−' + Math.abs(chg).toFixed(1) + '%', txt: false,
           body: 'It was bigger a year ago. Price per square foot for ' + typeL + ' homes in '
-              + hpEsc(c.name) + ' is down ' + Math.abs(chg).toFixed(1) + '% over the last 12 months '
-              + 'against the 12 before'
+              + hpEsc(c.name) + ' is down ' + Math.abs(chg).toFixed(1) + '% ' + win
+              + ', against the 12 before that'
               + (offPk ? ', and the community as a whole is running about ' + offPk
                  + '% below where it was in ' + peakWhen : '')
               + '. A gain that is shrinking is still a gain, but you should know which way it is moving.' };
@@ -1454,7 +1509,8 @@ function hpPage(D, p, host) {
                 ? 'Homes here routinely sell for more than the county figure.'
               : normal
                 ? 'That is the ordinary relationship here: across ' + c.just_ratio_n + ' '
-                  + hpEsc(c.name) + ' homes sold in the last two years, the typical one went for '
+                  + hpEsc(c.name) + ' homes sold in the two years to '
+                  + hpEsc(c.asofLabel || 'the roll date') + ', the typical one went for '
                   + c.ratio_now.toFixed(2) + ' times what the county said that same home was worth.'
                 : 'That is ' + (mult > c.ratio_now ? 'above' : 'below') + ' the ' + c.ratio_now.toFixed(2)
                   + ' that is typical here, which is worth knowing rather than glossing over. It usually means '
@@ -1482,7 +1538,8 @@ function hpPage(D, p, host) {
             + 'here, and those values do not jump around when the market moves. So compare what homes actually '
             + 'sold for against what the county says they are worth. '
             + 'In ' + half + ' ' + pyr + ', ' + hpEsc(c.name) + ' homes sold for ' + c.ratio_peak.toFixed(2)
-            + ' times the county value. Today they sell for ' + c.ratio_now.toFixed(2) + ' times. '
+            + ' times the county value. As at ' + hpEsc(c.asofLabel || 'the roll date') + ' they sell for '
+            + c.ratio_now.toFixed(2) + ' times. '
             + '<strong>That is ' + off + '% down from the top.</strong> '
             + 'It is the same for every home here. If you bought near the peak, so did your neighbors, '
             + 'and none of it is real money unless you sell.</p>';
@@ -1498,7 +1555,8 @@ function hpPage(D, p, host) {
         others.push(c.types[ti].toLowerCase() + 's ' + (t2.chg < 0 ? 'down ' : 'up ') + Math.abs(t2.chg) + '%');
       }
       h += '<p class="note"><strong>Your type of home, not the community average.</strong> '
-        + hpEsc(p.typeName) + ' homes here sold for $' + trend.psf12 + ' a square foot over the last year. '
+        + hpEsc(p.typeName) + ' homes here sold for $' + trend.psf12 + ' a square foot in the 12 months to '
+        + hpEsc(c.asofLabel || 'the roll date') + '. '
         + 'The year before, $' + trend.psf24 + '. That is '
         + (trend.chg < 0 ? 'down ' : 'up ') + Math.abs(trend.chg) + '%.'
         + (others.length ? ' Meanwhile ' + others.join(', ') + '.' : '')
@@ -1597,9 +1655,48 @@ function hpPage(D, p, host) {
   }
 
   /* ---- 5. the tax bill ---- */
-  h += '<div class="card" id="ballot">'
-    + '<div class="tag">November 3 ballot</div>'
-    + '<h2>What the homestead amendment does to this bill</h2>';
+  /* THE YEAR IS NAMED NOW. "the November 3 ballot" read in 2027 points at
+     whatever election is next. And once the day has passed this card stops
+     forecasting and becomes the homestead deadline card, which is Michael's
+     decision and is useful all year round rather than for six weeks. */
+  const ballotOpen = hpBallotOpen();
+  h += '<div class="card" id="ballot">';
+  if (!ballotOpen) {
+    /* AFTER THE VOTE, AND THE RESULT IS NOT SET. The page will not print a
+       forecast built on an outcome it has not been told. What it gives instead
+       is the pair of dates that decide an exemption, which are statutory and
+       came off the Property Appraiser's own page rather than out of reasoning:
+       own and occupy as a permanent residence on 1 January of the year claimed,
+       and file by 1 March of that year.
+       When Michael sets HP_BALLOT.result the forecast copy can come back,
+       written for what actually happened. */
+    h += '<div class="tag">Homestead deadlines</div>'
+      + '<h2>The two dates that decide your exemption</h2>';
+    if (p.hs) {
+      h += '<p>You already have a homestead exemption on this address, so these dates are not yours to '
+        + 'worry about while you stay put. They matter the moment you move, because a new home starts over.</p>'
+        + '<p>To claim it on a different Florida home you have to own it and be living in it as your '
+        + 'permanent residence on <strong>1 January</strong> of the year you are claiming, and file by '
+        + '<strong>1 March</strong> of that year. Miss 1 January and you wait a whole year, whatever date '
+        + 'you file.</p>'
+        + '<p class="small">The homestead amendment went to the ballot on ' + HP_BALLOT.label + '. There is no '
+        + 'figure for it on this page, because a forecast built on a result this page has not been told '
+        + 'would be a guess dressed up as arithmetic. The Property Appraiser on '
+        + '<a href="tel:19418618200">941-861-8200</a> has the current numbers before I do.</p>';
+    } else {
+      h += '<p>The county has no homestead exemption recorded on this address. If this is your main home, '
+        + 'that is money leaving every single year, and it is free to apply for.</p>'
+        + '<p>Two dates decide it. You have to own the home and be living in it as your permanent residence '
+        + 'on <strong>1 January</strong> of the year you are claiming. And you have to file by '
+        + '<strong>1 March</strong> of that year. Late applications are considered, but 1 March is the '
+        + 'timely deadline and 1 January is the one you cannot make up later.</p>'
+        + '<p>One free call to the Property Appraiser on <a href="tel:19418618200">941-861-8200</a> with '
+        + 'this address will tell you whether it qualifies and what it would take off the bill. If this is '
+        + 'a rental or a second home it does not apply.</p>';
+    }
+  } else {
+  h += '<div class="tag">' + HP_BALLOT.label + ' ballot</div>'
+    + '<h2>What the homestead amendment would do to this bill</h2>';
   if (p.hs) {
     h += '<p class="lead">' + hpMoney(saving) + ' a year less by 2028</p>'
       + '<p>The part of your tax bill that this amendment changes goes from ' + hpMoney(now.nonschool) + ' now to '
@@ -1624,19 +1721,44 @@ function hpPage(D, p, host) {
       + 'on by up to 10% a year. The amendment cuts that to 5%. It slows down how fast the bill can grow. It does not '
       + 'reduce what is owed now.</p>'
       + '<p>If this became somebody\'s permanent residence and carried a homestead exemption, the bill would be about '
-      + hpMoney(hypoNow) + ' a year today and about ' + hpMoney(hypo28) + ' by 2028, which is '
-      + hpMoney(hypoSaving) + ' a year less than it is paying now. Whether this home can qualify is a question for the '
-      + 'Property Appraiser on 941-861-8200, and there is a date most people have not heard about: anyone who is a '
-      + 'permanent Florida resident by 31 December 2026 is eligible for the larger exemption from the start, and '
-      + 'anyone establishing residency on or after 1 January 2027 begins at $50,000 and waits until the fifth year.</p>';
+      + hpMoney(hypoNow) + ' a year today and about ' + hpMoney(hypo28) + ' by 2028 if the amendment passes. '
+      /* THE OLD SENTENCE DID NOT ADD UP AND READ AS A NON-SEQUITUR. It printed
+         two figures and then a saving measured from a THIRD number that was
+         never named, the actual no-homestead bill. On one page the two printed
+         figures differed by $1,040 while the sentence claimed $1,625. The third
+         number is now stated. */
+      + 'What it is actually paying now, with no homestead, is ' + hpMoney(now.nonschool + now.school)
+      + ' a year, so the homestead plus the amendment together would be about ' + hpMoney(hypoSaving)
+      + ' a year less than that.</p>'
+      + '<p>Whether this home can qualify is a question for the Property Appraiser on '
+      + '<a href="tel:19418618200">941-861-8200</a>. There are two dates that decide it and most people have '
+      + 'not heard about either: you have to own the home and be living in it as your permanent residence on '
+      + '<strong>1 January</strong> of the year you are claiming, and file by <strong>1 March</strong> of '
+      + 'that year. And if the amendment passes as written, anyone who is a permanent Florida resident before '
+      + '1 January 2027 gets the larger exemption from the start, while anyone establishing residency after '
+      + 'that begins lower and waits until the fifth year. That last part is contingent on the vote, so '
+      + 'confirm it with them rather than with me.</p>';
   }
-  h += '<table class="bill"><thead><tr><th>Line</th><th class="r">Now</th><th class="r">2027</th><th class="r">2028</th></tr></thead><tbody>'
-    + '<tr><td><strong>The part that changes</strong><br><span class="dim">county, city, hospital and water district</span></td>'
-    + '<td class="r">' + hpMoney(now.nonschool) + '</td><td class="r">' + hpMoney(y27.nonschool) + '</td><td class="r"><strong>' + hpMoney(y28.nonschool) + '</strong></td></tr>'
-    + '<tr><td><strong>School tax</strong><br><span class="dim">the amendment does not touch this</span></td>'
-    + '<td class="r">' + hpMoney(now.school) + '</td><td class="r">' + hpMoney(y27.school) + '</td><td class="r">' + hpMoney(y28.school) + '</td></tr>'
-    + '<tr><td><strong>District, fire, trash and stormwater</strong><br><span class="dim">not touched either, and not counted here</span></td>'
-    + '<td class="r dim" colspan="3">on your TRIM notice, unchanged</td></tr>'
+  }
+  /* Three columns while the vote is ahead, one after it. A 2027 and a 2028
+     column is a forecast, and the page does not publish a forecast of a result
+     it has not been told. */
+  h += '<table class="bill"><thead><tr><th>Line</th><th class="r">Now</th>'
+    + (ballotOpen ? '<th class="r">2027</th><th class="r">2028</th>' : '')
+    + '</tr></thead><tbody>'
+    + '<tr><td><strong>The part' + (ballotOpen ? ' that changes' : '') + '</strong>'
+    + '<br><span class="dim">county, city, hospital and water district</span></td>'
+    + '<td class="r">' + hpMoney(now.nonschool) + '</td>'
+    + (ballotOpen ? '<td class="r">' + hpMoney(y27.nonschool) + '</td><td class="r"><strong>'
+        + hpMoney(y28.nonschool) + '</strong></td>' : '') + '</tr>'
+    + '<tr><td><strong>School tax</strong>'
+    + (ballotOpen ? '<br><span class="dim">the amendment does not touch this</span>' : '') + '</td>'
+    + '<td class="r">' + hpMoney(now.school) + '</td>'
+    + (ballotOpen ? '<td class="r">' + hpMoney(y27.school) + '</td><td class="r">'
+        + hpMoney(y28.school) + '</td>' : '') + '</tr>'
+    + '<tr><td><strong>District, fire, trash and stormwater</strong>'
+    + '<br><span class="dim">not counted here</span></td>'
+    + '<td class="r dim" colspan="' + (ballotOpen ? '3' : '1') + '">on your TRIM notice</td></tr>'
     + '</tbody></table>'
     + '<p class="small">Your tax district is ' + hpEsc(now.district.name) + '. The rate is ' + now.district.nonschool
     + ' per thousand dollars of value on the part that changes, and ' + now.district.school + ' on the school part. '
@@ -1654,7 +1776,9 @@ function hpPage(D, p, host) {
                                              : Math.max(0, p.exempt - c.std_exemption))))
     + '. Those two are the figures your TRIM notice calls taxable value. ' + hpEsc(c.roll) + '. '
     + 'A final certified rate can move the total by a few dollars either way. '
-    + 'This assumes the amendment passes as written and your homestead status does not change. Not tax advice.</p>'
+    + (ballotOpen ? 'The 2027 and 2028 columns assume the amendment passes as written and that your homestead '
+        + 'status does not change. ' : '')
+    + 'Not tax advice.</p>'
     /* Grand Palm and Sunrise Preserve have no verified TRIM notice, so cdd_note
        is empty and 2,056 pages printed this bold heading followed by nothing.
        No note means say nothing, which is the same rule the build script uses. */
@@ -1801,7 +1925,8 @@ function hpPage(D, p, host) {
     + '<h2>The rest of ' + hpEsc(c.name) + '</h2>'
     + '<p>' + c.parcels.toLocaleString('en-US') + ' homes. ' + c.homesteads.toLocaleString('en-US') + ' of them are somebody\'s main residence, '
     + 'and ' + c.out_of_state.toLocaleString('en-US') + ' are owned by somebody who lives in another state. '
-    + 'Over the last 12 months ' + c.resales12 + ' were sold by one owner to another. Half went for more than '
+    + 'In the 12 months to ' + hpEsc(c.asofLabel || 'the roll date') + ', ' + c.resales12
+    + ' were sold by one owner to another. Half went for more than '
     + hpMoney(c.median_price12) + ' and half for less, which works out to $' + c.median_psf12
     + ' a square foot across ' + (c.n_types >= 2 ? hpWords(c.n_types) + ' kinds of home' : 'every home') + ' here.</p>'
     + '<p>' + (c.site ? '<a href="' + hpEsc(c.site) + '">' + hpEsc(c.name) + ' home values</a> &middot; ' : '')
@@ -1892,7 +2017,13 @@ function hpPage(D, p, host) {
     + '<p class="small">I record that this page was opened, and which figures were typed into the net proceeds '
     + 'calculator, so I know which addresses to follow up on. No cookies, no third party tracking, and nothing '
     + 'here is ever sold or shared.</p>'
-    + '<p class="small">Built from the ' + hpEsc(c.roll) + '. Page generated ' + hpDate(new Date().toISOString().slice(0, 10)) + '.</p>'
+    /* "Page generated <today>" was the freshest-looking thing on the page and
+       the only one that meant nothing. A reader opening a bookmark in 2028 saw
+       a 2028 date a few words after "2026 certified roll". What matters is how
+       old the FIGURES are, so that is what it says now. */
+    + '<p class="small">Built from the ' + hpEsc(c.roll)
+    + (c.asofLabel ? '. Every figure on this page is as at ' + hpEsc(c.asofLabel)
+        + ', which is the most recent sale in that record' : '') + '.</p>'
     + '</div>';
 
   h += '</div>' + (range ? '<script>' + HP_JS + '</script>' : '')
@@ -2374,7 +2505,7 @@ function hpLookupPage(REG, host, q, matches, tried, loose) {
   let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     + '<title>What your home is worth, and every sale that says so | Florida Home Value AI</title>'
-    + '<meta name="description" content="One page about your own home. What it is worth today with every comparable sale listed underneath, what Save Our Homes has saved you, what the November ballot does to your tax bill, and what you would walk away with if you sold. Sarasota County public records.">'
+    + '<meta name="description" content="One page about your own home. What it is worth today with every comparable sale listed underneath, what Save Our Homes has saved you, what the homestead rules do to your tax bill, and what you would walk away with if you sold. Sarasota County public records.">'
     + '<link rel="canonical" href="https://' + host + '/my-home">'
     + '<meta property="og:type" content="website">'
     + '<meta property="og:title" content="What your home is worth, and every sale that says so">'
@@ -2400,7 +2531,7 @@ function hpLookupPage(REG, host, q, matches, tried, loose) {
     +   'nothing behind it: the comparable sales it rests on are listed underneath with full addresses, '
     +   'so you can look up any deed yourself.</p>'
     +   '<p class="lede">Type your address and the page builds itself. What your home is worth today, what '
-    +   'Save Our Homes has saved you, what the November ballot does to your tax bill, and what you would '
+    +   'Save Our Homes has saved you, what the homestead rules do to your tax bill, and what you would '
     +   'walk away with if you sold. Every figure comes from Sarasota County public records.</p>'
     +   '<p class="lede">RPR, which is run by the National Association of Realtors, works out its own '
     +   'estimate for your address, and it sits on the page beside mine. Where the two disagree the page '
@@ -2463,7 +2594,7 @@ function hpLookupPage(REG, host, q, matches, tried, loose) {
     + '<li><strong>Where your own home sits among them,</strong> and how far it has moved since you bought it, '
     + 'up or down.</li>'
     + '<li><strong>What Save Our Homes has saved you</strong>, in dollars a year, and what happens to it the day you sell.</li>'
-    + '<li><strong>Your tax bill, line by line, before and after the November ballot.</strong></li>'
+    + '<li><strong>Your tax bill, line by line, and the homestead deadlines that change it.</strong></li>'
     + '<li><strong>What you would walk away with</strong> after the costs of selling.</li>'
     + '<li><strong>Every sale the county has recorded on your address</strong>, back to the day it was built.</li>'
     + '</ul>'
