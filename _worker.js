@@ -2582,27 +2582,106 @@ const HP_LICENCE = 'Michael Putnam, Florida Real Estate Sales Associate with Put
    one row and cannot create one. */
 const HP_LEADS_KEY = 'nZiXUZTehDwquzE7Vk89GkDxe5Lc1FAf';
 
+/* THE KEY DOES NOT TRAVEL IN A URL, AND THAT IS THE WHOLE POINT OF THIS SHAPE.
+   The existing leads page takes its password as ?pw= and the lead emails carry
+   a ?k= link, so the credential to every customer record sits in Michael's
+   mailbox, in his browser history and in request logs. When this page was first
+   written on 25 September 2026 it repeated that mistake within the hour.
+   So: the key is posted once from a form, it comes back as an HttpOnly cookie,
+   and nothing after that has it in an address bar. A ?k= link still works, for
+   the bookmark and for links already sent, but it sets the cookie and
+   immediately redirects to a bare /leads so the key does not sit on screen or
+   in history.
+   This is not bank-grade. Anyone holding the cookie or the key can read the
+   leads. It is a large improvement on mailing the key to yourself forever. */
+const HP_LEADS_COOKIE = 'fhv_leads';
+
+function hpLeadsCookie(request) {
+  const raw = request.headers.get('Cookie') || '';
+  const parts = raw.split(';');
+  for (let i = 0; i < parts.length; i++) {
+    const kv = parts[i].split('=');
+    if (kv[0] && kv[0].trim() === HP_LEADS_COOKIE) {
+      return decodeURIComponent((kv[1] || '').trim());
+    }
+  }
+  return '';
+}
+
+function hpLeadsLogin(message, status) {
+  return new Response('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    + '<meta name="robots" content="noindex, nofollow"><title>FHV leads</title><style>'
+    + 'body{font:400 17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+    + 'background:#faf7f2;color:#1a1714;display:flex;align-items:center;justify-content:center;'
+    + 'min-height:100vh;margin:0;padding:20px}'
+    + 'form{background:#fff;border:1px solid #e6ded2;border-radius:10px;padding:26px;max-width:360px;width:100%}'
+    + 'h1{font-size:20px;margin:0 0 6px}p{color:#57504a;font-size:15px;margin:0 0 16px}'
+    + 'input{width:100%;padding:13px;border:1px solid #d8d2c8;border-radius:8px;font-size:16px;'
+    + 'box-sizing:border-box;margin-bottom:10px}'
+    + 'button{width:100%;padding:13px;background:#8a601d;color:#fff;border:0;border-radius:8px;'
+    + 'font-size:16px;cursor:pointer}.e{color:#9b3b2f;font-size:15px;margin-bottom:10px}'
+    + '</style></head><body><form method="POST" action="/leads">'
+    + '<h1>FHV leads</h1><p>Your leads key.</p>'
+    + (message ? '<div class="e">' + message + '</div>' : '')
+    + '<input type="password" name="k" autofocus autocomplete="current-password">'
+    + '<button type="submit">Open</button></form></body></html>',
+    { status: status || 200, headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-Robots-Tag': 'noindex, nofollow',
+        'Cache-Control': 'no-store'
+      } });
+}
+
 async function hpLeadsRoute(env, request, path) {
   const url = new URL(request.url);
-  if (url.searchParams.get('k') !== HP_LEADS_KEY) {
-    /* Same answer for a wrong key and a missing one, and the same answer a
-       scanner gets for any other unknown path. Nothing to learn from it. */
-    return new Response('Not found', { status: 404 });
-  }
   const noStore = {
     'Content-Type': 'text/html; charset=utf-8',
     'X-Robots-Tag': 'noindex, nofollow',
     'Cache-Control': 'no-store'
   };
+  /* 30 days, so he is not retyping it every visit. HttpOnly keeps it away from
+     any script on the page, Secure keeps it off plain HTTP, Lax means it still
+     arrives when he clicks a link in an email. */
+  const setCookie = HP_LEADS_COOKIE + '=' + encodeURIComponent(HP_LEADS_KEY)
+    + '; Path=/; Max-Age=2592000; HttpOnly; Secure; SameSite=Lax';
+
+  /* The form posts the key. Right key, cookie set, straight to the table. */
+  if (path === '/leads' && request.method === 'POST') {
+    let given = '';
+    try {
+      const form = await request.formData();
+      given = (form.get('k') || '').toString();
+    } catch (err) { given = ''; }
+    if (given !== HP_LEADS_KEY) return hpLeadsLogin('That is not the key.', 401);
+    return new Response(null, { status: 303, headers: {
+      'Location': '/leads', 'Set-Cookie': setCookie, 'Cache-Control': 'no-store' } });
+  }
+
+  /* A ?k= link, from the bookmark or from an email already sent. Swap it for the
+     cookie and get the key out of the address bar. */
+  if (url.searchParams.get('k') === HP_LEADS_KEY) {
+    const to = path === '/mark' ? '/mark?id=' + encodeURIComponent(url.searchParams.get('id') || '')
+                               : '/leads';
+    return new Response(null, { status: 303, headers: {
+      'Location': to, 'Set-Cookie': setCookie, 'Cache-Control': 'no-store' } });
+  }
+
+  if (hpLeadsCookie(request) !== HP_LEADS_KEY) {
+    /* A wrong or missing key gets the login form on /leads and nothing at all
+       anywhere else, so probing /mark teaches nothing. */
+    if (path === '/leads') return hpLeadsLogin('', 200);
+    return new Response('Not found', { status: 404 });
+  }
 
   if (path === '/mark') {
     const id = parseInt(url.searchParams.get('id') || '', 10);
     if (!id) return new Response('No id', { status: 400, headers: noStore });
     try {
-      /* THE TABLE HAS ITS OWN contacted COLUMN AND THE VAULT'S OWN MARK BUTTON
-         SETS IT. Writing notify_status instead would have left the two leads
-         pages disagreeing about who has been written to. COALESCE so clicking
-         it twice does not move the original date. */
+      /* THE TABLE HAS ITS OWN contacted COLUMN AND THE OTHER LEADS PAGE SETS IT.
+         Writing notify_status instead would leave the two pages disagreeing
+         about who has been written to. COALESCE so a second click does not move
+         the original date. */
       await env.DB.prepare(
         'UPDATE leads SET contacted = 1, contacted_at = COALESCE(contacted_at, ?) WHERE id = ?'
       ).bind(new Date().toISOString(), id).run();
@@ -2612,12 +2691,12 @@ async function hpLeadsRoute(env, request, path) {
     }
     return new Response('<!DOCTYPE html><html><head><meta charset="UTF-8">'
       + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-      + '<title>Marked</title><style>body{font:400 18px/1.6 -apple-system,BlinkMacSystemFont,'
-      + '"Segoe UI",sans-serif;margin:0;padding:40px 20px;background:#faf7f2;color:#1a1714}'
-      + 'a{color:#8a601d}</style></head><body>'
-      + '<p><strong>Row ' + id + ' marked contacted.</strong></p>'
-      + '<p><a href="/leads?k=' + HP_LEADS_KEY + '">All leads</a></p>'
-      + '</body></html>', { headers: noStore });
+      + '<meta name="robots" content="noindex, nofollow"><title>Marked</title>'
+      + '<style>body{font:400 18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+      + 'margin:0;padding:40px 20px;background:#faf7f2;color:#1a1714}a{color:#8a601d}</style>'
+      + '</head><body><p><strong>Row ' + id + ' marked as written to.</strong></p>'
+      + '<p><a href="/leads">Back to all leads</a></p></body></html>',
+      { headers: noStore });
   }
 
   /* /leads */
@@ -2638,8 +2717,9 @@ async function hpLeadsRoute(env, request, path) {
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   };
-  /* Rows can hold whatever a form was given, so every field is escaped on the
-     way out. One of them held a shell command this morning. */
+  /* Rows hold whatever a form was handed, so everything is escaped on the way
+     out. One of them held a shell command on 25 September. */
+  const waiting = rows.filter(function (r) { return !Number(r.contacted || 0); }).length;
   let body = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     + '<meta name="robots" content="noindex, nofollow"><title>FHV leads</title><style>'
@@ -2654,22 +2734,23 @@ async function hpLeadsRoute(env, request, path) {
     + 'tr.done{opacity:.5}a{color:#8a601d}.tag{font-size:12px;padding:2px 6px;border-radius:4px;'
     + 'background:#f3ece1}</style></head><body>'
     + '<h1>FHV leads</h1><p class="n">' + rows.length + ' most recent, newest first. '
-    + 'Contacted rows are faded.</p><table><thead><tr>'
+    + waiting + ' not written to yet. Faded rows are done.</p><table><thead><tr>'
     + '<th>#</th><th>When</th><th>Address</th><th>Who</th><th>What they wanted</th><th></th>'
     + '</tr></thead><tbody>';
   for (const r of rows) {
     const done = Number(r.contacted || 0) === 1;
-    const who = [r.name, r.email, r.phone].filter(function (x) { return x; }).join('<br>');
+    const who = [r.name, r.email, r.phone].filter(function (x) { return x; }).length;
     body += '<tr' + (done ? ' class="done"' : '') + '>'
       + '<td>' + r.id + '</td>'
       + '<td>' + esc(String(r.received_at || '').replace('T', ' ').slice(0, 16)) + '</td>'
       + '<td>' + esc(r.address) + (r.subdivision ? '<br><span class="tag">'
           + esc(r.subdivision) + '</span>' : '') + '</td>'
       + '<td>' + (who ? esc(r.name) + (r.name && (r.email || r.phone) ? '<br>' : '')
-          + esc(r.email) + (r.email && r.phone ? '<br>' : '') + esc(r.phone) : '<span class="tag">anon</span>') + '</td>'
+          + esc(r.email) + (r.email && r.phone ? '<br>' : '') + esc(r.phone)
+          : '<span class="tag">anon</span>') + '</td>'
       + '<td class="w">' + esc(r.wants) + '</td>'
-      + '<td>' + (done ? 'done' : '<a href="/mark?id=' + r.id + '&k=' + HP_LEADS_KEY
-          + '">mark done</a>') + '</td></tr>';
+      + '<td>' + (done ? 'done' : '<a href="/mark?id=' + r.id + '">mark done</a>')
+      + '</td></tr>';
   }
   body += '</tbody></table></body></html>';
   return new Response(body, { headers: noStore });
