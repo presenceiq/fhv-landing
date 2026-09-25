@@ -742,7 +742,13 @@ function hpLoadOne(raw) {
   if (!c.parcels) c.parcels = parcels.length;
 
   const bySlug = {};
-  parcels.forEach(function (p, i) { p.i = i; bySlug[p.slug] = p; });
+  parcels.forEach(function (p, i) {
+    p.i = i;
+    bySlug[p.slug] = p;
+    /* Built once per parcel rather than on every keystroke of every search. */
+    p.hay     = hpClean(p.num + ' ' + p.street + ' ' + p.unit, true).join(' ');
+    p.haywide = hpClean(p.num + ' ' + p.street + ' ' + p.unit + ' ' + (p.city || ''), true).join(' ');
+  });
 
   const salesByParcel = {};
   raw.sales.forEach(function (s) {
@@ -812,9 +818,19 @@ function hpTitle(s) {
 }
 /* The street line on its own. Used only where the city and state are already
    sitting next to it on the same line. */
+/* ONE address format, everywhere, and it is the one RPR can read.
+   The county never writes a unit into an address at all. It keeps StreetNumber,
+   LOCDescription and LocUnit as separate fields, so any assembled address is
+   somebody's choice of format. Where the county does write it in prose, in the
+   legal description, it writes UNIT. Stellar MLS writes "Unit #101". RPR cannot
+   parse "#101" but parses "Unit 101" and returns a five star answer.
+   So: the county's word, the county's street abbreviation, and the format RPR
+   understands. Display and query are now the same string, which means they can
+   never drift apart. Slugs are stored in the data files and are unaffected, so
+   no link anyone has ever been sent breaks. */
 function hpStreetLine(p) {
   let a = p.num + ' ' + hpTitle(p.street);
-  if (p.unit) a += ' #' + p.unit;
+  if (p.unit) a += ', Unit ' + p.unit;
   return a;
 }
 
@@ -824,20 +840,6 @@ function hpStreetLine(p) {
    the share card, the sale history, the correction form, the vault record and
    every comparable sale. A partial address makes a reader stop and work out
    which house is meant, and there are 1,935 of them. */
-/* RPR cannot parse "#101". It CAN parse "Unit 101", and it returns a five star
-   answer for the same condo when asked that way. Michael found this by pasting
-   both formats into RPR by hand. An earlier version of this page told 260 condo
-   owners RPR had nothing for their address, which was wrong: RPR had it, we were
-   asking badly. The page still displays #101, because that is how the county
-   writes it and how an owner recognizes their own home. Only the string sent to
-   RPR is different. */
-function hpRprQuery(p, c) {
-  const city = hpTitle(p.city || (c && c.city) || '');
-  return p.num + ' ' + hpTitle(p.street)
-       + (p.unit ? ', Unit ' + p.unit : '')
-       + (city ? ', ' + city : '') + ', FL ' + p.zip;
-}
-
 function hpAddress(p, c) {
   const city = hpTitle(p.city || (c && c.city) || '');
   return hpStreetLine(p) + (city ? ', ' + city : '') + ', FL ' + p.zip;
@@ -1077,7 +1079,7 @@ function hpPage(D, p, host) {
        Nothing is sent to RPR beyond the address, which is on the page anyway. */
     + '<script>window.rprAvmWidgetOptions={'
     +   'Token:"B7078914-3207-44B1-A650-21ECA3E39AB7",'
-    +   'Query:' + JSON.stringify(hpRprQuery(p, c)) + ','
+    +   'Query:' + JSON.stringify(addr) + ','
     +   'CoBrandCode:"btsputnamrealtygroup",'
     +   'ContainerSelector:"#rprWidgetContainer",'
     +   'ShowRprLinks:false};<\/script>'
@@ -1696,7 +1698,10 @@ async function hpRoute(env, request, slug) {
        common case, one obvious match, goes straight to their page instead of
        making them pick from a list of one. */
     if (q) {
-      const exact = REG.bySlug[hpNorm(q).replace(/ /g, '-')];
+      /* The stored slug uses the county's spelling, so try that first, then the
+         collapsed form for somebody who typed "Circle" where the county says CIR. */
+      const exact = REG.bySlug[hpClean(q, false).join('-')]
+                 || REG.bySlug[hpClean(q, true).join('-')];
       if (exact) return Response.redirect('https://' + host + '/h/' + exact.slug, 302);
       const m = hpSearch(REG, q, 12);
       if (m.length === 1) return Response.redirect('https://' + host + '/h/' + m[0].slug, 302);
@@ -1916,17 +1921,72 @@ function hpWords(n) {
   return w[n] || String(n);
 }
 
+/* Words that carry no information in an address search. The page now displays
+   "20181 Ragazza Cir, Unit 101", so an owner will type "unit" and will paste the
+   whole line including the city, the state and the zip. Before this, both of
+   those failed and told them their own address did not exist, which is the worst
+   thing this page could do to somebody. Street types are NOT in here: "cir" and
+   "dr" tell two addresses apart. */
+const HP_NOISE = ['unit', 'apt', 'apartment', 'ste', 'suite', 'no', 'num', 'lot',
+                  'fl', 'florida', 'usa', 'us'];
+
+/* The county abbreviates a street type, Stellar MLS spells it out, and a person
+   types whichever they saw. "20181 Ragazza Circle" and "20181 RAGAZZA CIR" are
+   the same house, so both collapse to the county's spelling before matching.
+   Only the type words are mapped. Street NAMES are left alone. */
+const HP_STYPE = {
+  circle: 'cir', drive: 'dr', street: 'st', lane: 'ln', court: 'ct',
+  boulevard: 'blvd', terrace: 'ter', place: 'pl', avenue: 'ave', road: 'rd',
+  trail: 'trl', parkway: 'pkwy', crossing: 'xing', point: 'pt', square: 'sq',
+  highway: 'hwy', cove: 'cv', glen: 'gln', bend: 'bnd', hollow: 'holw',
+  landing: 'lndg', trace: 'trce', plaza: 'plz', grove: 'grv', view: 'vw',
+  alley: 'aly', crescent: 'cres', pass: 'pass', path: 'path', row: 'row',
+  run: 'run', walk: 'walk', way: 'way', loop: 'loop', park: 'park'
+};
+
+/* map=false leaves street types alone, for trying the stored slug, which is
+   built from the county's own spelling. map=true collapses them, and the parcel
+   haystack is collapsed the same way so both sides always agree.
+
+   WHY BOTH SIDES. Mapping only the query breaks any street whose NAME contains a
+   type word. There are three here, Cozy Grove Dr, Winter Park Ct and Avon Park
+   Ct, covering 105 homes: a search for "Cozy Grove" became "cozy grv" and found
+   nothing. Collapsing the haystack too makes it symmetric and those work again. */
+function hpClean(q, map) {
+  const out = [];
+  hpNorm(q).split(' ').forEach(function (t) {
+    if (!t) return;
+    if (HP_NOISE.indexOf(t) > -1) return;
+    if (/^3[0-9]{4}$/.test(t)) return;        /* a Florida zip is not a house number */
+    out.push(map === false ? t : (HP_STYPE[t] || t));
+  });
+  return out;
+}
+
 function hpSearch(REG, q, limit) {
-  const n = hpNorm(q);
+  const toks = hpClean(q, true);
+  const n = toks.join(' ');
   if (n.length < 2) return [];
   const hits = [];
   for (const p of REG.parcels) {
-    const hay = hpNorm(p.num + ' ' + p.street + ' ' + p.unit);
+    const hay = p.hay;
     let score = -1;
     if (hay === n) score = 0;
     else if (hay.indexOf(n) === 0) score = 1;
     else if ((' ' + hay).indexOf(' ' + n) > -1) score = 2;
     else if (hay.indexOf(n) > -1) score = 3;
+    else if (toks.length > 1) {
+      /* Nothing matched as one run of text. Try every word instead, so a pasted
+         line still finds the house even with a typo somewhere in it. The city is
+         in this haystack but not the one above, so ranking is unchanged while a
+         pasted "..., Venice, FL 34293" no longer blocks the match. */
+      const wide = p.haywide;
+      let all = true;
+      for (let i = 0; i < toks.length; i++) {
+        if (wide.indexOf(toks[i]) === -1) { all = false; break; }
+      }
+      if (all) score = 4;
+    }
     if (score >= 0) hits.push({ p: p, score: score });
     if (hits.length > 400) break;
   }
