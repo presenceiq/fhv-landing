@@ -716,6 +716,9 @@ function hpLoadOne(raw) {
   if (!c.city)         c.city = '';
   if (!c.region)       c.region = '';
   if (!c.builder)      c.builder = 'the builder';
+  if (!c.site)         c.site = '';
+  if (!c.n_types)      c.n_types = 0;
+  if (!c.bt || !c.bt.n) c.bt = null;
   if (!c.roll)         c.roll = 'the county certified roll';
   /* ratio_now drives the market context and the time adjustment. Without it the
      page simply leaves those parts out rather than failing. */
@@ -880,8 +883,8 @@ function hpComps(D, subj) {
    WHAT THIS DOES, AND WHY IT IS NOT PRICE PER SQUARE FOOT.
 
    The first version took the median price per square foot of the comparable
-   sales and multiplied by the subject's size. It was measured against 113 real
-   Gran Paradiso sales and it was good where the comps were nearly the same size
+   sales and multiplied by the subject's size. Measured against every qualified
+   Gran Paradiso resale, it was good where the comps were nearly the same size
    as the subject, and badly wrong where they were not. 12691 Cinqueterre came
    out at $775,000 and sold for $470,000, because price per square foot is not
    flat across sizes: homes of 1,500 to 1,800 feet ran $207 a foot in the last
@@ -1037,7 +1040,7 @@ function hpPage(D, p, host) {
     + '<link rel="preconnect" href="https://fonts.googleapis.com">'
     + '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
     + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">'
-    + '<style>' + HP_CSS + '</style></head><body>';
+    + '<style>' + HP_CSS + '</style></head><body data-slug="' + hpEsc(p.slug) + '">';
 
   /* ---- masthead ---- */
   h += '<div class="wrap">'
@@ -1163,8 +1166,10 @@ function hpPage(D, p, host) {
       if (range.tight) {
         h += '<div class="trust good"><strong>This is the strong case.</strong> '
           + range.n + ' comparable homes, close to yours in size, sold in the window shown above. '
-          + 'I tested this against 113 real ' + hpEsc(c.name) + ' sales: the range caught the actual selling price '
-          + '86% of the time and the middle figure was out by about 5%.</div>';
+          + (c.bt ? 'I tested this against ' + c.bt.n + ' real ' + hpEsc(c.name) + ' sales: the range caught the '
+                     + 'actual selling price ' + c.bt.cov + '% of the time and the middle figure was out by about '
+                     + c.bt.err + '%.' : '')
+          + '</div>';
       } else {
         h += '<div class="trust weak"><strong>Treat this one as a wide guess.</strong> '
           + 'I could not find enough recent sales genuinely like your home, so the net had to be cast wider '
@@ -1432,12 +1437,13 @@ function hpPage(D, p, host) {
 
      The percentages below are the ones already used by the community valuation
      tool, and they are local judgment rather than anything measured from deeds,
-     which the page says out loud. The one number here that IS measured is the
-     pool: across 101 single-family sales a pool is worth about 8% more than the
-     county value alone implies. It is deliberately NOT in this list, because
-     the comparable sales above are already matched pool against pool, so it is
-     in the figure already. Asking for it again would count it twice, which is
-     what the community tool does.                                            */
+     which the page says out loud. A pool is deliberately NOT in this list,
+     because the comparable sales above are already matched pool against pool,
+     so it is in the figure already. Asking for it again would count it twice.
+     An earlier draft also claimed a pool was worth a measured percentage. That
+     claim is gone. Every way of measuring it from deeds alone confounds the
+     pool with the kind of home that tends to have one, and a figure that
+     cannot be defended does not belong on a page that asks to be checked.    */
   if (range) {
     h += '<div class="card" id="extras">'
       + '<div class="tag">What the county cannot see</div>'
@@ -1476,7 +1482,7 @@ function hpPage(D, p, host) {
       + 'tick, because these things stop adding up after a point.</p>'
       + '<p class="small">A pool is not on the list on purpose. The county does record pools, so the comparable '
       + 'sales above are already matched pool against pool and it is in the figure already. For the record, '
-      + 'across 101 single-family sales here a pool is worth about 8% more than the county value alone suggests.</p>'
+      + 'a pool is already priced into the figure above rather than being added on here.</p>'
       + '<p class="small">Solar you own outright, impact windows, a recent roof and a whole-house generator are '
       + 'all worth money to the right buyer, and I have left them off because I cannot put an honest number on '
       + 'them from sales data. Tell me about them and I will factor them in properly.</p>'
@@ -1487,180 +1493,6 @@ function hpPage(D, p, host) {
       + '</div>';
   }
 
-  h += '<form class="card signup" method="POST" action="/h/' + hpEsc(p.slug) + '">'
-    + '<input type="hidden" name="form" value="alerts">'
-    /* ---- the alerts signup ----------------------------------------------
-       WHAT THIS PROMISES, AND WHY IT IS NARROWER THAN IT WAS.
-       An earlier version offered new listings, price cuts and pending sales as
-       well. Three problems with that. Nothing sends them. They come from the
-       MLS feed rather than the county, and the Stellar agreement limits that
-       data to public listing display, which an outbound email is not. And a
-       closed price is the only one of the four that is a fact rather than a
-       hope. So this promises recorded sales only. That part is county record,
-       it needs nobody's permission, and it is the part no other agent sends.
-       If Brian and Ben clear MLS-driven alerts, widen it then and not before. */
-    + '<div class="tag">Sale alerts</div>'
-    + '<h2>Be told when a home near you sells, and for how much</h2>'
-    + '<p>Bookmark this page. The address in your browser bar is all of it, the same link still works in two '
-    + 'years, and I reload the county records regularly so new sales turn up here on their own. '
-    + 'You do not have to give me anything for that.</p>'
-    + '<p>What an email address gets you is not the link. It is being told. '
-    + 'When a home near you sells I will send you which house, when it closed, and what the buyer actually paid, '
-    + 'without you having to remember to come back and look.</p>'
-    + '<p>And when a home near you does sell, I will tell you: which house, when it closed, and what the buyer '
-    + 'actually paid. Asking prices are public and mostly noise. The recorded price is what your own home gets '
-    + 'measured against, and most owners never see it until they are already trying to sell.</p>'
-    + '<p class="small">Pick how close to home you want it.</p>'
-    + '<div class="scopes">'
-    +   '<label><input type="radio" name="scope" value="street" checked> <strong>' + hpEsc(hpTitle(p.street)) + ' only.</strong> Your own street, nothing else.</label>'
-    +   '<label><input type="radio" name="scope" value="plan"> <strong>Homes like yours anywhere in ' + hpEsc(c.name) + '.</strong> '
-    +     hpEsc(p.typeName) + ', within 10% of your ' + p.sqft.toLocaleString('en-US') + ' square feet. '
-    +     'These are the sales that actually move your number.</label>'
-    +   '<label><input type="radio" name="scope" value="community"> <strong>All ' + c.parcels.toLocaleString('en-US') + ' homes in ' + hpEsc(c.name) + '.</strong> '
-    +     'Everything, including types and sizes unlike yours.</label>'
-    + '</div>'
-    + '<div class="row"><input type="email" name="email" required placeholder="your email"><button type="submit">Email me the link</button></div>'
-    + '<p class="small">Expect a message within a few days of a sale being recorded, not the same minute. '
-    + 'County records take a little while to appear and I would rather send you a real closed price than a rumor. '
-    + 'If you want to know sooner than that, call me and I will just tell you.</p>'
-    + '<p class="small">Your address and email stay with me. I never sell them, share them or give them to anyone. '
-    + 'Every message has an unsubscribe link, or reply with the word stop and you are off the same day.</p>'
-    + '</form>';
-
-
-  /* ---- 4. RPR, when one has been added ---- */
-  if (rpr) {
-    h += '<div class="card">'
-      + '<div class="tag">A second opinion, not mine</div>'
-      + '<h2>What RPR says</h2>'
-      + '<p>RPR is run by the National Association of Realtors. It works a different way to the sales above, and it '
-      + 'draws on listing photos, descriptions and price histories that county records never contain.</p>'
-      + '<div class="rpr"><div class="rprv">' + hpMoney(rpr.value) + '</div>'
-      + '<div class="rprr">Range ' + hpK(rpr.lo) + ' to ' + hpK(rpr.hi) + ' &middot; as of ' + hpEsc(rpr.asof) + '</div></div>'
-      + '<p class="small">Where the two agree, that is worth something. Where they disagree, the gap is usually condition, upgrades or view, and that is the part no automated number can settle.</p>'
-      + '</div>';
-  } else {
-    h += '<div class="card quiet">'
-      + '<h2>Want a second opinion on the number?</h2>'
-      + '<p>I can pull an independent estimate for this address from RPR, which is run by the National Association of Realtors, and put it on this page next to the recorded sales. It works a different way, and it draws on listing photos, descriptions and price histories that county records never contain. Text me the address and I will add it. There is no charge and nothing follows from it.</p>'
-      + '</div>';
-  }
-
-  /* ---- 5. the tax bill ---- */
-  h += '<div class="card">'
-    + '<div class="tag">November 3 ballot</div>'
-    + '<h2>What the homestead amendment does to this bill</h2>';
-  if (p.hs) {
-    h += '<p class="lead">' + hpMoney(saving) + ' a year less by 2028</p>'
-      + '<p>The part of your tax bill that this amendment changes goes from ' + hpMoney(now.nonschool) + ' now to '
-      + hpMoney(y27.nonschool) + ' in 2027 and ' + hpMoney(y28.nonschool) + ' in 2028.'
-      + (y28.nonschool < 1 ? ' It reaches zero.' : ' It does not reach zero. Even in 2028 you would still be taxed on ' + hpMoney(Math.max(0, p.assessed - c.new_2028 - Math.max(0, p.exempt - c.std_exemption))) + ' of value.') + '</p>'
-      + '<p>If your taxes are escrowed that is about ' + hpMoney(saving / 12) + ' a month. It does not arrive when the votes are counted. '
-      + 'The change first appears on the tax bill mailed in November 2027, and your servicer resets the escrow at its next annual analysis, so a smaller payment lands in early 2028.</p>';
-  } else {
-    /* The saving above is zero for a parcel with no homestead, because the
-       increase does not reach it. The figure worth giving is the one it WOULD
-       get, so the owner can weigh it, and that has to be worked out as though
-       the homestead were in place rather than read off the real bill. */
-    const d0 = now.district;
-    const hypoNow = Math.max(0, p.assessed - c.std_exemption) * d0.nonschool / 1000
-                  + Math.max(0, p.assessed - 25000) * d0.school / 1000;
-    const hypo28 = Math.max(0, p.assessed - c.new_2028) * d0.nonschool / 1000
-                 + Math.max(0, p.assessed - 25000) * d0.school / 1000;
-    const hypoSaving = Math.max(0, (now.nonschool + now.school) - hypo28);
-    h += '<p>This home does not have a homestead exemption on the county records. The amendment only helps homes that do, '
-      + 'so nothing on this bill changes.</p>'
-      + '<p>One thing would change. On a home without homestead, the county can currently raise the amount you are taxed '
-      + 'on by up to 10% a year. The amendment cuts that to 5%. It slows down how fast the bill can grow. It does not '
-      + 'reduce what is owed now.</p>'
-      + '<p>If this became somebody\'s permanent residence and carried a homestead exemption, the bill would be about '
-      + hpMoney(hypoNow) + ' a year today and about ' + hpMoney(hypo28) + ' by 2028, which is '
-      + hpMoney(hypoSaving) + ' a year less than it is paying now. Whether this home can qualify is a question for the '
-      + 'Property Appraiser on 941-861-8200, and there is a date most people have not heard about: anyone who is a '
-      + 'permanent Florida resident by 31 December 2026 is eligible for the larger exemption from the start, and '
-      + 'anyone establishing residency on or after 1 January 2027 begins at $50,000 and waits until the fifth year.</p>';
-  }
-  h += '<table class="bill"><thead><tr><th>Line</th><th class="r">Now</th><th class="r">2027</th><th class="r">2028</th></tr></thead><tbody>'
-    + '<tr><td><strong>The part that changes</strong><br><span class="dim">county, city, hospital and water district</span></td>'
-    + '<td class="r">' + hpMoney(now.nonschool) + '</td><td class="r">' + hpMoney(y27.nonschool) + '</td><td class="r"><strong>' + hpMoney(y28.nonschool) + '</strong></td></tr>'
-    + '<tr><td><strong>School tax</strong><br><span class="dim">the amendment does not touch this</span></td>'
-    + '<td class="r">' + hpMoney(now.school) + '</td><td class="r">' + hpMoney(y27.school) + '</td><td class="r">' + hpMoney(y28.school) + '</td></tr>'
-    + '<tr><td><strong>District, fire, trash and stormwater</strong><br><span class="dim">not touched either, and not counted here</span></td>'
-    + '<td class="r dim" colspan="3">on your TRIM notice, unchanged</td></tr>'
-    + '</tbody></table>'
-    + '<p class="small">Your tax district is ' + hpEsc(now.district.name) + '. The rate is ' + now.district.nonschool
-    + ' per thousand dollars of value on the part that changes, and ' + now.district.school + ' on the school part. '
-    + 'You are taxed on ' + hpMoney(p.assessed) + '. ' + hpEsc(c.roll) + '. '
-    + '2026 rates were not final when this was built, so expect a difference of a few dollars either way. '
-    + 'This assumes the amendment passes as written and your homestead status does not change. Not tax advice.</p>'
-    + '<p class="note"><strong>The part that does not change.</strong> ' + hpEsc(c.cdd_note) + '</p>'
-    + '</div>';
-
-  /* ---- 6. net proceeds ---- */
-  if (range) {
-    h += '<div class="card" id="proceeds">'
-      + '<div class="tag">Net proceeds</div>'
-      + '<h2>What you would actually walk away with</h2>'
-      + '<p>The sale price starts at the middle of the range above. Everything else is empty because '
-      + 'I do not know your numbers and I am not going to guess them. Fill in what you know and the total follows.</p>'
-      + '<div class="calc">'
-      +   '<label>Sale price<input type="number" id="np_price" value="' + range.mid + '" step="1000"></label>'
-      +   '<label>Mortgage payoff<input type="number" id="np_loan" placeholder="what you still owe" step="1000"></label>'
-      +   '<label>Listing side commission %<input type="number" id="np_lc" placeholder="whatever you agree" step="0.25"></label>'
-      +   '<label>Buyer agent compensation %<input type="number" id="np_bc" placeholder="whatever you agree" step="0.25"></label>'
-      +   '<label>Title and other closing costs<input type="number" id="np_cl" placeholder="ask your title company" step="100"></label>'
-      +   '<label>Repairs and credits<input type="number" id="np_rp" placeholder="if any" step="500"></label>'
-      + '</div>'
-      + '<div class="npout" id="np_out"></div>'
-      + '<p class="small"><strong>The commission boxes start empty on purpose.</strong> '
-      + 'There has never been a standard commission rate. It has always been negotiable and it always was, '
-      + 'whatever anyone has told you over the years. What changed in August 2024 is that the rules now make that '
-      + 'plain and put the buyer agent\'s pay in writing between you and your buyer. '
-      + 'Putting a number in those boxes would be inventing a rate that does not exist, so type in what you are '
-      + 'actually being quoted and the total follows.</p>'
-      + '<p class="small">Documentary stamps are the one figure that is fixed: Florida charges $0.70 per $100 of the sale price '
-      + 'on the deed, and in Sarasota County that is customarily the seller\'s. It is worked out from the sale price above '
-      + 'and shown on its own line. Prorated taxes, your exact payoff, and the HOA and district estoppel fees are not in here '
-      + 'and will move the total. This is an estimate for planning, not a closing statement.</p>'
-      + '</div>';
-  }
-
-  /* ---- 7. the sale history ---- */
-  if (sales.length) {
-    h += '<div class="card">'
-      + '<div class="tag">Public record</div>'
-      + '<h2>What the county has recorded on ' + hpEsc(addr) + '</h2>'
-      + '<table class="comps"><thead><tr><th>Date</th><th class="r">Price</th><th>What it was</th></tr></thead><tbody>';
-    sales.forEach(function (s) {
-      h += '<tr><td>' + hpDate(s.date) + '</td><td class="r">' + hpMoney(s.price) + '</td>'
-        + '<td>' + (s.builder ? 'Original closing from ' + hpEsc(c.builder)
-                              : 'Owner to owner resale')
-        /* A builder closing is already kept out of the comp set for its own
-           reason, so tagging it again would say the same thing twice and imply
-           the price was somehow doubtful. The tag is only for a resale the
-           county did not flag as arms length. */
-        + ((!s.builder && !s.qualified) ? ' <span class="chip">not counted as a comp</span>' : '')
-        + '</td></tr>';
-    });
-    h += '</tbody></table><p class="small">Warranty and trustee deeds over $50,000 only. '
-      + 'Quit claims, corrective deeds and transfers for a dollar are left out because they are not sales. '
-      + 'A transfer marked <em>not counted as a comp</em> is a real recorded sale that the county did not flag '
-      + 'as a normal open-market sale, usually because it was between family, between companies, or part of a larger '
-      + 'deal. It stays in your history because it happened, and it is left out of the comparable list because it '
-      + 'would skew the number.</p></div>';
-  }
-
-  /* ---- 8. what the records cannot see ---- */
-  h += '<div class="card quiet">'
-    + '<h2>What the county records cannot see</h2>'
-    + '<p>County records carry square footage, bedrooms, bathrooms, year built and whether there is a pool. That is the whole list. '
-    + 'They do not show whether the kitchen has been redone, what the floors are, how old the roof and air handler are, '
-    + 'whether the lanai is extended or enclosed, or whether you have storm shutters. '
-    + 'On two homes that look identical on paper, that list is usually the whole difference in price.</p>'
-    + '<p>If you want a number that accounts for them, that takes twenty minutes and someone standing in the house. No charge and no obligation either way.</p>'
-    + '<p class="cta"><a class="btn" href="tel:19416629941">Call 941-662-9941</a> <a class="btn ghost" href="sms:19416629941">Text me instead</a></p>'
-    + '</div>';
-
   /* ---- 10. the rest of the community ---- */
   h += '<div class="card quiet">'
     + '<h2>The rest of ' + hpEsc(c.name) + '</h2>'
@@ -1668,8 +1500,8 @@ function hpPage(D, p, host) {
     + 'and ' + c.out_of_state.toLocaleString('en-US') + ' are owned by somebody who lives in another state. '
     + 'Over the last 12 months ' + c.resales12 + ' were sold by one owner to another. Half went for more than '
     + hpMoney(c.median_price12) + ' and half for less, which works out at $' + c.median_psf12
-    + ' a square foot across all four kinds of home here.</p>'
-    + '<p><a href="https://granparadiso.floridahomevalueai.com/">' + hpEsc(c.name) + ' home values</a> &middot; '
+    + ' a square foot across ' + (c.n_types >= 2 ? hpWords(c.n_types) + ' kinds of home' : 'every home') + ' here.</p>'
+    + '<p>' + (c.site ? '<a href="' + hpEsc(c.site) + '">' + hpEsc(c.name) + ' home values</a> &middot; ' : '')
     + '<a href="/property-tax-calculator">the tax calculator for any address</a> &middot; '
     + '<a href="/flood-zones">how to check the flood zone on this address</a> &middot; '
     + '<a href="/meet">about Michael Putnam</a></p>'
@@ -1740,7 +1572,8 @@ function hpPage(D, p, host) {
     + '<p class="small">Built from the ' + hpEsc(c.roll) + '. Page generated ' + hpDate(new Date().toISOString().slice(0, 10)) + '.</p>'
     + '</div>';
 
-  h += '</div>' + (range ? '<script>' + HP_JS + '</script>' : '') + '</body></html>';
+  h += '</div>' + (range ? '<script>' + HP_JS + '</script>' : '')
+     + '<script>' + HP_BEACON_JS + '</script></body></html>';
   return h;
 }
 
@@ -1846,6 +1679,45 @@ async function hpRoute(env, request, slug) {
     const email = String(form.get('email') || '').trim();
     const kind = String(form.get('form') || 'alerts');
     const addr = hpAddress(p, D.c);
+
+    /* The silent beacon. No email, no phone, so the alerts worker's "somebody
+       left contact details" test correctly ignores a view. A calculator row is
+       tagged so that worker can pick it out on purpose. Nothing is shown to the
+       visitor and nothing is waited on. */
+    if (kind === 'log') {
+      const what = String(form.get('kind') || '') === 'calc' ? 'calc' : 'view';
+      const ref = String(form.get('ref') || '').slice(0, 200);
+      const detail = String(form.get('detail') || '').slice(0, 200);
+      /* The daily digest groups by whatever sits between CAME FROM and ON, so
+         this has to be a short readable name and not a raw URL. */
+      let src = 'direct';
+      if (ref && ref.indexOf(host) === -1) {
+        let h2 = '';
+        try { h2 = new URL(ref).hostname.replace(/^www\./, ''); } catch (e) { h2 = ''; }
+        src = /facebook|fb\.com|instagram/.test(h2) ? 'Facebook'
+            : /google/.test(h2)                      ? 'Google'
+            : /bing|duckduckgo|yahoo/.test(h2)       ? 'another search engine'
+            : /chatgpt|openai|perplexity|claude|gemini/.test(h2) ? 'an AI assistant'
+            : h2 || 'somewhere without a referrer';
+      } else if (ref) {
+        src = 'another page on the site';
+      }
+      await fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: '', phone: '', email: '', address: addr,
+          territory_id: D.c.name + ' - personal home page ' + (what === 'calc' ? 'CALCULATOR' : 'view'),
+          subdivision: D.c.name,
+          homeowner_note: 'CAME FROM ' + src + ' ON a personal address page',
+          wants: (what === 'calc'
+                   ? 'CALCULATOR USED on a personal home page\nThey filled in: ' + detail
+                   : 'PAGE VIEW on a personal home page')
+                 + '\nAddress: ' + addr
+                 + '\nPage URL: https://' + host + '/h/' + p.slug
+        })
+      }).catch(function () {});
+      return new Response(null, { status: 204, headers: { 'X-Robots-Tag': 'noindex, nofollow' } });
+    }
 
     /* A correction. The message goes to the vault with the parcel attached, so
        it arrives saying which house and what the page had claimed, rather than
@@ -1963,6 +1835,12 @@ function hpNorm(s) {
 /* Rank matches so that typing a house number finds the house, and typing a
    street finds the street. Anything starting with what was typed beats
    anything merely containing it. */
+/* Small numbers read better as words in a sentence. */
+function hpWords(n) {
+  const w = ['no', 'one', 'two', 'three', 'four', 'five', 'six'];
+  return w[n] || String(n);
+}
+
 function hpSearch(REG, q, limit) {
   const n = hpNorm(q);
   if (n.length < 2) return [];
@@ -2250,6 +2128,63 @@ td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 /* ------------------------------------------------------ the one bit of JS
    The net proceeds calculator. Everything else on the page is already final
    HTML when it leaves the server. */
+/* ---------------------------------------------------------------------------
+   THE BEACON. Two signals, both silent to the visitor.
+
+   A VIEW, recorded once per browser per address, ever. Not once per visit.
+   The page tells people to bookmark it, so an owner coming back weekly is
+   doing exactly what was asked, and counting those as fresh interest would
+   fill the daily digest with the same handful of owners. Because a repeat
+   row can now only come from a DIFFERENT browser, three rows on one address
+   means three different people looked at that house, which is worth knowing.
+
+   THE CALCULATOR. Somebody typing a mortgage payoff or a commission rate into
+   the net proceeds boxes is not browsing, they are working out what they would
+   walk away with. That is the strongest selling signal on the page and no
+   portal hands it over. Fires once per page load, not once per keystroke.
+
+   Both go out with sendBeacon, which survives the page being closed and never
+   makes the visitor wait. If it fails, nothing on the page changes.        */
+const HP_BEACON_JS = `
+(function(){
+  var slug=document.body.getAttribute('data-slug');
+  if(!slug) return;
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function ping(kind,extra){
+    try{
+      var f=new FormData();
+      f.append('form','log'); f.append('kind',kind);
+      f.append('ref',document.referrer||''); f.append('detail',extra||'');
+      if(navigator.sendBeacon) navigator.sendBeacon('/h/'+slug,f);
+      else fetch('/h/'+slug,{method:'POST',body:f,keepalive:true}).catch(function(){});
+    }catch(e){}
+  }
+  if(!lsGet('fhv_seen_'+slug)){ lsSet('fhv_seen_'+slug,'1'); ping('view',''); }
+
+  /* The calculator. np_price arrives filled in, so it is not a signal on its
+     own and is deliberately not in this list. */
+  var watch=['np_loan','np_lc','np_bc','np_cl','np_rp'], fired=false;
+  function check(){
+    if(fired) return;
+    var used=[];
+    for(var i=0;i<watch.length;i++){
+      var e=document.getElementById(watch[i]);
+      if(e && String(e.value).trim()!=='' && (parseFloat(e.value)||0)>0) used.push(watch[i]);
+    }
+    if(!used.length) return;
+    fired=true;
+    var name={np_loan:'mortgage payoff',np_lc:'listing commission',np_bc:'buyer agent compensation',
+              np_cl:'closing costs',np_rp:'repairs and credits'};
+    ping('calc',used.map(function(k){return name[k];}).join(', '));
+  }
+  watch.forEach(function(id){
+    var e=document.getElementById(id);
+    if(e) e.addEventListener('change',check);
+  });
+})();
+`;
+
 const HP_JS = `
 (function(){
   /* the "what the county cannot see" adjuster */
