@@ -824,6 +824,20 @@ function hpStreetLine(p) {
    the share card, the sale history, the correction form, the vault record and
    every comparable sale. A partial address makes a reader stop and work out
    which house is meant, and there are 1,935 of them. */
+/* RPR cannot parse "#101". It CAN parse "Unit 101", and it returns a five star
+   answer for the same condo when asked that way. Michael found this by pasting
+   both formats into RPR by hand. An earlier version of this page told 260 condo
+   owners RPR had nothing for their address, which was wrong: RPR had it, we were
+   asking badly. The page still displays #101, because that is how the county
+   writes it and how an owner recognizes their own home. Only the string sent to
+   RPR is different. */
+function hpRprQuery(p, c) {
+  const city = hpTitle(p.city || (c && c.city) || '');
+  return p.num + ' ' + hpTitle(p.street)
+       + (p.unit ? ', Unit ' + p.unit : '')
+       + (city ? ', ' + city : '') + ', FL ' + p.zip;
+}
+
 function hpAddress(p, c) {
   const city = hpTitle(p.city || (c && c.city) || '');
   return hpStreetLine(p) + (city ? ', ' + city : '') + ', FL ' + p.zip;
@@ -1063,7 +1077,7 @@ function hpPage(D, p, host) {
        Nothing is sent to RPR beyond the address, which is on the page anyway. */
     + '<script>window.rprAvmWidgetOptions={'
     +   'Token:"B7078914-3207-44B1-A650-21ECA3E39AB7",'
-    +   'Query:' + JSON.stringify(addr) + ','
+    +   'Query:' + JSON.stringify(hpRprQuery(p, c)) + ','
     +   'CoBrandCode:"btsputnamrealtygroup",'
     +   'ContainerSelector:"#rprWidgetContainer",'
     +   'ShowRprLinks:false};<\/script>'
@@ -1361,8 +1375,6 @@ function hpPage(D, p, host) {
       + '<p>It works differently from everything above. Mine is built only from recorded sale prices on deeds. '
       + 'RPR also draws on listing photos, descriptions and asking price histories, which county records do '
       + 'not contain. So where the two disagree, neither one is lying. They are looking at different things.</p>'
-      + (p.unit ? '<p class="small">Fair warning on this one. RPR often has nothing at all for an address '
-                + 'with a unit number, and yours has one. If the space below stays empty, that is why.</p>' : '')
       + '<div id="rprWidgetContainer"></div>'
       /* Hidden until the script has waited and found the container still empty.
          Keyed off what actually happened rather than off my guess about which
