@@ -1349,19 +1349,27 @@ function hpPage(D, p, host) {
   } else {
     h += '<div class="card quiet">'
       + '<h2>A second opinion, worked out a different way</h2>'
-      + '<p>Below is an independent estimate for this address from RPR, which is run by the National '
-      + 'Association of Realtors. I have not touched the number and I cannot change it. It is here because '
-      + 'two methods agreeing tells you more than one method sounding confident.</p>'
+      /* Deliberately not "below is an estimate". RPR comes up empty for about 6%
+         of these addresses, all of them condominiums with a unit number, and a
+         sentence that promises a number is a broken promise on 260 pages. This
+         wording is true whether the widget fills or not. */
+      + '<p>RPR, which is run by the National Association of Realtors, works out its own estimate for '
+      + 'this address. It is theirs and not mine. I have not touched it and I cannot change it, which is '
+      + 'the point: two methods agreeing tells you more than one method sounding confident.</p>'
       + '<p>It works differently from everything above. Mine is built only from recorded sale prices on deeds. '
       + 'RPR also draws on listing photos, descriptions and asking price histories, which county records do '
       + 'not contain. So where the two disagree, neither one is lying. They are looking at different things.</p>'
+      + (p.unit ? '<p class="small">Fair warning on this one. RPR often has nothing at all for an address '
+                + 'with a unit number, and yours has one. If the space below stays empty, that is why.</p>' : '')
       + '<div id="rprWidgetContainer"></div>'
-      + '<p class="small">If nothing appears in the space above, that is RPR, not this page. It comes up '
-      + 'empty for some addresses, most often '
-      + (p.unit ? 'condominiums with a unit number, like this one. '
-               : 'condominiums with a unit number. ')
-      + 'Call me on <a href="tel:19416629941">941-662-9941</a> and I will pull it by hand and tell you what it says. '
-      + 'RPR is an estimate too, not an appraisal.</p>'
+      /* Hidden until the script has waited and found the container still empty.
+         Keyed off what actually happened rather than off my guess about which
+         addresses RPR knows, so it stays right if RPR changes either way. */
+      + '<p class="small" id="rprNone" style="display:none">Nothing came back from RPR for this address. '
+      + 'That is RPR and not this page, and it does not mean anything is wrong with your home. '
+      + 'Call me on <a href="tel:19416629941">941-662-9941</a> and I will pull it by hand and tell you '
+      + 'what it says.</p>'
+      + '<p class="small">RPR is an estimate too, not an appraisal.</p>'
       + '</div>';
   }
 
@@ -1723,11 +1731,24 @@ async function hpRoute(env, request, slug) {
        tagged so that worker can pick it out on purpose. Nothing is shown to the
        visitor and nothing is waited on. */
     if (kind === 'log') {
+      /* ---- WHY THIS WRITES TO D1 AND NOT TO THE VAULT ----------------------
+         It went to the vault first and the vault emailed Michael on arrival,
+         one message per page view titled "Gran Paradiso lookup". That is the
+         exact flood this was designed to avoid: the point of a view row is to
+         be counted later, not to interrupt him. The vault decides on its own
+         what to email and it is not this file's job to argue with it, so these
+         rows skip it and land in the table directly.
+
+         Nothing is lost by doing that. fhv-alerts reads the same table, so the
+         daily digest still counts these, the "came back a third time" entry
+         still works, and a CALCULATOR row still produces its own alert inside
+         five minutes with wording written for it.
+
+         notify_status is 'logged' rather than 'pending' so nothing that retries
+         unsent notifications ever picks one of these up and mails it anyway. */
       const what = String(form.get('kind') || '') === 'calc' ? 'calc' : 'view';
       const ref = String(form.get('ref') || '').slice(0, 200);
       const detail = String(form.get('detail') || '').slice(0, 200);
-      /* The daily digest groups by whatever sits between CAME FROM and ON, so
-         this has to be a short readable name and not a raw URL. */
       let src = 'direct';
       if (ref && ref.indexOf(host) === -1) {
         let h2 = '';
@@ -1740,20 +1761,22 @@ async function hpRoute(env, request, slug) {
       } else if (ref) {
         src = 'another page on the site';
       }
-      await fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: '', phone: '', email: '', address: addr,
-          territory_id: D.c.name + ' - personal home page ' + (what === 'calc' ? 'CALCULATOR' : 'view'),
-          subdivision: D.c.name,
-          homeowner_note: 'CAME FROM ' + src + ' ON a personal address page',
-          wants: (what === 'calc'
-                   ? 'CALCULATOR USED on a personal home page\nThey filled in: ' + detail
-                   : 'PAGE VIEW on a personal home page')
-                 + '\nAddress: ' + addr
-                 + '\nPage URL: https://' + host + '/h/' + p.slug
-        })
-      }).catch(function () {});
+      const territory = D.c.name + ' - personal home page ' + (what === 'calc' ? 'CALCULATOR' : 'view');
+      const wants = (what === 'calc'
+                      ? 'CALCULATOR USED on a personal home page\nThey filled in: ' + detail
+                      : 'PAGE VIEW on a personal home page')
+                  + '\nAddress: ' + addr
+                  + '\nPage URL: https://' + host + '/h/' + p.slug;
+      try {
+        await env.DB.prepare(
+          'INSERT INTO leads (received_at, notify_status, territory_id, subdivision, address, ' +
+          'wants, homeowner_note, raw_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        ).bind(
+          new Date().toISOString(), 'logged', territory, D.c.name, addr, wants,
+          'CAME FROM ' + src + ' ON a personal address page',
+          JSON.stringify({ kind: what, slug: p.slug, source: src, detail: detail })
+        ).run();
+      } catch (err) { /* a page must never fail because a log row did */ }
       return new Response(null, { status: 204, headers: { 'X-Robots-Tag': 'noindex, nofollow' } });
     }
 
@@ -2220,6 +2243,21 @@ const HP_BEACON_JS = `
     var e=document.getElementById(id);
     if(e) e.addEventListener('change',check);
   });
+
+  /* Did RPR actually fill its box? The widget gives no callback, so the only
+     honest test is to look. Poll for eight seconds, then say so if it is still
+     empty. A slow answer is not a missing one, which is why this waits rather
+     than checking once. */
+  var box=document.getElementById('rprWidgetContainer'), miss=document.getElementById('rprNone');
+  if(box&&miss){
+    var tries=0;
+    var look=setInterval(function(){
+      tries++;
+      var got=(box.textContent||'').replace(/\s/g,'').length>8||box.querySelector('iframe,img,table');
+      if(got){ clearInterval(look); return; }
+      if(tries>=16){ clearInterval(look); miss.style.display=''; }
+    },500);
+  }
 })();
 `;
 
