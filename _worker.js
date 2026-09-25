@@ -2554,6 +2554,122 @@ const HP_LOOKUP_JS = `
    in one place once Brian settles the exact wording. */
 const HP_LICENCE = 'Michael Putnam, Florida Real Estate Sales Associate with Putnam Realty Group';
 
+/* ===========================================================================
+   THE LEADS VIEWER AND THE MARK BUTTON  —  /leads?k=  and  /mark?id=&k=
+   ===========================================================================
+
+   WHY THESE EXIST HERE
+   Both used to live on fhv-lead-vault.cleirshusband.workers.dev, an endpoint on
+   the open internet that accepted any POST from anyone, wrote it into the leads
+   table and emailed Michael. On 25 September 2026 a credential scanner found it
+   and put twelve junk rows and twelve emails through it in eight seconds. The
+   payloads were attempts to read .env and /proc/self/environ and to run shell
+   commands, none of which a Worker can do, so nothing was compromised. The real
+   problem was never the scanner: it was that anyone who found that URL could
+   write a convincing fake lead straight into Michael's inbox.
+
+   The endpoint is being retired. That removed two things he actually used, so
+   they are rebuilt here, on his own domain, behind a key:
+
+     /leads?k=KEY          browse the table, which was the vault's /leads
+     /mark?id=N&k=KEY      mark a row contacted, which was the vault's /mark
+
+   THE KEY IS NOT SECURITY THEATRE BUT IT IS NOT MUCH EITHER. It keeps the table
+   out of reach of anything sweeping for open endpoints, which is the actual
+   threat that turned up. Anyone Michael sends the URL to can read his leads. If
+   that ever matters, move it behind Cloudflare Access.
+   Nothing here writes on a GET except /mark, which only ever sets one column on
+   one row and cannot create one. */
+const HP_LEADS_KEY = 'nZiXUZTehDwquzE7Vk89GkDxe5Lc1FAf';
+
+async function hpLeadsRoute(env, request, path) {
+  const url = new URL(request.url);
+  if (url.searchParams.get('k') !== HP_LEADS_KEY) {
+    /* Same answer for a wrong key and a missing one, and the same answer a
+       scanner gets for any other unknown path. Nothing to learn from it. */
+    return new Response('Not found', { status: 404 });
+  }
+  const noStore = {
+    'Content-Type': 'text/html; charset=utf-8',
+    'X-Robots-Tag': 'noindex, nofollow',
+    'Cache-Control': 'no-store'
+  };
+
+  if (path === '/mark') {
+    const id = parseInt(url.searchParams.get('id') || '', 10);
+    if (!id) return new Response('No id', { status: 400, headers: noStore });
+    try {
+      await env.DB.prepare('UPDATE leads SET notify_status = ? WHERE id = ?')
+        .bind('contacted', id).run();
+    } catch (err) {
+      return new Response('Could not mark that one. Call it done anyway.',
+        { status: 500, headers: noStore });
+    }
+    return new Response('<!DOCTYPE html><html><head><meta charset="UTF-8">'
+      + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+      + '<title>Marked</title><style>body{font:400 18px/1.6 -apple-system,BlinkMacSystemFont,'
+      + '"Segoe UI",sans-serif;margin:0;padding:40px 20px;background:#faf7f2;color:#1a1714}'
+      + 'a{color:#8a601d}</style></head><body>'
+      + '<p><strong>Row ' + id + ' marked contacted.</strong></p>'
+      + '<p><a href="/leads?k=' + HP_LEADS_KEY + '">All leads</a></p>'
+      + '</body></html>', { headers: noStore });
+  }
+
+  /* /leads */
+  let rows = [];
+  try {
+    const q = await env.DB.prepare(
+      'SELECT id, received_at, notify_status, territory_id, subdivision, address, '
+      + 'name, email, phone, wants FROM leads ORDER BY id DESC LIMIT 300'
+    ).all();
+    rows = q.results || [];
+  } catch (err) {
+    return new Response('The leads table did not answer. Try again in a minute.',
+      { status: 503, headers: noStore });
+  }
+
+  const esc = function (v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  };
+  /* Rows can hold whatever a form was given, so every field is escaped on the
+     way out. One of them held a shell command this morning. */
+  let body = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    + '<meta name="robots" content="noindex, nofollow"><title>FHV leads</title><style>'
+    + 'body{font:400 16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;'
+    + 'margin:0;padding:18px;background:#faf7f2;color:#1a1714}'
+    + 'h1{font-size:22px;margin:0 0 4px}.n{color:#57504a;font-size:15px;margin:0 0 16px}'
+    + 'table{border-collapse:collapse;width:100%;background:#fff}'
+    + 'th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;'
+    + 'color:#57504a;border-bottom:1px solid #e6ded2;padding:8px;position:sticky;top:0;background:#fff}'
+    + 'td{border-bottom:1px solid #f0eae1;padding:8px;vertical-align:top;font-size:15px}'
+    + 'td.w{white-space:pre-wrap;max-width:420px}'
+    + 'tr.done{opacity:.5}a{color:#8a601d}.tag{font-size:12px;padding:2px 6px;border-radius:4px;'
+    + 'background:#f3ece1}</style></head><body>'
+    + '<h1>FHV leads</h1><p class="n">' + rows.length + ' most recent, newest first. '
+    + 'Contacted rows are faded.</p><table><thead><tr>'
+    + '<th>#</th><th>When</th><th>Address</th><th>Who</th><th>What they wanted</th><th></th>'
+    + '</tr></thead><tbody>';
+  for (const r of rows) {
+    const done = String(r.notify_status || '') === 'contacted';
+    const who = [r.name, r.email, r.phone].filter(function (x) { return x; }).join('<br>');
+    body += '<tr' + (done ? ' class="done"' : '') + '>'
+      + '<td>' + r.id + '</td>'
+      + '<td>' + esc(String(r.received_at || '').replace('T', ' ').slice(0, 16)) + '</td>'
+      + '<td>' + esc(r.address) + (r.subdivision ? '<br><span class="tag">'
+          + esc(r.subdivision) + '</span>' : '') + '</td>'
+      + '<td>' + (who ? esc(r.name) + (r.name && (r.email || r.phone) ? '<br>' : '')
+          + esc(r.email) + (r.email && r.phone ? '<br>' : '') + esc(r.phone) : '<span class="tag">anon</span>') + '</td>'
+      + '<td class="w">' + esc(r.wants) + '</td>'
+      + '<td>' + (done ? 'done' : '<a href="/mark?id=' + r.id + '&k=' + HP_LEADS_KEY
+          + '">mark done</a>') + '</td></tr>';
+  }
+  body += '</tbody></table></body></html>';
+  return new Response(body, { headers: noStore });
+}
+
 /* -------------------------------------------------------------- the styles */
 const HP_CSS = `
 /* Type is set larger than a web default on purpose. A lot of what matters
@@ -2824,6 +2940,17 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');   // tolerate a trailing slash
 
+    /* Michael's own two pages, both key-gated, both replacing endpoints that
+       used to sit unauthenticated on fhv-lead-vault.cleirshusband.workers.dev.
+       Checked before anything else so a scanner never reaches further in. */
+    if (path === '/leads' || path === '/mark') {
+      try {
+        return await hpLeadsRoute(env, request, path);
+      } catch (err) {
+        return new Response('Not found', { status: 404 });
+      }
+    }
+
     /* /my-home is the address box, /h/<slug> is one owner's page. */
     const hpPath = path.toLowerCase();
     if (hpPath === '/my-home' || hpPath === '/my-home/suggest'
@@ -2911,16 +3038,22 @@ export default {
           const q = new URLSearchParams();
           for (const [k, v] of form.entries()) if (k !== 'email') q.set(k, v.toString());
           if (email) {
-            /* Same vault the rest of the site writes to, same payload shape. */
-            await fetch('https://fhv-lead-vault.cleirshusband.workers.dev/', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                name: '', phone: '', email: email, address: '',
-                territory_id: 'Home search - new listing alert',
-                subdivision: q.get('city') || 'Southwest Florida',
-                wants: 'Wants an alert when a new home matches: ' + (describeSearch(q) || 'their saved search')
-              })
-            }).catch(() => {});
+            /* THIS WAS THE LAST THING ON THE SITE THAT POSTED TO THE VAULT.
+               It now writes straight to D1 through the same function the
+               personal pages use, so nothing on floridahomevalueai.com depends
+               on a public endpoint any more and the workers.dev route can be
+               switched off. notify stays 'pending' because this person left an
+               email address and fhv-alerts should mail Michael about them. */
+            await hpLog(env, {
+              notify: 'pending',
+              territory: 'Home search - new listing alert',
+              community: q.get('city') || 'Southwest Florida',
+              address: '',
+              email: email,
+              wants: 'Wants an alert when a new home matches: '
+                   + (describeSearch(q) || 'their saved search'),
+              raw: { kind: 'home-search', search: q.toString() }
+            });
           }
           const back = new URL(request.url);
           back.search = q.toString();
