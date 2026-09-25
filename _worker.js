@@ -2599,8 +2599,13 @@ async function hpLeadsRoute(env, request, path) {
     const id = parseInt(url.searchParams.get('id') || '', 10);
     if (!id) return new Response('No id', { status: 400, headers: noStore });
     try {
-      await env.DB.prepare('UPDATE leads SET notify_status = ? WHERE id = ?')
-        .bind('contacted', id).run();
+      /* THE TABLE HAS ITS OWN contacted COLUMN AND THE VAULT'S OWN MARK BUTTON
+         SETS IT. Writing notify_status instead would have left the two leads
+         pages disagreeing about who has been written to. COALESCE so clicking
+         it twice does not move the original date. */
+      await env.DB.prepare(
+        'UPDATE leads SET contacted = 1, contacted_at = COALESCE(contacted_at, ?) WHERE id = ?'
+      ).bind(new Date().toISOString(), id).run();
     } catch (err) {
       return new Response('Could not mark that one. Call it done anyway.',
         { status: 500, headers: noStore });
@@ -2619,7 +2624,7 @@ async function hpLeadsRoute(env, request, path) {
   let rows = [];
   try {
     const q = await env.DB.prepare(
-      'SELECT id, received_at, notify_status, territory_id, subdivision, address, '
+      'SELECT id, received_at, contacted, contacted_at, territory_id, subdivision, address, '
       + 'name, email, phone, wants FROM leads ORDER BY id DESC LIMIT 300'
     ).all();
     rows = q.results || [];
@@ -2653,7 +2658,7 @@ async function hpLeadsRoute(env, request, path) {
     + '<th>#</th><th>When</th><th>Address</th><th>Who</th><th>What they wanted</th><th></th>'
     + '</tr></thead><tbody>';
   for (const r of rows) {
-    const done = String(r.notify_status || '') === 'contacted';
+    const done = Number(r.contacted || 0) === 1;
     const who = [r.name, r.email, r.phone].filter(function (x) { return x; }).join('<br>');
     body += '<tr' + (done ? ' class="done"' : '') + '>'
       + '<td>' + r.id + '</td>'
