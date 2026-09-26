@@ -1941,8 +1941,14 @@ function hpPage(D, p, host, gTag) {
          exactly that in writing, and it is the only version where the page is
          not pretending to know something it cannot know. The amount still falls
          under the same 12% ceiling as everything else on this card. */
+      /* The label named none of these things when it shipped, so the only words
+         a reader scanning the card saw were "the things nobody records", and the
+         generator and the shutters sat in the small print underneath. Michael
+         went looking for them on the live page and could not find them. If he
+         cannot, the owner who asked for them cannot. They are in the label now. */
       + '<div class="extras">'
-      +   '<label>What would you add for the things nobody records?'
+      +   '<label>Generator, hurricane shutters, solar, impact windows. What would you add for the things '
+      +     'nobody records?'
       +     '<input type="text" inputmode="numeric" class="xown" id="x_own" '
       +     'placeholder="Your own figure, in dollars">'
       +   '</label>'
