@@ -2175,6 +2175,45 @@ async function hpLog(env, row) {
   } catch (err) { /* a page must never fail because a row did not land */ }
 }
 
+/* ---------------------------------------------------------------------------
+   UPDATE A CALCULATOR ROW INSTEAD OF ADDING A SECOND ONE.
+
+   Added 25 September 2026 after a live test. Somebody working out their net
+   proceeds on a phone very often stops to look the mortgage payoff up in their
+   banking app. Switching apps tells the browser the page is hidden, which sends
+   the figures collected so far and would otherwise close the book on them. What
+   they type when they come back is the more useful half.
+
+   So the page may send a fuller version, and this replaces the earlier row
+   rather than making a second one. Two rows on one address would mean two
+   emails about the same person, which is the flood this whole design exists to
+   avoid. Thirty minutes is the window: past that it is a fresh sitting and
+   deserves its own row.
+
+   It returns true when it updated something, so the caller knows not to insert.
+   Any failure returns false and the caller inserts as usual, because a lost
+   figure is better than a lost lead.                                        */
+async function hpLogCalcUpdate(env, slug, wants, raw) {
+  try {
+    const cutoff = new Date(Date.now() - 30 * 60000).toISOString();
+    const prior = await env.DB.prepare(
+      "SELECT id, wants FROM leads WHERE raw_json LIKE ? AND wants LIKE 'CALCULATOR USED%' " +
+      'AND received_at > ? ORDER BY id DESC LIMIT 1'
+    ).bind('%"slug":"' + slug + '"%', cutoff).first();
+    if (!prior) return false;
+    /* Only ever replace with MORE than was there. A later message that somehow
+       carries less must not erase the figures already recorded. */
+    const lines = (t) => String(t || '').split('\n').filter(function (L) {
+      return /^\s{3}\S/.test(L);
+    }).length;
+    if (lines(wants) <= lines(prior.wants)) return true;
+    await env.DB.prepare(
+      'UPDATE leads SET wants = ?, raw_json = ?, received_at = ? WHERE id = ?'
+    ).bind(wants, JSON.stringify(raw || {}), new Date().toISOString(), prior.id).run();
+    return true;
+  } catch (err) { return false; }
+}
+
 /* --------------------------------------------------------------- the route */
 async function hpRoute(env, request, slug) {
   const u = new URL(request.url);
@@ -2336,15 +2375,21 @@ async function hpRoute(env, request, slug) {
                          is unreadable at a glance, which is the only way he
                          reads these. */
                       ? 'CALCULATOR USED on a personal home page\nWhat they typed in:\n'
-                        + detail.split(', ').map(function (s) { return '   ' + s; }).join('\n')
+                        + detail.split(' | ').map(function (s) { return '   ' + s; }).join('\n')
                       : 'PAGE VIEW on a personal home page')
                   + '\nAddress: ' + addr
                   + '\nPage URL: https://' + host + '/h/' + p.slug;
-      await hpLog(env, {
-        territory: territory, community: D.c.name, address: addr, wants: wants,
-        note: 'CAME FROM ' + src + (gtag ? ', TAGGED ' + gtag : '') + ' ON a personal address page',
-        raw: { kind: what, slug: p.slug, source: src, detail: detail, g: gtag || null }
-      });
+      const raw = { kind: what, slug: p.slug, source: src, detail: detail, g: gtag || null };
+      /* A second calculator message from the same sitting fills in the earlier
+         row rather than adding to it. See hpLogCalcUpdate. */
+      const filled = what === 'calc' && await hpLogCalcUpdate(env, p.slug, wants, raw);
+      if (!filled) {
+        await hpLog(env, {
+          territory: territory, community: D.c.name, address: addr, wants: wants,
+          note: 'CAME FROM ' + src + (gtag ? ', TAGGED ' + gtag : '') + ' ON a personal address page',
+          raw: raw
+        });
+      }
       return new Response(null, { status: 204, headers: { 'X-Robots-Tag': 'noindex, nofollow' } });
     }
 
@@ -3132,18 +3177,21 @@ const HP_BEACON_JS = `
 
   /* The calculator. np_price arrives filled in, so it is not a signal on its
      own and is deliberately not in this list. */
-  var watch=['np_loan','np_lc','np_bc','np_cl','np_rp'], fired=false;
+  /* sentBoxes rather than a true/false lock. A message goes out only when more
+     boxes are filled in than the last message carried, so the page can upgrade
+     what it already said without repeating it. The worker replaces the earlier
+     row rather than adding one, so this never turns into two emails. */
+  var watch=['np_loan','np_lc','np_bc','np_cl','np_rp'], sentBoxes=0, idle=null;
   function bVal(id){ var e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; }
   function bMoney(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
   function check(){
-    if(fired) return;
     var used=[];
     for(var i=0;i<watch.length;i++){
       var e=document.getElementById(watch[i]);
       if(e && String(e.value).trim()!=='' && (parseFloat(e.value)||0)>0) used.push(watch[i]);
     }
-    if(!used.length) return;
-    fired=true;
+    if(used.length<=sentBoxes) return;
+    sentBoxes=used.length;
     var name={np_loan:'mortgage payoff',np_lc:'listing commission',np_bc:'buyer agent compensation',
               np_cl:'closing costs',np_rp:'repairs and credits'};
     /* percentages read as percentages, everything else as dollars. Sending the
@@ -3156,17 +3204,22 @@ const HP_BEACON_JS = `
       var k=used[j], val=bVal(k);
       parts.push(name[k]+' '+(pct[k]?(val+'%'):bMoney(val)));
     }
-    /* The sale price box arrives pre-filled with the middle of the range, so it
-       is only worth reporting if they overwrote it. Somebody who types a higher
-       number thinks the house is worth more than this page said, which is a
-       conversation. */
+    /* THE SALE PRICE GOES FIRST, EVERY TIME. It used to be reported only when
+       they overwrote it, on the reasoning that the pre-filled figure is the
+       page's own and tells you nothing new. That was wrong from the inbox: the
+       email then showed a payoff and a net with nothing to measure them against,
+       so "walking away with $370,275" could have been a modest house or a large
+       one. The first line now says what the house is worth, and says whether
+       that figure is the page's or theirs. Somebody who types a higher number
+       thinks the house is worth more than the page said, which is a call. */
     var pe=document.getElementById('np_price');
     var price=bVal('np_price');
-    if(pe){
+    if(pe && price>0){
       var startV=parseFloat(pe.getAttribute('data-start'))||0;
-      if(price>0 && startV>0 && Math.abs(price-startV)>=1000){
-        parts.push('sale price changed to '+bMoney(price)+' from the '+bMoney(startV)+' this page showed');
-      }
+      parts.unshift(startV>0 && Math.abs(price-startV)>=1000
+        ? 'sale price '+bMoney(price)+', THEIR OWN figure, '+(price>startV?'above':'below')
+          +' the '+bMoney(startV)+' this page showed them'
+        : 'sale price '+bMoney(price)+', the figure this page showed them');
     }
     /* The same arithmetic the visible total uses, so the email carries the
        figure they actually saw rather than a second opinion. Documentary stamps
@@ -3180,12 +3233,36 @@ const HP_BEACON_JS = `
             - stamps - bVal('np_cl') - bVal('np_rp') - bVal('np_loan');
       parts.push('the page showed them walking away with '+bMoney(net));
     }
-    ping('calc',parts.join(', '));
+    /* Pipe separated, not comma separated. The worker turns each item into its
+       own line in the email, and the items now contain commas of their own
+       ("sale price $675,000, the figure this page showed them"), which split into
+       two nonsense lines. A pipe cannot appear in any of this text. */
+    ping('calc',parts.join(' | '));
   }
+  /* WHEN IT FIRES, and this was wrong until 25 Sep. It used to fire on the first
+     box that got a value, which was correct while the row recorded only which
+     boxes were touched: the first one told you everything. Now the row carries
+     the amounts, and firing on the first box throws away every figure typed
+     after it. A live test filled four boxes and the row held one.
+
+     So it waits instead. Twelve seconds after the last keystroke, or the moment
+     the page is hidden or closed, whichever comes first. Still exactly one
+     message, because two rows on one address would mean two emails about the
+     same person. Twelve seconds is long enough to move between boxes and short
+     enough that somebody who fills one box and sits reading still gets logged. */
+  function later(){ if(idle) clearTimeout(idle); idle=setTimeout(check,12000); }
+  function now(){ if(idle) clearTimeout(idle); check(); }
   watch.forEach(function(id){
     var e=document.getElementById(id);
-    if(e) e.addEventListener('change',check);
+    if(e){ e.addEventListener('input',later); e.addEventListener('change',later); }
   });
+  /* visibilitychange is the one a phone actually fires when the browser is put
+     away or the tab is switched. pagehide covers a desktop close. Neither is
+     guaranteed on a killed process, which is why the idle timer exists as well. */
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='hidden') now();
+  });
+  window.addEventListener('pagehide',now);
 
   /* Did RPR actually fill its box? The widget gives no callback, so the only
      honest test is to look. Poll for eight seconds, then say so if it is still
