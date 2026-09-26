@@ -900,6 +900,29 @@ function hpDaysAgo(n, asOf) {
   const d = new Date((isNaN(base) ? Date.now() : base) - n * 86400000);
   return d.toISOString().slice(0, 10);
 }
+/* "?g=gp-buysell" to hang on a redirect, or nothing at all. */
+function hpTagQS(url) {
+  const t = hpCleanTag(url && url.searchParams ? url.searchParams.get('g') : '');
+  return t ? '?g=' + encodeURIComponent(t) : '';
+}
+
+/* The ?g= group tag, stripped to safe characters. It lands in a database and in
+   an email Michael reads, so nothing else gets through. */
+function hpCleanTag(v) {
+  return String(v || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
+}
+
+/* THE PLURAL OF A PROPERTY TYPE. "Single-family" needs the word homes after it
+   and the other three do not, so appending " homes" to every type name produced
+   "townhome homes" and "condo homes" on every townhome and condo page. */
+function hpTypePlural(typeName) {
+  const t = String(typeName || '').toLowerCase();
+  if (t === 'townhome') return 'townhomes';
+  if (t === 'condo')    return 'condos';
+  if (t === 'villa')    return 'villas';
+  return t + ' homes';          /* single-family homes */
+}
+
 /* "September 2026", for saying out loud how old the figures are. */
 function hpMonthYear(iso) {
   const m = String(iso || '').match(/^(\d{4})-(\d{2})/);
@@ -1091,7 +1114,7 @@ function hpBill(D, p, newNonSchoolExemption) {
 }
 
 /* ------------------------------------------------------------- the renderer */
-function hpPage(D, p, host) {
+function hpPage(D, p, host, gTag) {
   const c = D.c;
   const addr = hpAddress(p, c);
   const sales = (D.sales[p.i] || []).slice().reverse();      // newest first
@@ -1108,6 +1131,7 @@ function hpPage(D, p, host) {
 
   const sohGap = Math.max(0, p.just - p.assessed);
   const canonical = 'https://' + host + '/h/' + p.slug;
+  const tag = hpCleanTag(gTag);
 
   /* THE SAVE OUR HOMES GAP IS NOT ALWAYS THE OWNER'S, AND THE OLD COPY ASSUMED
      IT WAS. On a certified roll, the assessed value of a home that changed hands
@@ -1177,7 +1201,16 @@ function hpPage(D, p, host) {
     +   'ContainerSelector:"#rprWidgetContainer",'
     +   'ShowRprLinks:false};<\/script>'
     + '<script src="https://www.narrpr.com/widgets/avm-widget/widget.ashx/script"><\/script>'
-    + '</head><body data-slug="' + hpEsc(p.slug) + '">';
+    /* THE GROUP TAG. Everything arriving from Facebook has the same referrer
+       whichever group it came from, so a referrer can never tell Michael which
+       of three Grand Palm groups produced a lookup. A tag on the link can.
+       He posts /my-home?g=gp-buysell to one group and ?g=gp-residents to
+       another; the lookup page carries the tag through its redirect to here,
+       this writes it into the body tag, and the beacon sends it with the row.
+       Kept short and stripped to safe characters because it lands in a
+       database and in an email Michael reads. */
+    + '</head><body data-slug="' + hpEsc(p.slug) + '"'
+    + (tag ? ' data-g="' + hpEsc(tag) + '"' : '') + '>';
 
   /* ---- masthead ---- */
   h += '<div class="wrap">'
@@ -1265,7 +1298,8 @@ function hpPage(D, p, host) {
       }
       if (chg !== null && chg > 0) {
         return { big: '+' + chg.toFixed(1) + '%', txt: false,
-          body: 'Price per square foot for ' + typeL + ' homes in ' + hpEsc(c.name) + ' is up '
+          body: 'Price per square foot for ' + hpEsc(hpTypePlural(p.typeName)) + ' in '
+              + hpEsc(c.name) + ' is up '
               + chg.toFixed(1) + '% ' + win + ', against the 12 before that. The figure beside '
               + 'this one looks back at what you paid. This one looks at where the market is heading.',
           small: '' };
@@ -1298,8 +1332,8 @@ function hpPage(D, p, host) {
       G = { big: '+' + hpMoney(gain), txt: false, body: paid + ' ' + today, small: '' };
       if (chg !== null && chg < 0) {
         B = { big: '−' + Math.abs(chg).toFixed(1) + '%', txt: false,
-          body: 'It was bigger a year ago. Price per square foot for ' + typeL + ' homes in '
-              + hpEsc(c.name) + ' is down ' + Math.abs(chg).toFixed(1) + '% ' + win
+          body: 'It was bigger a year ago. Price per square foot for '
+              + hpEsc(hpTypePlural(p.typeName)) + ' in ' + hpEsc(c.name) + ' is down ' + Math.abs(chg).toFixed(1) + '% ' + win
               + ', against the 12 before that'
               + (offPk ? ', and the community as a whole is running about ' + offPk
                  + '% below where it was in ' + peakWhen : '')
@@ -1555,14 +1589,15 @@ function hpPage(D, p, host) {
         others.push(c.types[ti].toLowerCase() + 's ' + (t2.chg < 0 ? 'down ' : 'up ') + Math.abs(t2.chg) + '%');
       }
       h += '<p class="note"><strong>Your type of home, not the community average.</strong> '
-        + hpEsc(p.typeName) + ' homes here sold for $' + trend.psf12 + ' a square foot in the 12 months to '
+        + hpEsc(hpTypePlural(p.typeName)).replace(/^./, function (m) { return m.toUpperCase(); })
+        + ' here sold for $' + trend.psf12 + ' a square foot in the 12 months to '
         + hpEsc(c.asofLabel || 'the roll date') + '. '
         + 'The year before, $' + trend.psf24 + '. That is '
         + (trend.chg < 0 ? 'down ' : 'up ') + Math.abs(trend.chg) + '%.'
         + (others.length ? ' Meanwhile ' + others.join(', ') + '.' : '')
         + ' The types here move at very different rates, so a single community average would tell most owners '
         + 'something untrue about their own home. That is why this page only counts sales of '
-        + hpEsc(p.typeName.toLowerCase()) + ' homes.</p>';
+        + hpEsc(hpTypePlural(p.typeName)) + '.</p>';
     }
     h += '</div>';
   }
@@ -1894,9 +1929,30 @@ function hpPage(D, p, host) {
       + '<p class="small">A pool is not on the list on purpose. The county does record pools, so the comparable '
       + 'sales above are already matched pool against pool and it is in the figure already. For the record, '
       + 'a pool is already priced into the figure above rather than being added on here.</p>'
-      + '<p class="small">Solar you own outright, impact windows, a recent roof and a whole-house generator are '
-      + 'all worth money to the right buyer, and I have left them off because I cannot put an honest number on '
-      + 'them from sales data. Tell me about them and I will factor them in properly.</p>'
+      /* ADDED 25 SEPTEMBER 2026, FROM A HOMEOWNER'S SUGGESTION. A Grand Palm
+         owner wrote in asking whether a whole-house generator, about $15,000
+         installed, and automatic hurricane shutters should count. The paragraph
+         that used to sit here said those were deliberately left off because
+         there is no honest number to put on them from sales data, which is true:
+         a deed does not record a generator, so nothing can be measured.
+         The answer is not to invent a percentage. It is to let the owner put
+         their own figure in and label it as theirs. Michael promised them
+         exactly that in writing, and it is the only version where the page is
+         not pretending to know something it cannot know. The amount still falls
+         under the same 12% ceiling as everything else on this card. */
+      + '<div class="extras">'
+      +   '<label>What would you add for the things nobody records?'
+      +     '<input type="text" inputmode="numeric" class="xown" id="x_own" '
+      +     'placeholder="Your own figure, in dollars">'
+      +   '</label>'
+      + '</div>'
+      + '<p class="small">A whole-house generator, automatic hurricane shutters on the lanai, owned solar, '
+      + 'impact windows, a roof newer than the house. None of those appear in a county record, so there is '
+      + 'nothing for me to measure them against and I am not going to make a percentage up. You know what '
+      + 'you paid and what it is worth to you. Put a figure in and the number above moves by it. It is your '
+      + 'figure, not mine, and it counts toward the same 12% ceiling as the boxes.</p>'
+      + '<p class="small">Worth saying plainly: almost nothing returns what it cost. That is true of most '
+      + 'improvements. You buy a generator for how you live in the house, not as an investment.</p>'
       + '<p class="cta"><a class="btn" href="tel:19416629941">Call 941-662-9941</a> '
       + '<a class="btn ghost" href="sms:19416629941">Text me instead</a></p>'
       + '<p class="small">Twenty minutes and someone standing in the house beats any amount of arithmetic. '
@@ -2053,7 +2109,7 @@ function hpDone(D, p, kind, scope) {
     const what = scope === 'community'
         ? 'every sale in ' + D.c.name + ', all ' + D.c.parcels.toLocaleString('en-US') + ' homes'
       : scope === 'plan'
-        ? hpEsc(p.typeName) + ' homes within 10% of your ' + p.sqft.toLocaleString('en-US') + ' square feet, anywhere in ' + D.c.name
+        ? hpEsc(hpTypePlural(p.typeName)) + ' within 10% of your ' + p.sqft.toLocaleString('en-US') + ' square feet, anywhere in ' + D.c.name
         : hpTitle(p.street) + ' only';
     title = 'Done. You are on the list.';
     body = '<p>You will hear from me whenever a home sells in <strong>' + hpEsc(what) + '</strong>: '
@@ -2130,7 +2186,11 @@ async function hpRoute(env, request, slug) {
          collapsed form for somebody who typed "Circle" where the county says CIR. */
       const exact = REG.bySlug[hpClean(q, false).join('-')]
                  || REG.bySlug[hpClean(q, true).join('-')];
-      if (exact) return Response.redirect('https://' + host + '/h/' + exact.slug, 302);
+      /* THE TAG DIES HERE IF IT IS NOT CARRIED. Somebody clicks
+         /my-home?g=gp-buysell from a Facebook group, types their address, and
+         this 302 sends them to /h/<slug> with the tag stripped, so the row that
+         lands has no idea which group they came from. */
+      if (exact) return Response.redirect('https://' + host + '/h/' + exact.slug + hpTagQS(u), 302);
       let m = hpSearch(REG, q, 12);
 
       /* ---- a misspelled street must not be a dead end ----------------------
@@ -2179,7 +2239,7 @@ async function hpRoute(env, request, slug) {
         }
       }
 
-      if (m.length === 1 && !loose) return Response.redirect('https://' + host + '/h/' + m[0].slug, 302);
+      if (m.length === 1 && !loose) return Response.redirect('https://' + host + '/h/' + m[0].slug + hpTagQS(u), 302);
       return new Response(hpLookupPage(REG, host, q, m, true, loose), {
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
       });
@@ -2243,6 +2303,7 @@ async function hpRoute(env, request, slug) {
       const what = String(form.get('kind') || '') === 'calc' ? 'calc' : 'view';
       const ref = String(form.get('ref') || '').slice(0, 200);
       const detail = String(form.get('detail') || '').slice(0, 200);
+      const gtag = hpCleanTag(form.get('g'));
       let src = 'direct';
       if (ref && ref.indexOf(host) === -1) {
         let h2 = '';
@@ -2263,8 +2324,8 @@ async function hpRoute(env, request, slug) {
                   + '\nPage URL: https://' + host + '/h/' + p.slug;
       await hpLog(env, {
         territory: territory, community: D.c.name, address: addr, wants: wants,
-        note: 'CAME FROM ' + src + ' ON a personal address page',
-        raw: { kind: what, slug: p.slug, source: src, detail: detail }
+        note: 'CAME FROM ' + src + (gtag ? ', TAGGED ' + gtag : '') + ' ON a personal address page',
+        raw: { kind: what, slug: p.slug, source: src, detail: detail, g: gtag || null }
       });
       return new Response(null, { status: 204, headers: { 'X-Robots-Tag': 'noindex, nofollow' } });
     }
@@ -2321,7 +2382,7 @@ async function hpRoute(env, request, slug) {
     });
   }
 
-  return new Response(hpPage(D, p, host), {
+  return new Response(hpPage(D, p, host, u.searchParams.get('g')), {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'X-Robots-Tag': 'noindex, nofollow',
@@ -2995,6 +3056,7 @@ td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .extras{display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0}
 .extras label{display:block;font-size:17px;line-height:1.5;padding:10px 12px;background:var(--warm);border:1px solid var(--line);border-radius:8px;cursor:pointer}
 .extras select{display:block;width:100%;margin-top:5px;padding:10px;font:400 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.extras input[type=text]{display:block;width:100%;margin-top:5px;padding:10px;font:400 16px Inter,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);box-sizing:border-box}
 .xout{background:#fffaf1;border:1px solid var(--gold);border-radius:8px;padding:16px;text-align:center;margin:14px 0}
 .xout .xbig{font:800 30px/1.15 "Playfair Display",Georgia,serif;color:var(--goldink)}
 .xout .xsub{font-size:16px;color:var(--dim);margin-top:4px}
@@ -3043,6 +3105,7 @@ const HP_BEACON_JS = `
       var f=new FormData();
       f.append('form','log'); f.append('kind',kind);
       f.append('ref',document.referrer||''); f.append('detail',extra||'');
+      f.append('g',document.body.getAttribute('data-g')||'');
       if(navigator.sendBeacon) navigator.sendBeacon('/h/'+slug,f);
       else fetch('/h/'+slug,{method:'POST',body:f,keepalive:true}).catch(function(){});
     }catch(e){}
@@ -3098,7 +3161,14 @@ const HP_JS = `
       var up=0, boxes=document.querySelectorAll('.xf');
       for(var i=0;i<boxes.length;i++) if(boxes[i].checked) up+=parseFloat(boxes[i].getAttribute('data-up'))||0;
       var v=document.querySelector('.xv'), c=document.querySelector('.xc');
-      var adj=up+(v?parseFloat(v.value)||0:0)+(c?parseFloat(c.value)||0:0);
+      /* The owner's own figure for the things no record holds, converted to a
+         share of the base so it lands under the same ceiling as everything else.
+         Digits only, so "$15,000" and "15000" both work. */
+      var own=document.getElementById('x_own');
+      var ownAmt=own?(parseFloat(String(own.value).replace(/[^0-9.]/g,''))||0):0;
+      if(ownAmt<0) ownAmt=0;
+      var ownPct=base>0?ownAmt/base:0;
+      var adj=up+ownPct+(v?parseFloat(v.value)||0:0)+(c?parseFloat(c.value)||0:0);
       /* The cap has to apply to the TOTAL. The three boxes only add to 9%, so
          clamping them alone could never bind, and the view dropdown then added
          up to 4% more on top of a figure the page called capped at 12%. A
@@ -3111,8 +3181,12 @@ const HP_JS = `
         +(Math.abs(diff)>=1000?'  ·  '+(diff>0?'+':'\u2212')+m(Math.abs(diff))+' against the figure above':'')
         +'</div>';
     };
-    var all=document.querySelectorAll('.xf,.xv,.xc');
-    for(var j=0;j<all.length;j++) all[j].addEventListener('change',draw);
+    var all=document.querySelectorAll('.xf,.xv,.xc,.xown');
+    for(var j=0;j<all.length;j++){
+      all[j].addEventListener('change',draw);
+      /* the dollar field has to redraw as it is typed, not only on blur */
+      if(all[j].className.indexOf('xown')>=0) all[j].addEventListener('input',draw);
+    }
     draw();
   }
 })();
