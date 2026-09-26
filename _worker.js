@@ -1830,7 +1830,8 @@ function hpPage(D, p, host, gTag) {
       + 'I do not know your numbers and I am not going to guess them. Fill in what you know and the total follows.</p>'
       + '<div class="npwrap">'
       +   '<div class="calc">'
-      +   '<label>Sale price<input type="number" id="np_price" value="' + range.mid + '" step="1000"></label>'
+      +   '<label>Sale price<input type="number" id="np_price" value="' + range.mid
+      +     '" data-start="' + range.mid + '" step="1000"></label>'
       +   '<label>Mortgage payoff<input type="number" id="np_loan" placeholder="what you still owe" step="1000"></label>'
       +   '<label>Listing side commission %<input type="number" id="np_lc" placeholder="whatever you agree" step="0.25"></label>'
       +   '<label>Buyer agent compensation %<input type="number" id="np_bc" placeholder="whatever you agree" step="0.25"></label>'
@@ -2070,9 +2071,18 @@ function hpPage(D, p, host, gTag) {
     + 'Putnam Realty Group supports the Fair Housing Act and the Equal Opportunity Act. '
     + 'This is not a solicitation of property currently listed with another brokerage. '
     + 'This page was built for one address and is not published or indexed.</p>'
-    + '<p class="small">I record that this page was opened, and which figures were typed into the net proceeds '
-    + 'calculator, so I know which addresses to follow up on. No cookies, no third party tracking, and nothing '
-    + 'here is ever sold or shared.</p>'
+    /* Rewritten 25 Sep 2026. It used to say "which figures were typed", which
+       read two ways: which boxes, or what amounts. The code then sent only the
+       box names, so the sentence was vague about something it did not even do.
+       It now sends the amounts, so the sentence says the amounts. A vague
+       promise is worse than either clear answer, and this is the sentence a
+       homeowner would quote back. "No cookies" also went, because the page
+       remembers a visit in the browser's own storage, and splitting that hair
+       is not worth the sentence. */
+    + '<p class="small">I record that this page was opened, how you got here, and the numbers you type into '
+    + 'the net proceeds calculator, amounts included, so I know which addresses to follow up on and what you '
+    + 'are working out. Your browser remembers that you have been here, so a second visit is not counted '
+    + 'twice. No third party tracking, and nothing here is ever sold or shared.</p>'
     /* "Page generated <today>" was the freshest-looking thing on the page and
        the only one that meant nothing. A reader opening a bookmark in 2028 saw
        a 2028 date a few words after "2026 certified roll". What matters is how
@@ -2302,7 +2312,10 @@ async function hpRoute(env, request, slug) {
          unsent notifications ever picks one of these up and mails it anyway. */
       const what = String(form.get('kind') || '') === 'calc' ? 'calc' : 'view';
       const ref = String(form.get('ref') || '').slice(0, 200);
-      const detail = String(form.get('detail') || '').slice(0, 200);
+      /* 400 rather than 200 since 25 Sep: the calculator detail now carries the
+         amounts and the net total, not just the names of the boxes, and every
+         box filled in on an expensive house runs past 200 characters. */
+      const detail = String(form.get('detail') || '').slice(0, 400);
       const gtag = hpCleanTag(form.get('g'));
       let src = 'direct';
       if (ref && ref.indexOf(host) === -1) {
@@ -2318,7 +2331,12 @@ async function hpRoute(env, request, slug) {
       }
       const territory = D.c.name + ' - personal home page ' + (what === 'calc' ? 'CALCULATOR' : 'view');
       const wants = (what === 'calc'
-                      ? 'CALCULATOR USED on a personal home page\nThey filled in: ' + detail
+                      /* One figure per line. It arrives as a comma separated
+                         list and an email full of dollar amounts run together
+                         is unreadable at a glance, which is the only way he
+                         reads these. */
+                      ? 'CALCULATOR USED on a personal home page\nWhat they typed in:\n'
+                        + detail.split(', ').map(function (s) { return '   ' + s; }).join('\n')
                       : 'PAGE VIEW on a personal home page')
                   + '\nAddress: ' + addr
                   + '\nPage URL: https://' + host + '/h/' + p.slug;
@@ -3115,6 +3133,8 @@ const HP_BEACON_JS = `
   /* The calculator. np_price arrives filled in, so it is not a signal on its
      own and is deliberately not in this list. */
   var watch=['np_loan','np_lc','np_bc','np_cl','np_rp'], fired=false;
+  function bVal(id){ var e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; }
+  function bMoney(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
   function check(){
     if(fired) return;
     var used=[];
@@ -3126,7 +3146,41 @@ const HP_BEACON_JS = `
     fired=true;
     var name={np_loan:'mortgage payoff',np_lc:'listing commission',np_bc:'buyer agent compensation',
               np_cl:'closing costs',np_rp:'repairs and credits'};
-    ping('calc',used.map(function(k){return name[k];}).join(', '));
+    /* percentages read as percentages, everything else as dollars. Sending the
+       amount rather than only the field name is the change of 25 Sep: the
+       footer says so in as many words, because a vague promise about "which
+       figures were typed" was worse than either clear answer. */
+    var pct={np_lc:1,np_bc:1};
+    var parts=[];
+    for(var j=0;j<used.length;j++){
+      var k=used[j], val=bVal(k);
+      parts.push(name[k]+' '+(pct[k]?(val+'%'):bMoney(val)));
+    }
+    /* The sale price box arrives pre-filled with the middle of the range, so it
+       is only worth reporting if they overwrote it. Somebody who types a higher
+       number thinks the house is worth more than this page said, which is a
+       conversation. */
+    var pe=document.getElementById('np_price');
+    var price=bVal('np_price');
+    if(pe){
+      var startV=parseFloat(pe.getAttribute('data-start'))||0;
+      if(price>0 && startV>0 && Math.abs(price-startV)>=1000){
+        parts.push('sale price changed to '+bMoney(price)+' from the '+bMoney(startV)+' this page showed');
+      }
+    }
+    /* The same arithmetic the visible total uses, so the email carries the
+       figure they actually saw rather than a second opinion. Documentary stamps
+       at $0.70 per $100 are the page's own line and are included here for the
+       same reason. */
+    if(price>0){
+      var stamps=Math.ceil(price/100)*0.70;
+      var net=price
+            - (price*bVal('np_lc')/100)
+            - (price*bVal('np_bc')/100)
+            - stamps - bVal('np_cl') - bVal('np_rp') - bVal('np_loan');
+      parts.push('the page showed them walking away with '+bMoney(net));
+    }
+    ping('calc',parts.join(', '));
   }
   watch.forEach(function(id){
     var e=document.getElementById(id);
